@@ -1,0 +1,185 @@
+{
+  "version": "1.0.0",
+  "presets": [
+    {
+      "name": "Ethereal Pad",
+      "type": "atmospheric",
+      "category": "pad",
+      "bpm": 80,
+      "key": "C",
+      "scale": "major",
+      "bars": 8,
+      "tags": ["ambient", "pad", "ethereal"],
+      "config": {
+        "synth": {
+          "type": "pad",
+          "waveform": "sine",
+          "voices": 8,
+          "detune": 5,
+          "filterType": "lowpass",
+          "filterCutoff": 1500,
+          "filterResonance": 1,
+          "ampAttack": 3,
+          "ampDecay": 2,
+          "ampSustain": 0.8,
+          "ampRelease": 4
+        },
+        "fx": [
+          {
+            "type": "reverb",
+            "params": {
+              "decay": 8,
+              "mix": 0.7,
+              "preDelay": 50
+            }
+          },
+          {
+            "type": "delay",
+            "params": {
+              "time": 0.75,
+              "feedback": 0.6,
+              "mix": 0.4
+            }
+          },
+          {
+            "type": "chorus",
+            "params": {
+              "rate": 0.3,
+              "depth": 0.4,
+              "mix": 0.5
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Dark Ambient Drone",
+      "type": "atmospheric",
+      "category": "drone",
+      "bpm": 60,
+      "key": "D",
+      "scale": "minor",
+      "bars": 16,
+      "tags": ["ambient", "drone", "dark"],
+      "config": {
+        "synth": {
+          "type": "drone",
+          "waveform": "sawtooth",
+          "voices": 6,
+          "detune": 15,
+          "filterType": "lowpass",
+          "filterCutoff": 800,
+          "filterResonance": 3,
+          "ampAttack": 5,
+          "ampDecay": 3,
+          "ampSustain": 0.9,
+          "ampRelease": 6
+        },
+        "fx": [
+          {
+            "type": "reverb",
+            "params": {
+              "decay": 12,
+              "mix": 0.8
+            }
+          },
+          {
+            "type": "granular",
+            "params": {
+              "grainSize": 200,
+              "grainDensity": 5,
+              "pitchRandom": 0.5,
+              "wetMix": 0.3
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Crystal Texture",
+      "type": "atmospheric",
+      "category": "texture",
+      "bpm": 90,
+      "key": "F",
+      "scale": "lydian",
+      "bars": 8,
+      "tags": ["ambient", "texture", "crystal"],
+      "config": {
+        "synth": {
+          "type": "texture",
+          "waveform": "triangle",
+          "voices": 12,
+          "detune": 8,
+          "filterType": "bandpass",
+          "filterCutoff": 3000,
+          "filterResonance": 5,
+          "ampAttack": 2,
+          "ampDecay": 1,
+          "ampSustain": 0.6,
+          "ampRelease": 3
+        },
+        "fx": [
+          {
+            "type": "reverb",
+            "params": {
+              "decay": 6,
+              "mix": 0.6
+            }
+          },
+          {
+            "type": "delay",
+            "params": {
+              "time": 0.5,
+              "feedback": 0.5,
+              "mix": 0.35
+            }
+          },
+          {
+            "type": "spectral",
+            "params": {
+              "freeze": 0.3,
+              "spectralBlur": 0.4
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Ocean Waves",
+      "type": "atmospheric",
+      "category": "texture",
+      "bpm": 70,
+      "bars": 16,
+      "tags": ["ambient", "nature", "ocean"],
+      "config": {
+        "synth": {
+          "type": "noise",
+          "filterType": "bandpass",
+          "filterCutoff": 500,
+          "filterResonance": 0.5,
+          "ampAttack": 4,
+          "ampDecay": 2,
+          "ampSustain": 0.7,
+          "ampRelease": 5
+        },
+        "fx": [
+          {
+            "type": "reverb",
+            "params": {
+              "decay": 10,
+              "mix": 0.7
+            }
+          },
+          {
+            "type": "filter",
+            "params": {
+              "type": "lowpass",
+              "cutoff": 2000,
+              "resonance": 2
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
