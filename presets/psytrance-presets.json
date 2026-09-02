@@ -1,0 +1,190 @@
+{
+  "version": "1.0.0",
+  "presets": [
+    {
+      "name": "Psytrance Kick",
+      "type": "percussion",
+      "category": "drums",
+      "bpm": 145,
+      "config": {
+        "synth": {
+          "type": "kick",
+          "pitch": 50,
+          "pitchDecay": 0.05,
+          "ampDecay": 0.3,
+          "click": 0.5
+        },
+        "fx": [
+          {
+            "type": "compressor",
+            "params": {
+              "threshold": -15,
+              "ratio": 6,
+              "attack": 0.5,
+              "release": 50
+            }
+          },
+          {
+            "type": "saturation",
+            "params": {
+              "drive": 3,
+              "mix": 0.7
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Psytrance Bass",
+      "type": "bass",
+      "category": "bass",
+      "bpm": 145,
+      "key": "G",
+      "scale": "minor",
+      "bars": 4,
+      "config": {
+        "synth": {
+          "type": "bass",
+          "waveform": "sawtooth",
+          "filterType": "lowpass",
+          "filterCutoff": 800,
+          "filterResonance": 3,
+          "ampDecay": 0.2
+        },
+        "fx": [
+          {
+            "type": "compressor",
+            "params": {
+              "threshold": -18,
+              "ratio": 4,
+              "attack": 1,
+              "release": 80
+            }
+          },
+          {
+            "type": "saturation",
+            "params": {
+              "drive": 2,
+              "mix": 0.5
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Acid Lead",
+      "type": "lead",
+      "category": "lead",
+      "bpm": 145,
+      "key": "A",
+      "scale": "minor",
+      "bars": 4,
+      "config": {
+        "synth": {
+          "type": "lead",
+          "waveform": "sawtooth",
+          "filterType": "lowpass",
+          "filterCutoff": 3000,
+          "filterResonance": 15,
+          "filterEnvAmount": 8000,
+          "filterDecay": 0.3
+        },
+        "fx": [
+          {
+            "type": "delay",
+            "params": {
+              "time": 0.375,
+              "feedback": 0.4,
+              "mix": 0.3
+            }
+          },
+          {
+            "type": "reverb",
+            "params": {
+              "decay": 1.5,
+              "mix": 0.2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Psy Atmosphere",
+      "type": "atmospheric",
+      "category": "pad",
+      "bpm": 145,
+      "key": "D",
+      "scale": "minor",
+      "bars": 8,
+      "config": {
+        "synth": {
+          "type": "pad",
+          "waveform": "sawtooth",
+          "voices": 4,
+          "detune": 10,
+          "filterType": "lowpass",
+          "filterCutoff": 2000,
+          "filterResonance": 2,
+          "ampAttack": 2,
+          "ampDecay": 1,
+          "ampSustain": 0.7,
+          "ampRelease": 3
+        },
+        "fx": [
+          {
+            "type": "reverb",
+            "params": {
+              "decay": 5,
+              "mix": 0.5
+            }
+          },
+          {
+            "type": "delay",
+            "params": {
+              "time": 0.5,
+              "feedback": 0.5,
+              "mix": 0.3
+            }
+          },
+          {
+            "type": "chorus",
+            "params": {
+              "rate": 0.5,
+              "depth": 0.3,
+              "mix": 0.4
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Psy FX Riser",
+      "type": "fx",
+      "category": "fx",
+      "bpm": 145,
+      "bars": 4,
+      "config": {
+        "synth": {
+          "type": "noise",
+          "filterType": "bandpass",
+          "filterCutoffStart": 200,
+          "filterCutoffEnd": 10000,
+          "filterResonance": 10,
+          "ampAttack": 4,
+          "ampDecay": 0.1,
+          "ampSustain": 1,
+          "ampRelease": 0.5
+        },
+        "fx": [
+          {
+            "type": "reverb",
+            "params": {
+              "decay": 3,
+              "mix": 0.6
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
