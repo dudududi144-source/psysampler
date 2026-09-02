@@ -1,0 +1,107 @@
+{
+  "version": "1.0.0",
+  "presets": [
+    {
+      "name": "Melodic Minor Loop",
+      "type": "melodic",
+      "bpm": 120,
+      "key": "A",
+      "scale": "minor",
+      "bars": 4,
+      "slices": 16,
+      "fx": [
+        {
+          "type": "filter",
+          "params": {
+            "frequency": 2000,
+            "resonance": 2
+          }
+        },
+        {
+          "type": "reverb",
+          "params": {
+            "decay": 2.5,
+            "mix": 0.3
+          }
+        }
+      ]
+    },
+    {
+      "name": "Heavy Bass Loop",
+      "type": "bass",
+      "bpm": 140,
+      "key": "E",
+      "scale": "minor",
+      "bars": 4,
+      "slices": 8,
+      "fx": [
+        {
+          "type": "compressor",
+          "params": {
+            "threshold": -20,
+            "ratio": 4
+          }
+        },
+        {
+          "type": "saturation",
+          "params": {
+            "drive": 3
+          }
+        }
+      ]
+    },
+    {
+      "name": "Atmospheric Pad",
+      "type": "atmospheric",
+      "bpm": 90,
+      "key": "D",
+      "scale": "major",
+      "bars": 8,
+      "slices": 16,
+      "fx": [
+        {
+          "type": "reverb",
+          "params": {
+            "decay": 5,
+            "mix": 0.6
+          }
+        },
+        {
+          "type": "delay",
+          "params": {
+            "time": 0.375,
+            "feedback": 0.4,
+            "mix": 0.3
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rhythmic Percussion",
+      "type": "percussion",
+      "bpm": 128,
+      "key": "C",
+      "scale": "minor",
+      "bars": 4,
+      "slices": 16,
+      "fx": [
+        {
+          "type": "transient-shaper",
+          "params": {
+            "attack": 5,
+            "sustain": -3
+          }
+        },
+        {
+          "type": "compressor",
+          "params": {
+            "threshold": -15,
+            "ratio": 3,
+            "attack": 5,
+            "release": 50
+          }
+        }
+      ]
+    }
+  ]
+}
