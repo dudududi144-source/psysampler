@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSY LOOPER - Advanced Loop Manipulator</title>
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-tertiary: #1a1a25;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0b0;
+      --accent: #00ff88;
+      --accent-hover: #00cc6a;
+      --danger: #ff3366;
+      --warning: #ffaa00;
+      --border: #2a2a35;
+      --radius: 8px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+    
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    
+    .header {
+      background: var(--bg-secondary);
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    
+    .transport {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+    }
+    
+    .btn:hover {
+      background: var(--border);
+    }
+    
+    .btn.primary {
+      background: var(--accent);
+      color: var(--bg-primary);
+    }
+    
+    .btn.primary:hover {
+      background: var(--accent-hover);
+    }
+    
+    .main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 250px 1fr 250px;
+      gap: 1rem;
+      padding: 1rem;
+      overflow: hidden;
+    }
+    
+    .panel {
+      background: var(--bg-secondary);
+      border-radius: var(--radius);
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    
+    .panel h2 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+    }
+    
+    .bank-selector {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .bank-btn {
+      padding: 1rem 0.5rem;
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      color: var(--text-primary);
+    }
+    
+    .bank-btn:hover {
+      border-color: var(--accent);
+    }
+    
+    .bank-btn.active {
+      background: var(--accent);
+      color: var(--bg-primary);
+      border-color: var(--accent);
+    }
+    
+    .slice-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .slice {
+      aspect-ratio: 1;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+    
+    .slice:hover {
+      border-color: var(--accent);
+      transform: scale(1.05);
+    }
+    
+    .slice.active {
+      background: var(--accent);
+      color: var(--bg-primary);
+      border-color: var(--accent);
+    }
+    
+    .slice.playing {
+      animation: pulse 0.5s ease-in-out;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .control-group label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .slider {
+      width: 100%;
+      height: 6px;
+      background: var(--bg-tertiary);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    
+    .footer {
+      background: var(--bg-secondary);
+      padding: 0.5rem 2rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .status {
+      display: flex;
+      gap: 2rem;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    
+    .indicator.active {
+      background: var(--accent);
+    }
+    
+    .file-drop {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .file-drop:hover {
+      border-color: var(--accent);
+    }
+    
+    .file-drop.dragover {
+      border-color: var(--accent);
+      background: var(--bg-tertiary);
+    }
+    
+    .info-box {
+      background: var(--bg-tertiary);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .info-box h3 {
+      font-size: 0.875rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    
+    .info-box p {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.25rem;
+    }
+    
+    select {
+      width: 100%;
+      padding: 0.5rem;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+    }
+    
+    input[type="file"] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <h1>PSY LOOPER</h1>
+      <div class="transport">
+        <button class="btn" id="btn-play">Play</button>
+        <button class="btn" id="btn-stop">Stop</button>
+        <button class="btn" id="btn-load">Load Loop</button>
+        <button class="btn primary" id="btn-generate">Generate Loop</button>
+        <input type="file" id="file-input" accept="audio/*">
+      </div>
+    </div>
+    
+    <div class="main">
+      <div class="panel">
+        <h2>Bank Selector</h2>
+        <div class="bank-selector" id="bank-selector">
+          <div class="bank-btn active" data-bank="0">1</div>
+          <div class="bank-btn" data-bank="1">2</div>
+          <div class="bank-btn" data-bank="2">3</div>
+          <div class="bank-btn" data-bank="3">4</div>
+          <div class="bank-btn" data-bank="4">5</div>
+          <div class="bank-btn" data-bank="5">6</div>
+          <div class="bank-btn" data-bank="6">7</div>
+          <div class="bank-btn" data-bank="7">8</div>
+        </div>
+        
+        <div class="info-box" id="bank-info">
+          <h3>Bank 1</h3>
+          <p>No loop loaded</p>
+        </div>
+        
+        <div class="file-drop" id="file-drop">
+          Drop audio file here<br>
+          or click to browse
+        </div>
+      </div>
+      
+      <div class="panel">
+        <h2>Slice Grid</h2>
+        <div class="slice-grid" id="slice-grid">
+          <!-- Slices will be generated here -->
+        </div>
+      </div>
+      
+      <div class="panel">
+        <h2>Controls</h2>
+        <div class="controls">
+          <div class="control-group">
+            <label>Loop Type</label>
+            <select id="loop-type">
+              <option value="melodic">Melodic</option>
+              <option value="rhythmic">Rhythmic</option>
+              <option value="lead">Lead</option>
+              <option value="fx">FX</option>
+              <option value="percussion">Percussion</option>
+              <option value="bass">Bass</option>
+              <option value="chord">Chord</option>
+              <option value="atmospheric">Atmospheric</option>
+            </select>
+          </div>
+          
+          <div class="control-group">
+            <label>BPM: <span id="bpm-value">140</span></label>
+            <input type="range" class="slider" id="bpm-slider" min="60" max="240" value="140">
+          </div>
+          
+          <div class="control-group">
+            <label>Key</label>
+            <select id="key-select">
+              <option value="C">C</option>
+              <option value="C#">C#</option>
+              <option value="D">D</option>
+              <option value="D#">D#</option>
+              <option value="E">E</option>
+              <option value="F">F</option>
+              <option value="F#">F#</option>
+              <option value="G">G</option>
+              <option value="G#">G#</option>
+              <option value="A">A</option>
+              <option value="A#">A#</option>
+              <option value="B">B</option>
+            </select>
+          </div>
+          
+          <div class="control-group">
+            <label>Scale</label>
+            <select id="scale-select">
+              <option value="minor">Minor</option>
+              <option value="major">Major</option>
+              <option value="dorian">Dorian</option>
+              <option value="phrygian">Phrygian</option>
+              <option value="lydian">Lydian</option>
+              <option value="mixolydian">Mixolydian</option>
+              <option value="aeolian">Aeolian</option>
+              <option value="locrian">Locrian</option>
+            </select>
+          </div>
+          
+          <div class="control-group">
+            <label>Bars: <span id="bars-value">4</span></label>
+            <input type="range" class="slider" id="bars-slider" min="1" max="16" value="4">
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <div class="status">
+        <div class="status-item">
+          <div class="indicator active"></div>
+          <span>Audio: Ready</span>
+        </div>
+        <div class="status-item">
+          <div class="indicator"></div>
+          <span>MIDI: Disconnected</span>
+        </div>
+        <div class="status-item">
+          <div class="indicator active"></div>
+          <span>Engine: Web Audio</span>
+        </div>
+      </div>
+      <div>
+        PSY LOOPER v1.0.0 | 200+ Features | MIT License
+      </div>
+    </div>
+  </div>
+  
+  <script type="module">
+    // PSY LOOPER - Main Application
+    import { LooperDevice } from './src/looper-device.js';
+    import { MIDIIntegration } from './src/midi-integration.js';
+    
+    // Initialize
+    const looper = new LooperDevice();
+    let audioContext = null;
+    let currentBank = 0;
+    let midi = null;
+    
+    // DOM elements
+    const sliceGrid = document.getElementById('slice-grid');
+    const bankSelector = document.getElementById('bank-selector');
+    const bankInfo = document.getElementById('bank-info');
+    const fileDrop = document.getElementById('file-drop');
+    const fileInput = document.getElementById('file-input');
+    
+    // Initialize slices
+    function initSliceGrid(numSlices = 16) {
+      sliceGrid.innerHTML = '';
+      for (let i = 0; i < numSlices; i++) {
+        const slice = document.createElement('div');
+        slice.className = 'slice';
+        slice.dataset.index = i;
+        slice.textContent = i + 1;
+        
+        slice.addEventListener('click', () => {
+          looper.triggerSlice(currentBank, i, 1.0);
+          slice.classList.add('playing');
+          setTimeout(() => slice.classList.remove('playing'), 500);
+        });
+        
+        sliceGrid.appendChild(slice);
+      }
+    }
+    
+    // Bank selection
+    bankSelector.addEventListener('click', (e) => {
+      if (e.target.classList.contains('bank-btn')) {
+        document.querySelectorAll('.bank-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        currentBank = parseInt(e.target.dataset.bank);
+        looper.setBank(currentBank);
+        updateBankInfo();
+      }
+    });
+    
+    function updateBankInfo() {
+      const info = looper.getBankInfo(currentBank);
+      bankInfo.innerHTML = '<h3>Bank ' + (currentBank + 1) + '</h3>';
+      if (info.hasLoop) {
+        bankInfo.innerHTML += '<p>Slices: ' + info.numSlices + '</p>';
+        bankInfo.innerHTML += '<p>Duration: ' + info.duration.toFixed(2) + 's</p>';
+        bankInfo.innerHTML += '<p>Type: ' + (info.analysis?.type || 'unknown') + '</p>';
+        initSliceGrid(info.numSlices);
+      } else {
+        bankInfo.innerHTML += '<p>No loop loaded</p>';
+        initSliceGrid(16);
+      }
+    }
+    
+    // File handling
+    fileDrop.addEventListener('click', () => fileInput.click());
+    
+    fileDrop.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileDrop.classList.add('dragover');
+    });
+    
+    fileDrop.addEventListener('dragleave', () => {
+      fileDrop.classList.remove('dragover');
+    });
+    
+    fileDrop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileDrop.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) loadFile(file);
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) loadFile(file);
+    });
+    
+    async function loadFile(file) {
+      if (!audioContext) {
+        audioContext = new AudioContext();
+        await audioContext.audioWorklet.addModule('./worklets/looper-engine.js');
+        looper.onContext(audioContext);
+      }
+      
+      const arrayBuffer = await file.arrayBuffer();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      const analysis = looper.loadLoop(audioBuffer, currentBank);
+      updateBankInfo();
+    }
+    
+    // Transport
+    document.getElementById('btn-play').addEventListener('click', () => {
+      if (!audioContext) {
+        audioContext = new AudioContext();
+        looper.onContext(audioContext);
+      }
+      looper.play();
+    });
+    
+    document.getElementById('btn-stop').addEventListener('click', () => {
+      looper.stop();
+    });
+    
+    document.getElementById('btn-load').addEventListener('click', () => {
+      fileInput.click();
+    });
+    
+    document.getElementById('btn-generate').addEventListener('click', async () => {
+      if (!audioContext) {
+        audioContext = new AudioContext();
+        await audioContext.audioWorklet.addModule('./worklets/looper-engine.js');
+        looper.onContext(audioContext);
+      }
+      
+      const type = document.getElementById('loop-type').value;
+      const bpm = parseInt(document.getElementById('bpm-slider').value);
+      const key = document.getElementById('key-select').value;
+      const scale = document.getElementById('scale-select').value;
+      const bars = parseInt(document.getElementById('bars-slider').value);
+      
+      const result = await looper.generateLoop(type, {
+        bpm,
+        key,
+        scale,
+        bars,
+        bank: currentBank
+      });
+      
+      updateBankInfo();
+    });
+    
+    // Sliders
+    document.getElementById('bpm-slider').addEventListener('input', (e) => {
+      document.getElementById('bpm-value').textContent = e.target.value;
+    });
+    
+    document.getElementById('bars-slider').addEventListener('input', (e) => {
+      document.getElementById('bars-value').textContent = e.target.value;
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      
+      const key = e.key;
+      if (key >= '1' && key <= '9') {
+        const sliceIdx = parseInt(key) - 1;
+        looper.triggerSlice(currentBank, sliceIdx, 1.0);
+      }
+    });
+    
+    // Initialize
+    initSliceGrid();
+    
+    console.log('PSY LOOPER initialized');
+    console.log('200+ features | 8 loop banks | ML-powered | Deterministic');
+  </script>
+</body>
+</html>
