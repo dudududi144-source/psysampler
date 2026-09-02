@@ -1,52 +1,43 @@
-// Build Script - Bundle all files into self-contained index.html
+#!/usr/bin/env bun
+// Build script for PSY LOOPER
 
-import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import fs from 'fs';
+import path from 'path';
 
-console.log('Building PSY LOOPER...');
+const execAsync = promisify(exec);
 
-// Read source files
-const srcFiles = [
-  'src/looper-device.js',
-  'src/slice-engine.js',
-  'src/slice-bank.js',
-  'src/analyzer.js',
-  'src/generator.js',
-  'src/audio-graph.js',
-  'src/fx-chain.js',
-  'src/midi-integration.js',
-  'src/determinism.js',
-  'src/loop-types.js',
-  'src/time-stretch.js',
-  'src/pitch-shift.js',
-  'src/keyboard.js',
-  'src/performance.js',
-  'src/transport.js',
-  'src/scheduler.js',
-  'src/recorder.js',
-  'src/rex2-parser.js',
-  'src/co-pilot.js',
-  'src/ui.js',
-  'src/export.js',
-  'src/factory-presets.js',
-  'src/automation.js',
-  'src/sequencer.js',
-  'src/foundation-integration.js'
-];
-
-// Read CSS
-const css = readFileSync('css/looper.css', 'utf-8');
-
-// Bundle JavaScript
-let jsBundle = '';
-for (const file of srcFiles) {
-  try {
-    const content = readFileSync(file, 'utf-8');
-    jsBundle += content + '\n\n';
-  } catch (err) {
-    console.warn('Warning: Could not read ' + file);
+async function build() {
+  console.log('🔨 Building PSY LOOPER...');
+  
+  // Clean dist
+  console.log('📦 Cleaning dist directory...');
+  if (fs.existsSync('dist')) {
+    fs.rmSync('dist', { recursive: true });
   }
+  fs.mkdirSync('dist', { recursive: true });
+  
+  // Build with bun
+  console.log('📦 Building with bun...');
+  await execAsync('bun build ./src/index.js --outdir ./dist --minify');
+  
+  // Copy assets
+  console.log('📦 Copying assets...');
+  if (fs.existsSync('public')) {
+    fs.cpSync('public', 'dist', { recursive: true });
+  }
+  
+  // Copy worklets
+  console.log('📦 Copying worklets...');
+  if (fs.existsSync('worklets')) {
+    fs.cpSync('worklets', path.join('dist', 'worklets'), { recursive: true });
+  }
+  
+  console.log('✅ Build complete!');
 }
 
-console.log('Bundle size: ' + (jsBundle.length / 1024).toFixed(2) + ' KB');
-console.log('Build complete!');
+build().catch(err => {
+  console.error('❌ Build failed:', err);
+  process.exit(1);
+});
