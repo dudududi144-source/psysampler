@@ -1,0 +1,85 @@
+{
+  "version": "1.0.0",
+  "loops": [
+    {
+      "id": "melodic-01",
+      "name": "Psytrance Melody",
+      "type": "melodic",
+      "file": "melodic-01.wav",
+      "bpm": 145,
+      "key": "C",
+      "scale": "minor",
+      "bars": 4
+    },
+    {
+      "id": "rhythmic-01",
+      "name": "4-on-Floor Kick",
+      "type": "rhythmic",
+      "file": "rhythmic-01.wav",
+      "bpm": 140,
+      "key": null,
+      "scale": null,
+      "bars": 4
+    },
+    {
+      "id": "bass-01",
+      "name": "Rolling Bassline",
+      "type": "bass",
+      "file": "bass-01.wav",
+      "bpm": 145,
+      "key": "C",
+      "scale": "minor",
+      "bars": 4
+    },
+    {
+      "id": "fx-01",
+      "name": "Riser",
+      "type": "fx",
+      "file": "fx-01.wav",
+      "bpm": 140,
+      "key": null,
+      "scale": null,
+      "bars": 4
+    },
+    {
+      "id": "perc-01",
+      "name": "Hi-Hat Pattern",
+      "type": "percussion",
+      "file": "perc-01.wav",
+      "bpm": 140,
+      "key": null,
+      "scale": null,
+      "bars": 4
+    },
+    {
+      "id": "chord-01",
+      "name": "I-IV-V-I Progression",
+      "type": "chord",
+      "file": "chord-01.wav",
+      "bpm": 140,
+      "key": "C",
+      "scale": "major",
+      "bars": 4
+    },
+    {
+      "id": "atmos-01",
+      "name": "Evolving Pad",
+      "type": "atmospheric",
+      "file": "atmos-01.wav",
+      "bpm": 140,
+      "key": "A",
+      "scale": "minor",
+      "bars": 8
+    },
+    {
+      "id": "lead-01",
+      "name": "Arpeggio Lead",
+      "type": "lead",
+      "file": "lead-01.wav",
+      "bpm": 138,
+      "key": "A",
+      "scale": "minor",
+      "bars": 4
+    }
+  ]
+}
