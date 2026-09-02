@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "mappings": {
+    "slice_triggers": {
+      "36": { "bank": 0, "slice": 0 },
+      "38": { "bank": 0, "slice": 1 },
+      "40": { "bank": 0, "slice": 2 },
+      "41": { "bank": 0, "slice": 3 },
+      "43": { "bank": 0, "slice": 4 },
+      "45": { "bank": 0, "slice": 5 },
+      "47": { "bank": 0, "slice": 6 },
+      "48": { "bank": 0, "slice": 7 }
+    },
+    "bank_select": {
+      "1": 0,
+      "2": 1,
+      "3": 2,
+      "4": 3,
+      "5": 4,
+      "6": 5,
+      "7": 6,
+      "8": 7
+    },
+    "cc_mappings": {
+      "1": { "param": "filterCutoff", "min": 20, "max": 20000 },
+      "7": { "param": "volume", "min": 0, "max": 1 },
+      "10": { "param": "pan", "min": -1, "max": 1 },
+      "11": { "param": "reverbMix", "min": 0, "max": 1 },
+      "74": { "param": "filterResonance", "min": 0, "max": 20 },
+      "91": { "param": "delayMix", "min": 0, "max": 1 }
+    },
+    "transport": {
+      "play": 102,
+      "stop": 103,
+      "record": 104
+    }
+  }
+}
