@@ -132,6 +132,10 @@ select{background:var(--bg3);color:var(--text);border:1px solid var(--border);bo
         <div>Slices: <span id="infoSlices">&mdash;</span></div>
         <div>Duration: <span id="infoDuration">&mdash;</span></div>
       </div>
+      
+      <h2>&#127926; Loop Library (20)</h2>
+      <div style="max-height:250px;overflow-y:auto;display:flex;flex-direction:column;gap:3px" id="loopLibrary"></div>
+
       <h2>&#128203; Log</h2>
       <div class="log" id="log"></div>
     </div>
@@ -363,7 +367,48 @@ else if(k>="F1"&&k<="F8"){e.preventDefault();selectBank(parseInt(k.slice(1))-1)}
 document.body.addEventListener("dragover",e=>e.preventDefault());
 document.body.addEventListener("drop",e=>{e.preventDefault();if(e.dataTransfer.files[0])loadAudioFile(e.dataTransfer.files[0])})}
 
-function init(){renderBanks();renderSlices();renderWaveform();bindEvents();
+
+// Loop Library
+const LOOP_LIBRARY=[
+{name:"Kick 145",file:"loops/kick-145bpm.wav",type:"drums",bpm:145},
+{name:"Rolling Bass Gm",file:"loops/bass-rolling-145bpm-Gmin.wav",type:"bass",bpm:145},
+{name:"Melody Am",file:"loops/melody-145bpm-Amin.wav",type:"melodic",bpm:145},
+{name:"Hi-Hats",file:"loops/percussion-hats-145bpm.wav",type:"percussion",bpm:145},
+{name:"Pad Dm",file:"loops/pad-atmospheric-Dmin.wav",type:"atmospheric",bpm:145},
+{name:"Arp Lead Am",file:"loops/lead-arpeggio-145bpm-Amin.wav",type:"lead",bpm:145},
+{name:"Snare Groove",file:"loops/snare-groove-145bpm.wav",type:"drums",bpm:145},
+{name:"FX Riser",file:"loops/fx-riser-145bpm.wav",type:"fx",bpm:145},
+{name:"Chords AmFCG",file:"loops/chords-AmFCG-145bpm.wav",type:"chord",bpm:145},
+{name:"Full Groove",file:"loops/drum-groove-full-145bpm.wav",type:"drums",bpm:145},
+{name:"Acid 303",file:"loops/bass-acid-303-145bpm.wav",type:"bass",bpm:145},
+{name:"Dark Phrygian",file:"loops/melody-dark-phrygian-145bpm.wav",type:"melodic",bpm:145},
+{name:"Sub Bass",file:"loops/bass-sub-deep-145bpm.wav",type:"bass",bpm:145},
+{name:"Impact",file:"loops/fx-impact-downlifter.wav",type:"fx",bpm:145},
+{name:"Prog Trance",file:"loops/melody-progressive-trance-145bpm.wav",type:"melodic",bpm:145},
+{name:"Tribal Perc",file:"loops/percussion-tribal-145bpm.wav",type:"percussion",bpm:145},
+{name:"Glitch",file:"loops/fx-glitch-texture-145bpm.wav",type:"fx",bpm:145},
+{name:"Breakbeat",file:"loops/drum-breakbeat-145bpm.wav",type:"drums",bpm:145},
+{name:"Ambient",file:"loops/ambient-evolving-texture.wav",type:"atmospheric",bpm:145},
+{name:"Full Psy Mix",file:"loops/psytrance-full-mix-145bpm.wav",type:"melodic",bpm:145}
+];
+const TYPE_ICONS={drums:"\ud83e\udd41",bass:"\ud83c\udfb8",melodic:"\ud83c\udfb9",percussion:"\ud83e\ude98",atmospheric:"\ud83c\udf0c",lead:"\u2728",fx:"\ud83d\udcab",chord:"\ud83c\udfbc"};
+function renderLoopLibrary(){const el=document.getElementById("loopLibrary");if(!el)return;el.innerHTML="";
+LOOP_LIBRARY.forEach((loop,i)=>{const d=document.createElement("div");
+d.style.cssText="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 8px;cursor:pointer;font-size:.68rem;display:flex;justify-content:space-between;align-items:center;transition:all .15s";
+d.innerHTML="<span>"+(TYPE_ICONS[loop.type]||"\ud83c\udfb5")+" "+loop.name+"</span><span style='color:var(--text2)'>"+loop.bpm+"</span>";
+d.onmouseenter=()=>{d.style.borderColor="var(--accent)"};
+d.onmouseleave=()=>{d.style.borderColor="var(--border)"};
+d.onclick=()=>loadLibraryLoop(loop,i);el.appendChild(d)})}
+async function loadLibraryLoop(loop,idx){if(!actx)initAudio();if(actx.state==="suspended")actx.resume();
+log("Loading: "+loop.name+"...","info");
+try{const resp=await fetch(loop.file);if(!resp.ok)throw new Error("HTTP "+resp.status);
+const ab=await resp.arrayBuffer();const buf=await actx.decodeAudioData(ab);
+const bank=state.banks[state.currentBank];bank.buffer=buf;bank.analysis=analyzeBuffer(buf);bank.analysis.type=loop.type;
+bank.slices=detectSlices(buf,state.sensitivity);
+log("Loaded: "+loop.name+" ("+buf.duration.toFixed(2)+"s, "+bank.slices.length+" slices)","ok");
+renderBanks();renderSlices();renderWaveform();updateInfo()}catch(e){log("Error: "+e.message,"err")}}
+
+function init(){renderBanks();renderSlices();renderWaveform();bindEvents();renderLoopLibrary();
 log("PSY LOOPER v1.0 ready","ok");log("8 banks | 8 types | 6 FX | MIDI | WAV export","info");
 log("Space=play, G=generate, 1-9=slices, E=export","info");requestAnimationFrame(renderSpectrum)}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
