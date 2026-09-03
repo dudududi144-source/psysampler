@@ -1287,6 +1287,103 @@ var bk=S.banks[S.bank];if(!bk||!bk.slices||!bk.slices.length)return;
 log("DROP!","ok");
 for(var i=0;i<bk.slices.length;i++){playSlice(S.bank,i,1)}}
 
+
+// === ADVANCED FEATURES ===
+// PRESET SYSTEM
+var PRESETS={
+"Psy Classic":{genType:"melodic",key:"A",scale:"minor",bpm:145,fx:{delay:1,verb:1},fxP:{dm:.3,vm:.25}},
+"Dark Forest":{genType:"melodic",key:"E",scale:"phrygian",bpm:148,fx:{delay:1,verb:1,drive:1},fxP:{dm:.4,vm:.35,dd:.4}},
+"Uplifting":{genType:"arp-up",key:"C",scale:"major",bpm:140,fx:{delay:1,verb:1},fxP:{dm:.35,vm:.4}},
+"Acid Trip":{genType:"bass",key:"A",scale:"minor",bpm:145,fx:{drive:1,delay:1},fxP:{dd:.5,dm:.25}},
+"Ambient Dream":{genType:"atmospheric",key:"D",scale:"major",bpm:120,fx:{verb:1},fxP:{vm:.5}},
+"Techno Drive":{genType:"rhythmic",key:"E",scale:"minor",bpm:145,fx:{drive:1},fxP:{dd:.3}},
+"Progressive":{genType:"chord-stab",key:"G",scale:"minor",bpm:138,fx:{delay:1,verb:1},fxP:{dm:.3,vm:.3}},
+"Full On":{genType:"lead",key:"G",scale:"minor",bpm:145,fx:{delay:1,drive:1},fxP:{dm:.35,dd:.4}}
+};
+function loadPreset(name){
+var p=PRESETS[name];if(!p)return;
+S.genType=p.genType;S.bpm=p.bpm;
+if(p.fx)S.fx=p.fx;
+if(p.fxP)Object.assign(S.fxP,p.fxP);
+$("bpmR").value=S.bpm;$("bpmVal").textContent=S.bpm;
+$("gKey").value=p.key;$("gScale").value=p.scale;
+applyFX();
+log("Preset: "+name,"ok");
+// Auto-generate
+$("genBtn").click()}
+// MACRO CONTROLS
+function macroSpace(){
+// Space macro: reverb + delay + filter
+if(!AC)return;
+if(nVerbMix)nVerbMix.gain.value=.5;
+if(nDelMix)nDelMix.gain.value=.4;
+if(nFil)nFil.frequency.value=8000;
+log("MACRO: Space","ok")}
+function macroEnergy(){
+// Energy macro: drive + volume + filter open
+if(!AC)return;
+if(nDist)nDist.curve=dCurve(30);
+if(master)master.gain.value=Math.min(1,S.vol*1.2);
+if(nFil)nFil.frequency.value=15000;
+log("MACRO: Energy","ok")}
+function macroTension(){
+// Tension macro: filter close + resonance
+if(!AC)return;
+if(nFil){nFil.frequency.value=500;nFil.Q.value=8}
+log("MACRO: Tension","ok")}
+function macroReset(){
+// Reset all macros
+if(!AC)return;
+if(nVerbMix)nVerbMix.gain.value=S.fx.verb?S.fxP.vm:0;
+if(nDelMix)nDelMix.gain.value=S.fx.delay?S.fxP.dm:0;
+if(nDist)nDist.curve=dCurve(S.fx.drive?S.fxP.dd*50:0);
+if(nFil){nFil.frequency.value=S.fxP.ff;nFil.Q.value=.7}
+if(master)master.gain.value=S.vol;
+log("MACRO: Reset","ok")}
+// AUTOMATION: filter sweep over time
+var autoFilter=null;
+function startFilterSweep(){
+if(!AC||!nFil)return;
+if(autoFilter){clearInterval(autoFilter);autoFilter=null;log("Auto filter stopped");return}
+var startTime=Date.now();
+var duration=4000; // 4 seconds
+var startFreq=nFil.frequency.value;
+var endFreq=200;
+autoFilter=setInterval(function(){
+var elapsed=Date.now()-startTime;
+var progress=Math.min(1,elapsed/duration);
+var freq=startFreq+(endFreq-startFreq)*progress;
+nFil.frequency.value=freq;
+if(progress>=1){clearInterval(autoFilter);autoFilter=null;log("Filter sweep complete","ok")}
+},50);
+log("Auto filter sweep started","ok")}
+// LFO to PITCH
+var lfoPitch=null;
+function toggleLfoPitch(){
+var bk=S.banks[S.bank];if(!bk)return;
+if(lfoPitch){clearInterval(lfoPitch);lfoPitch=null;bk.pitch=0;
+$("piR").value=0;$("piV").textContent=0;log("LFO pitch off");return}
+var phase=0;
+lfoPitch=setInterval(function(){
+phase+=.1;
+bk.pitch=Math.round(Math.sin(phase)*5);
+$("piR").value=bk.pitch;$("piV").textContent=bk.pitch},100);
+log("LFO pitch on","ok")}
+// TAP TEMPO for slices (play slices in rhythm)
+function tapSlices(){
+var bk=S.banks[S.bank];if(!bk||!bk.slices||!bk.slices.length)return;
+var now=Date.now();
+if(!S._taps)S._taps=[];
+S._taps.push(now);
+if(S._taps.length>4)S._taps.shift();
+if(S._taps.length>=2){
+var intervals=[];
+for(var i=1;i<S._taps.length;i++)intervals.push(S._taps[i]-S._taps[i-1]);
+var avg=intervals.reduce(function(a,b){return a+b})/intervals.length;
+var si=S._taps.length%bk.slices.length;
+playSlice(S.bank,si);
+log("Tap: "+Math.round(60000/avg)+" BPM","ok")}}
+
 })();
 
 </script>
