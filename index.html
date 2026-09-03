@@ -407,7 +407,7 @@ function playSlice(bi,si,vel){
 if(!AC&&!initAudio())return;
 if(AC.state==="suspended")AC.resume();
 var bank=S.banks[bi];
-if(!bank||!bank.buf||!bank.slices||!bank.slices[si])return;
+if(!bank||!bank.buf||!bank.slices||!bank.slices[si]){if(!bank||!bank.buf)log("Load or generate a loop first","info");return;}
 
 var sl=bank.slices[si];
 var src=AC.createBufferSource();
