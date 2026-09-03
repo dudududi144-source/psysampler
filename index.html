@@ -518,6 +518,7 @@ function playAll(){
 function play(){
   if(!AC&&!initAudio())return;
   if(AC.state==="suspended")AC.resume();
+  if(!nEQ1){setupSoundQuality()}
   if(S.playing)return;
   S.playing=true;seqStep=0;seqNext=AC.currentTime+0.05;
   schedLoop();
