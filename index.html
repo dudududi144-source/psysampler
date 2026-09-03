@@ -821,7 +821,7 @@ function bindEvents(){
     var key=$("genKey").value,scale=$("genScale").value;
     log("Generating "+S.genType+" ("+key+" "+scale+")...");
     setTimeout(function(){
-      var buf=genLoop(S.genType,key,scale,4,S.bpm);
+      var buf=genLoopV2(S.genType,key,scale,4,S.bpm);
       var bank=S.banks[S.bank];
       bank.buf=buf;bank.info=analyze(buf);bank.slices=slice(buf,S.sens);
       log("Generated! "+bank.slices.length+" slices","ok");
