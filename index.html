@@ -268,7 +268,7 @@ for(var bi=0;bi<8;bi++){
 // === AUDIO GLOBALS ===
 var AC=null, master=null, analyser=null;
 var nFilter=null, nDelay=null, nDelayFb=null, nDelayMix=null;
-var nHP=null,nEQ1=null,nEQ2=null,nEQ3=null,nDeEss=null,nSoft=null;
+var nHP=null,nEQ1=null,nEQ2=null,nEQ3=null,nDeEss=null,nSoft=null,nDC=null;
 var nVerb=null, nVerbMix=null, nDist=null, nComp=null, nLim=null;
 var sources=[], seqT=null, seqStep=0, seqNext=0, taps=[];
 
@@ -287,6 +287,8 @@ function initAudio(){
     
     // Build FX chain
     nFilter=AC.createBiquadFilter();
+  // DC blocker: highpass at 20Hz to remove sub-sonic rumble
+  nDC=AC.createBiquadFilter();nDC.type="highpass";nDC.frequency.value=20;nDC.Q.value=0.5;
     nFilter.type="lowpass";
     nFilter.frequency.value=S.fxP.filterF;
     nFilter.Q.value=0.7;
@@ -319,6 +321,11 @@ function initAudio(){
     nComp.release.value=0.15;
     
     nLim=AC.createDynamicsCompressor();
+  nLim.threshold.value=-1;
+  nLim.knee.value=0;
+  nLim.ratio.value=20;
+  nLim.attack.value=0.001;
+  nLim.release.value=0.05;
     nLim.threshold.value=-1;
     nLim.knee.value=0;
     nLim.ratio.value=20;
@@ -332,7 +339,7 @@ function initAudio(){
     analyser.fftSize=2048;
     
     // Chain: filter -> dist -> comp -> lim -> master -> analyser -> out
-    nFilter.connect(nDist);
+    nFilter.connect(nDC);nDC.connect(nDist);
     nDist.connect(nComp);
     nComp.connect(nLim);
     nLim.connect(master);
@@ -490,6 +497,24 @@ function slice(buf,sens){
 }
 
 // === PLAYBACK ===
+
+// === REVERSE BUFFER CACHE ===
+var revCache={};
+function getReversedBuffer(buf){
+var key=buf.length;
+if(revCache[key])return revCache[key];
+var sr=buf.sampleRate;
+var ch=buf.numberOfChannels;
+var revBuf=AC.createBuffer(ch,buf.length,sr);
+for(var c=0;c<ch;c++){
+var src=buf.getChannelData(c);
+var dst=revBuf.getChannelData(c);
+for(var i=0;i<src.length;i++){dst[i]=src[src.length-1-i]}
+}
+revCache[key]=revBuf;
+return revBuf;
+}
+
 function playSlice(bi,si,vel){
   if(!AC&&!initAudio())return;
   if(AC.state==="suspended")AC.resume();
@@ -501,7 +526,10 @@ function playSlice(bi,si,vel){
   var gain=AC.createGain();
   var now=AC.currentTime;
   
-  src.buffer=bank.buf;
+  // Use reversed buffer if reverse is enabled
+  if(bank.rev){src.buffer=getReversedBuffer(bank.buf);
+  startSec=(bank.buf.length-sl.e)/bank.buf.sampleRate;
+  }else{src.buffer=bank.buf;}
   src.playbackRate.value=bank.speed*Math.pow(2,bank.pitch/12);
   
   gain.gain.setValueAtTime(0,now);
@@ -515,10 +543,8 @@ function playSlice(bi,si,vel){
   var startSec=sl.s/bank.buf.sampleRate;
   var durSec=Math.max(0.01,sl.d/bank.speed);
   
-  if(bank.rev){
-    startSec=(bank.buf.length-sl.e)/bank.buf.sampleRate;
-    src.playbackRate.value=-Math.abs(src.playbackRate.value);
-  }
+  // Reverse handled by playing reversed buffer data
+  // (negative playbackRate not supported in Web Audio API)
   
   // Release envelope: ramp down before end to prevent clicks
   var relSec=Math.max(.005,bank.rel/1000);
@@ -802,6 +828,9 @@ function renderInfo(){
 }
 
 function renderSpectrum(){
+  // Throttle to ~30fps
+  if(renderSpectrum._t&&performance.now()-renderSpectrum._t<33){requestAnimationFrame(renderSpectrum);return}
+  renderSpectrum._t=performance.now();
   var cv=$("specCv");if(!cv||!analyser)return;
   var rect=cv.parentElement.getBoundingClientRect();
   cv.width=rect.width||600;cv.height=rect.height||60;
