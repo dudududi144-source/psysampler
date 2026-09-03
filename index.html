@@ -890,7 +890,13 @@ function bindEvents(){
     if(k===" "){e.preventDefault();S.playing?stop():play()}
     else if(k>="1"&&k<="9"){playSlice(S.bank,parseInt(k)-1)}
     else if(k==="Escape"){stop()}
-    else if(k==="g"||k==="G"){$("genBtn").click()}
+    else if(k==="g"||k==="G"){// Auto-generate
+if(AC){setTimeout(function(){
+var key=$("gKey").value,scale=$("gScale").value,bars=parseInt($("gBars").value);
+var buf=genLoopV2(S.genType,key,scale,bars,S.bpm);
+var bank=S.banks[S.bank];
+bank.buf=buf;bank.info=analyze(buf);bank.slices=sliceBuf(buf,S.sens);
+renderAll()},50)}}
     else if(k==="e"||k==="E"){exportWAV()}
     else if(k>="F1"&&k<="F8"){e.preventDefault();S.bank=parseInt(k.slice(1))-1;$("bankLabel").textContent=S.bank+1;renderAll()}
   });
@@ -908,10 +914,11 @@ function init(){
   renderInfo();
   renderFX();
   renderLib();
+  if(typeof renderSeq==="function")renderSeq();
   bindEvents();
-  log("PSY LOOPER v2.0 ready","ok");
-  log("20 loops in library • 8 banks • 6 FX","ok");
-  log("Space=Play G=Generate 1-9=Slices","ok");
+  log("PSY LOOPER PRO v4.0 ready","ok");
+  log("95 loops | 13 gen types | 15 FX | 8 presets","ok");
+  log("Space=Play G=Generate 1-9=Slices F1-F8=Banks","ok");
   requestAnimationFrame(renderSpectrum);
 }
 
@@ -1038,45 +1045,33 @@ if($("randBtn"))$("randBtn").onclick=randomizeSlices;
 if($("probBtn"))$("probBtn").onclick=playProb;
 
 
-// === SOUND QUALITY ENHANCEMENTS ===
-// Master chain cleanup: gentle EQ + de-harsh + smooth limiter
-var nEQ1=null,nEQ2=null,nEQ3=null,nDeEss=null;
+// === SOUND QUALITY CHAIN ===
 function setupSoundQuality(){
-if(!AC)return;
-// Gentle presence EQ (reduce harshness at 3-5kHz)
-nEQ1=AC.createBiquadFilter();nEQ1.type="peaking";nEQ1.frequency.value=4000;nEQ1.Q.value=1.5;nEQ1.gain.value=-2;
-// Warm low-mid boost
-nEQ2=AC.createBiquadFilter();nEQ2.type="peaking";nEQ2.frequency.value=250;nEQ2.Q.value=1;nEQ2.gain.value=1;
-// Air boost (gentle high shelf)
-nEQ3=AC.createBiquadFilter();nEQ3.type="highshelf";nEQ3.frequency.value=10000;nEQ3.gain.value=1.5;
-// De-esser (reduce sibilance/harshness)
-nDeEss=AC.createBiquadFilter();nDeEss.type="peaking";nDeEss.frequency.value=6000;nDeEss.Q.value=3;nDeEss.gain.value=-3;
-// Insert into chain
+if(!AC||!nComp||!nLim)return;
 try{
-if(nComp&&nLim){
+// Create EQ nodes
+nEQ1=AC.createBiquadFilter();nEQ1.type="peaking";nEQ1.frequency.value=4000;nEQ1.Q.value=1.5;nEQ1.gain.value=-2;
+nEQ2=AC.createBiquadFilter();nEQ2.type="peaking";nEQ2.frequency.value=250;nEQ2.Q.value=1;nEQ2.gain.value=1;
+nEQ3=AC.createBiquadFilter();nEQ3.type="highshelf";nEQ3.frequency.value=10000;nEQ3.gain.value=1.5;
+nDeEss=AC.createBiquadFilter();nDeEss.type="peaking";nDeEss.frequency.value=6000;nDeEss.Q.value=3;nDeEss.gain.value=-3;
+// Soft limiter waveshaper
+nSoft=AC.createWaveShaper();
+var nn=4096,cc=new Float32Array(nn);
+for(var i=0;i<nn;i++){var x=i*2/nn-1;cc[i]=Math.tanh(x*1.2)*.9}
+nSoft.curve=cc;
+// Rebuild chain: comp -> EQ1 -> EQ2 -> EQ3 -> DeEss -> Limiter -> Soft -> master
 nComp.disconnect();
 nComp.connect(nEQ1);
 nEQ1.connect(nEQ2);
 nEQ2.connect(nEQ3);
 nEQ3.connect(nDeEss);
 nDeEss.connect(nLim);
+nLim.disconnect();
+nLim.connect(nSoft);
+nSoft.connect(master);
+log("Sound quality chain active","ok");
+}catch(e){log("SQ chain error: "+e.message,"er")}
 }
-}catch(e){}
-log("🎵 Sound quality chain active","ok");
-}
-// Call after audio init
-setTimeout(setupSoundQuality,100);
-// SOFT LIMITER for clean output
-var nSoft=null;
-function addSoftLimit(){
-if(!AC)return;
-nSoft=AC.createWaveShaper();
-var n=4096,c=new Float32Array(n);
-for(var i=0;i<n;i++){var x=i*2/n-1;c[i]=Math.tanh(x*1.2)*.9}
-nSoft.curve=c;
-try{if(nLim&&master){nLim.disconnect();nLim.connect(nSoft);nSoft.connect(master)}}catch(e){}
-}
-setTimeout(addSoftLimit,200);
 
 
 // === MORE GENERATION TYPES ===
@@ -1310,7 +1305,13 @@ $("gKey").value=p.key;$("gScale").value=p.scale;
 applyFX();
 log("Preset: "+name,"ok");
 // Auto-generate
-$("genBtn").click()}
+// Auto-generate
+if(AC){setTimeout(function(){
+var key=$("gKey").value,scale=$("gScale").value,bars=parseInt($("gBars").value);
+var buf=genLoopV2(S.genType,key,scale,bars,S.bpm);
+var bank=S.banks[S.bank];
+bank.buf=buf;bank.info=analyze(buf);bank.slices=sliceBuf(buf,S.sens);
+renderAll()},50)}}
 // MACRO CONTROLS
 function macroSpace(){
 // Space macro: reverb + delay + filter
