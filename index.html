@@ -499,10 +499,9 @@ function slice(buf,sens){
 // === PLAYBACK ===
 
 // === REVERSE BUFFER CACHE ===
-var revCache={};
+var revCache=new WeakMap();
 function getReversedBuffer(buf){
-var key=buf.length;
-if(revCache[key])return revCache[key];
+if(revCache.has(buf))return revCache.get(buf);
 var sr=buf.sampleRate;
 var ch=buf.numberOfChannels;
 var revBuf=AC.createBuffer(ch,buf.length,sr);
@@ -511,7 +510,7 @@ var src=buf.getChannelData(c);
 var dst=revBuf.getChannelData(c);
 for(var i=0;i<src.length;i++){dst[i]=src[src.length-1-i]}
 }
-revCache[key]=revBuf;
+revCache.set(buf,revBuf);
 return revBuf;
 }
 
@@ -909,7 +908,8 @@ function renderLib(){
 function bindEvents(){
   $("playBtn").onclick=function(){S.playing?stop():play()};
   $("stopBtn").onclick=stop;
-  $("bpmRange").oninput=function(){S.bpm=parseInt(this.value);$("bpmVal").textContent=S.bpm;if(nDelay)nDelay.delayTime.value=60/S.bpm*0.75};
+  $("bpmRange").oninput=function(){S.bpm=parseInt(this.value);$("bpmVal").textContent=S.bpm;
+  if(nDelay&&AC)nDelay.delayTime.setTargetAtTime((60/S.bpm)*0.75,AC.currentTime,.05);if(nDelay)nDelay.delayTime.value=60/S.bpm*0.75};
   $("tapBtn").onclick=function(){
     var now=Date.now();taps.push(now);if(taps.length>5)taps.shift();
     if(taps.length>=2){var iv=[];for(var i=1;i<taps.length;i++)iv.push(taps[i]-taps[i-1]);
@@ -988,7 +988,7 @@ function init(){
   renderLib();
   if(typeof renderSeqAdvanced==="function")renderSeqAdvanced();else if(typeof renderSeq==="function")renderSeq();
   bindEvents();
-  log("PSY LOOPER PRO v4.0 ready","ok");
+  log("PSY LOOPER PRO v5.0 ready","ok");
   log("120 loops | 13 gen types | 15 FX | 8 presets","ok");
   log("Space=Play G=Generate 1-9=Slices F1-F8=Banks","ok");
   requestAnimationFrame(renderSpectrum);
