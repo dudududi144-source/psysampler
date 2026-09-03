@@ -520,8 +520,16 @@ function playSlice(bi,si,vel){
     src.playbackRate.value=-Math.abs(src.playbackRate.value);
   }
   
+  // Release envelope: ramp down before end to prevent clicks
+  var relSec=Math.max(.005,bank.rel/1000);
+  if(durSec>relSec){
+    gain.gain.setValueAtTime(vel||1,now+durSec-relSec);
+    gain.gain.linearRampToValueAtTime(0,now+durSec);
+  }
+  
   src.start(now,startSec,durSec);
-  src.onended=function(){try{gain.gain.linearRampToValueAtTime(0,AC.currentTime+0.01)}catch(e){}};
+  src.stop(now+durSec+.02);
+  src.onended=function(){try{gain.disconnect()}catch(e){}};
   
   sources.push(src);
   if(sources.length>64){try{sources.shift().stop()}catch(e){}}
@@ -842,7 +850,7 @@ function renderFX(){
 function applyFX(){
   if(!AC)return;
   if(nFilter)nFilter.frequency.value=S.fx.filter?S.fxP.filterF:20000;
-  if(nDelayMix)nDelayMix.gain.value=S.fx.delay?S.fxP.delayM:0;
+  if(nDelayMix&&AC)nDelayMix.gain.setTargetAtTime(S.fx.delay?S.fxP.delayM:0,AC.currentTime,.02);
   if(nVerbMix)nVerbMix.gain.value=S.fx.reverb?S.fxP.revM:0;
   if(nDist)nDist.curve=distCurve(S.fx.dist?S.fxP.distD*100:0);
 }
