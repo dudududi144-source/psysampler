@@ -489,6 +489,12 @@ if(nDist)nDist.curve=mkDistCurve(S.fx.dist?S.fxP.distD*50:0);
 // Sync delay time to BPM
 if(nDel)nDel.delayTime.setTargetAtTime((60/S.bpm)*0.75,AC.currentTime,.05);
 }
+// Compatibility aliases
+var nFilter=nFil;
+var nDelay=nDel;
+var nDelayMix_old=nDelMix;
+var nVerbMix_old=nVerbMix;
+
 
 function playAll(){
   var bank=S.banks[S.bank];
