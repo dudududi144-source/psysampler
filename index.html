@@ -226,7 +226,14 @@ select{background:var(--p3);color:var(--txt);border:1px solid var(--brd);border-
     <div class="ctrl"><label>Swing <span id="swV">0</span>%</label><input type="range" id="swR" min="0" max="70" value="0" style="width:100%"></div>
     <div class="ctrl"><label>Sensitivity <span id="senV">50</span>%</label><input type="range" id="senR" min="10" max="90" value="50" style="width:100%"></div>
     
-    <h3>🎶 LOOP LIBRARY (20)</h3>
+    <h3>🎛️ MACROS</h3>
+<div class="fx-btns">
+<button class="btn" onclick="macroSpace()">Space</button>
+<button class="btn" onclick="macroEnergy()">Energy</button>
+<button class="btn" onclick="macroTension()">Tension</button>
+<button class="btn" onclick="macroReset()">Reset</button>
+</div>
+    <h3>🎶 LOOP LIBRARY (120)</h3>
     <div id="libEl" style="max-height:220px;overflow-y:auto"></div>
     
     <h3>⌨️ KEYS</h3>
@@ -991,7 +998,7 @@ function init(){
   if(typeof renderSeqAdvanced==="function")renderSeqAdvanced();else if(typeof renderSeq==="function")renderSeq();
   bindEvents();
   log("PSY LOOPER PRO v5.0 ready","ok");
-  log("120 loops | 13 gen types | 15 FX | 8 presets","ok");
+  log("120 loops | 13 gen types | 15 FX | 8 presets | 4 macros","ok");
   log("Space=Play G=Generate 1-9=Slices F1-F8=Banks","ok");
   requestAnimationFrame(renderSpectrum);
 }
@@ -1630,6 +1637,37 @@ seqState.steps[i]=pattern[i%pattern.length];
 }
 renderSeqAdvanced();
 log("Euclidean: "+pulses+"/"+steps,"ok");
+}
+
+
+// === MACROS (Commercial Grade) ===
+function macroSpace(){
+if(!AC)return;
+if(nVerbMix)nVerbMix.gain.setTargetAtTime(.5,AC.currentTime,.05);
+if(nDelayMix)nDelayMix.gain.setTargetAtTime(.4,AC.currentTime,.05);
+if(nFilter)nFilter.frequency.setTargetAtTime(8000,AC.currentTime,.05);
+log("MACRO: Space","ok");
+}
+function macroEnergy(){
+if(!AC)return;
+if(nDist)nDist.curve=distCurve(30);
+if(master)master.gain.setTargetAtTime(Math.min(1,S.vol*1.2),AC.currentTime,.05);
+if(nFilter)nFilter.frequency.setTargetAtTime(15000,AC.currentTime,.05);
+log("MACRO: Energy","ok");
+}
+function macroTension(){
+if(!AC)return;
+if(nFilter){nFilter.frequency.setTargetAtTime(500,AC.currentTime,.05);nFilter.Q.value=8;}
+log("MACRO: Tension","ok");
+}
+function macroReset(){
+if(!AC)return;
+if(nVerbMix)nVerbMix.gain.setTargetAtTime(S.fx.verb?S.fxP.revM:0,AC.currentTime,.05);
+if(nDelayMix)nDelayMix.gain.setTargetAtTime(S.fx.delay?S.fxP.delayM:0,AC.currentTime,.05);
+if(nDist)nDist.curve=distCurve(S.fx.dist?S.fxP.distD*100:0);
+if(nFilter){nFilter.frequency.setTargetAtTime(S.fx.filter?S.fxP.filterF:20000,AC.currentTime,.05);nFilter.Q.value=0.7;}
+if(master)master.gain.setTargetAtTime(S.vol,AC.currentTime,.05);
+log("MACRO: Reset","ok");
 }
 
 })();
