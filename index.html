@@ -1044,6 +1044,81 @@ try{if(nLim&&master){nLim.disconnect();nLim.connect(nSoft);nSoft.connect(master)
 }
 setTimeout(addSoftLimit,200);
 
+
+// === MORE GENERATION TYPES ===
+var EXTRA_GEN={
+"arp-up":function(root,sc,bars,bpm,sr){
+var beat=60/bpm,six=beat/4,N=Math.floor(bars*4*beat*sr),out=new Float32Array(N),r=rng(Date.now());
+var chord=[sc[0],sc[2%sc.length],sc[4%sc.length],sc[6%sc.length]];
+for(var i=0;i<bars*16;i++){var semi=chord[i%chord.length]+(i>=bars*8?12:0);
+var f=440*Math.pow(2,(root+semi-69)/12);var s=Math.floor(i*six*sr),L=Math.floor(six*.8*sr);
+if(s+L>N)break;var st=new Float32Array(L);for(var j=0;j<L;j++)st[j]=j/sr;
+var osc=new Float32Array(L);for(j=0;j<L;j++){osc[j]=Math.sin(2*Math.PI*f*st[j])+.3*Math.sin(2*Math.PI*f*2*st[j]);
+osc[j]*=Math.min(1,st[j]/.003)*Math.exp(-st[j]*8)*.2}
+for(j=0;j<L&&s+j<N;j++)out[s+j]+=osc[j]}
+return out},
+"arp-down":function(root,sc,bars,bpm,sr){
+var beat=60/bpm,six=beat/4,N=Math.floor(bars*4*beat*sr),out=new Float32Array(N);
+var chord=[sc[6%sc.length],sc[4%sc.length],sc[2%sc.length],sc[0]];
+for(var i=0;i<bars*16;i++){var semi=chord[i%chord.length];
+var f=440*Math.pow(2,(root+semi-69)/12);var s=Math.floor(i*six*sr),L=Math.floor(six*.8*sr);
+if(s+L>N)break;var st=new Float32Array(L);for(var j=0;j<L;j++)st[j]=j/sr;
+var osc=new Float32Array(L);for(j=0;j<L;j++){osc[j]=Math.sin(2*Math.PI*f*st[j])+.3*Math.sin(2*Math.PI*f*2*st[j]);
+osc[j]*=Math.min(1,st[j]/.003)*Math.exp(-st[j]*8)*.2}
+for(j=0;j<L&&s+j<N;j++)out[s+j]+=osc[j]}
+return out},
+"arp-rand":function(root,sc,bars,bpm,sr){
+var beat=60/bpm,six=beat/4,N=Math.floor(bars*4*beat*sr),out=new Float32Array(N),r=rng(Date.now());
+for(var i=0;i<bars*16;i++){if(r()<.2)continue;
+var semi=sc[Math.floor(r()*sc.length)]+(r()<.3?12:0);
+var f=440*Math.pow(2,(root+semi-69)/12);var s=Math.floor(i*six*sr),L=Math.floor(six*(r()<.3?2:1)*.8*sr);
+if(s+L>N)break;var st=new Float32Array(L);for(var j=0;j<L;j++)st[j]=j/sr;
+var osc=new Float32Array(L);for(j=0;j<L;j++){osc[j]=Math.sin(2*Math.PI*f*st[j])+.3*Math.sin(2*Math.PI*f*2*st[j]);
+osc[j]*=Math.min(1,st[j]/.003)*Math.exp(-st[j]*6)*.2}
+for(j=0;j<L&&s+j<N;j++)out[s+j]+=osc[j]}
+return out},
+"chord-stab":function(root,sc,bars,bpm,sr){
+var beat=60/bpm,N=Math.floor(bars*4*beat*sr),out=new Float32Array(N),r=rng(Date.now());
+var progs=[[0,3,4,0],[0,5,3,4],[5,3,4,0],[0,4,5,3]];
+var prog=progs[Math.floor(r()*progs.length)];
+for(var bar=0;bar<bars;bar++){var cr=sc[prog[bar%4]%sc.length];
+var notes=[cr,cr+3,cr+7];
+for(var stab=0;stab<2;stab++){var s=Math.floor((bar*4+stab*2)*beat*sr);var L=Math.floor(beat*1.5*sr);
+if(s+L>N)break;
+for(var n=0;n<notes.length;n++){var f=440*Math.pow(2,(root+notes[n]-69)/12);
+for(var j=0;j<L&&s+j<N;j++){var t=j/sr;
+var env=Math.min(1,t/.01)*Math.exp(-t*3);
+out[s+j]+=Math.sin(2*Math.PI*f*t)*env*.12}}}}
+return out},
+"melody-walk":function(root,sc,bars,bpm,sr){
+var beat=60/bpm,six=beat/4,N=Math.floor(bars*4*beat*sr),out=new Float32Array(N),r=rng(Date.now());
+var pos=Math.floor(r()*sc.length);
+for(var i=0;i<bars*8;i++){
+var step=r()<.5?1:(r()<.5?-1:2);
+pos=Math.max(0,Math.min(sc.length-1,pos+step));
+var semi=sc[pos]+(i>=bars*4?12:0);
+var f=440*Math.pow(2,(root+semi-69)/12);
+var s=Math.floor(i*six*2*sr),L=Math.floor(six*1.8*sr);
+if(s+L>N)break;
+for(var j=0;j<L&&s+j<N;j++){var t=j/sr;
+var env=Math.min(1,t/.008)*Math.exp(-t*4);
+out[s+j]+=(Math.sin(2*Math.PI*f*t)+.3*Math.sin(2*Math.PI*f*2*t))*env*.18}}
+return out}
+};
+// Extend gen types
+var GEN_TYPES=["melodic","rhythmic","bass","lead","fx","percussion","chord","atmospheric","arp-up","arp-down","arp-rand","chord-stab","melody-walk"];
+function genLoopV2(type,key,scale,bars,bpm){
+var sr=AC.sampleRate,root=(KEYS[key]||69),sc=SCALES[scale]||SCALES.minor;
+if(EXTRA_GEN[type]){
+var out=EXTRA_GEN[type](root,sc,bars,bpm,sr);
+// Normalize with fades
+var pk=0;for(var i=0;i<out.length;i++)pk=Math.max(pk,Math.abs(out[i]));
+if(pk>0){var nm=.82/pk;for(i=0;i<out.length;i++)out[i]*=nm}
+var fd=Math.floor(sr*.005);
+for(i=0;i<fd&&i<out.length;i++){out[i]*=i/fd;out[out.length-1-i]*=i/fd}
+var buf=AC.createBuffer(1,out.length,sr);buf.getChannelData(0).set(out);return buf}
+return genLoop(type,key,scale,bars,bpm)}
+
 })();
 
 </script>
