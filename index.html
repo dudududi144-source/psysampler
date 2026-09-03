@@ -798,27 +798,40 @@ function renderFX(){
   el.innerHTML="";
   fxs.forEach(function(fx){
     var row=document.createElement("div");
-    row.className="fx-row";
-    row.innerHTML='<div class="sw '+(fx.on?'on':'')+'" data-fx="'+fx.id+'"></div><span style="width:50px">'+fx.name+'</span><input type="range" min="'+fx.min+'" max="'+fx.max+'" value="'+fx.val+'" data-p="'+fx.slider+'">';
-    el.appendChild(row);
-  });
-  // Bind events
-  el.querySelectorAll(".sw").forEach(function(sw){
+    row.className="fx";
+    
+    var sw=document.createElement("div");
+    sw.className="sw"+(fx.on?" on":"");
     sw.onclick=function(){
-      var id=this.dataset.fx;
-      S.fx[id]=!S.fx[id];
+      S.fx[fx.id]=!S.fx[fx.id];
       this.classList.toggle("on");
       applyFX();
     };
-  });
-  el.querySelectorAll("input[type=range]").forEach(function(r){
-    r.oninput=function(){
-      var p=this.dataset.p,v=parseFloat(this.value);
-      if(p==="filterF"){S.fxP.filterF=v;if(nFilter&&S.fx.filter)nFilter.frequency.value=v}
-      if(p==="delayM"){S.fxP.delayM=v/100;if(nDelayMix&&S.fx.delay)nDelayMix.gain.value=v/100}
-      if(p==="revM"){S.fxP.revM=v/100;if(nVerbMix&&S.fx.reverb)nVerbMix.gain.value=v/100}
-      if(p==="distD"){S.fxP.distD=v/100;if(nDist&&S.fx.dist)nDist.curve=distCurve(v)}
+    row.appendChild(sw);
+    
+    var nm=document.createElement("span");
+    nm.style.width="45px";
+    nm.style.flexShrink="0";
+    nm.textContent=fx.name;
+    row.appendChild(nm);
+    
+    var sl=document.createElement("input");
+    sl.type="range";
+    sl.min=fx.min;
+    sl.max=fx.max;
+    sl.value=fx.val;
+    sl.style.flex="1";
+    sl.style.height="3px";
+    sl.oninput=function(){
+      if(fx.id==="filter")S.fxP.filterF=parseInt(this.value);
+      if(fx.id==="delay")S.fxP.delayM=parseInt(this.value)/100;
+      if(fx.id==="reverb")S.fxP.revM=parseInt(this.value)/100;
+      if(fx.id==="dist")S.fxP.distD=parseInt(this.value)/100;
+      applyFX();
     };
+    row.appendChild(sl);
+    
+    el.appendChild(row);
   });
 }
 
