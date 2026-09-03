@@ -2,7 +2,7 @@
 
 The Most Advanced Loop Manipulator in the PSY Family
 
-95 Loops | 13 Generation Types | 15 FX | 50+ Features
+100 Loops | 13 Generation Types | 15 FX | 50+ Features
 
 LIVE: https://dudududi144-source.github.io/psysampler/
 
@@ -13,7 +13,7 @@ LIVE: https://dudududi144-source.github.io/psysampler/
 PSY LOOPER PRO is a professional-grade audio looper.
 
 - Zero dependencies - Single HTML file
-- 95 synthesized loops
+- 100 synthesized loops
 - 13 generation types
 - 15 unique FX
 - Professional sound quality
@@ -51,7 +51,7 @@ Morph, Scatter, Build-up, Drop, Performance, Stutter Roll
 
 ---
 
-## Loop Library (95)
+## Loop Library (100)
 
 Drums (11), Bass (7), Melodic (8), Atmospheric (5),
 FX (7), Chords (2), Full Mixes (2)
@@ -78,7 +78,7 @@ FX (7), Chords (2), Full Mixes (2)
 - Max Slices: 16 per bank
 - Max Banks: 8
 - FX: 15 effects
-- Loops: 95
+- Loops: 100
 - Gen Types: 13
 
 ---
