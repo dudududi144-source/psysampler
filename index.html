@@ -849,7 +849,7 @@ function renderFX(){
 
 function applyFX(){
   if(!AC)return;
-  if(nFilter)nFilter.frequency.value=S.fx.filter?S.fxP.filterF:20000;
+  if(nFilter&&AC)nFilter.frequency.setTargetAtTime(S.fx.filter?S.fxP.filterF:20000,AC.currentTime,.02);
   if(nDelayMix&&AC)nDelayMix.gain.setTargetAtTime(S.fx.delay?S.fxP.delayM:0,AC.currentTime,.02);
   if(nVerbMix)nVerbMix.gain.value=S.fx.reverb?S.fxP.revM:0;
   if(nDist)nDist.curve=distCurve(S.fx.dist?S.fxP.distD*100:0);
