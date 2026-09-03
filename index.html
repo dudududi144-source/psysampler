@@ -1165,6 +1165,8 @@ var out=EXTRA_GEN[type](root,sc,bars,bpm,sr);
 // Normalize with fades
 var pk=0;for(var i=0;i<out.length;i++)pk=Math.max(pk,Math.abs(out[i]));
 if(pk>0){var nm=.82/pk;for(i=0;i<out.length;i++)out[i]*=nm}
+var fd=Math.floor(sr*.008);
+for(i=0;i<fd&&i<out.length;i++){out[i]*=i/fd;out[out.length-1-i]*=i/fd}
 var fd=Math.floor(sr*.005);
 for(i=0;i<fd&&i<out.length;i++){out[i]*=i/fd;out[out.length-1-i]*=i/fd}
 var buf=AC.createBuffer(1,out.length,sr);buf.getChannelData(0).set(out);return buf}
@@ -1357,7 +1359,7 @@ log("MACRO: Tension","ok")}
 function macroReset(){
 // Reset all macros
 if(!AC)return;
-if(nVerbMix)nVerbMix.gain.value=S.fx.verb?S.fxP.vm:0;
+if(nVerbMix)nVerbMix.gain.setTargetAtTime(S.fx.verb?S.fxP.vm:0,AC.currentTime,.02);
 if(nDelMix)nDelMix.gain.value=S.fx.delay?S.fxP.dm:0;
 if(nDist)nDist.curve=dCurve(S.fx.drive?S.fxP.dd*50:0);
 if(nFil){nFil.frequency.value=S.fxP.ff;nFil.Q.value=.7}
