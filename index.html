@@ -567,7 +567,7 @@ function playSlice(bi,si,vel){
 function playAll(){
   var bank=S.banks[S.bank];
   if(!bank||!bank.slices||!bank.slices.length)return;
-  var iv=(60/S.bpm)/bank.slices.length;
+  var iv=(60/S.bpm)/Math.max(1,bank.slices.length);
   bank.slices.forEach(function(_,i){setTimeout(function(){playSlice(S.bank,i)},i*iv*1000)});
 }
 
@@ -906,6 +906,8 @@ function renderLib(){
 
 // === EVENTS ===
 function bindEvents(){
+  if($("expBtn"))$("expBtn").onclick=exportWAV;
+  if($("panicBtn"))$("panicBtn").onclick=function(){stop();srcs.forEach(function(s){try{s.stop()}catch(e){}});log("PANIC - all stopped","er")};
   $("playBtn").onclick=function(){S.playing?stop():play()};
   $("stopBtn").onclick=stop;
   $("bpmRange").oninput=function(){S.bpm=parseInt(this.value);$("bpmVal").textContent=S.bpm;
@@ -1339,7 +1341,7 @@ log("Scatter","ok");
 var r=rng(Date.now());
 for(var i=0;i<bk.slices.length;i++){
 setTimeout(function(){
-var si=Math.floor(r()*bk.slices.length);
+var si=Math.floor(r()*Math.max(1,bk.slices.length));
 playSlice(S.bank,si,0.3+r()*0.7)},i*50)}}
 function buildUp(){
 var bk=S.banks[S.bank];if(!bk||!bk.slices||!bk.slices.length)return;
