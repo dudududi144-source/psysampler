@@ -1725,6 +1725,15 @@ if(master)master.gain.setTargetAtTime(S.vol,AC.currentTime,.05);
 log("MACRO: Reset","ok");
 }
 
+
+// === PANIC: Stop everything ===
+function panic(){
+stop();
+srcs.forEach(function(s){try{s.stop()}catch(e){}});
+srcs=[];
+log("PANIC: all audio stopped","er");
+}
+
 })();
 
 </script>
