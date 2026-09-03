@@ -168,6 +168,23 @@ select{background:var(--p3);color:var(--txt);border:1px solid var(--brd);border-
 <button class="btn" id="seqClrBtn" style="font-size:9px">CLR</button>
 </div>
 
+
+<h3>🎛️ CREATIVE TOOLS</h3>
+<div class="fx-btns">
+<button class="btn" onclick="pitchDown()">⬇️Oct</button>
+<button class="btn" onclick="pitchUp()">⬆️Oct</button>
+<button class="btn" onclick="halfTime()">🐌½x</button>
+<button class="btn" onclick="doubleTime()">🐇2x</button>
+<button class="btn" onclick="reverseAll()">🔄RevAll</button>
+<button class="btn" onclick="chopEqual(8)">✂️8</button>
+<button class="btn" onclick="chopEqual(16)">✂️16</button>
+<button class="btn" onclick="scrambleSlices()">🔀Scr</button>
+<button class="btn" onclick="duplicateBank()">📋Dup</button>
+<button class="btn" onclick="togglePhaser()">🌀Phaser</button>
+<button class="btn" onclick="toggleFlanger()">✈️Flanger</button>
+<button class="btn" onclick="toggleTremolo()">〰️Trem</button>
+</div>
+
 <h3>📈 SPECTRUM</h3>
     <div class="wave" style="height:60px"><canvas id="specCv"></canvas></div>
     <div class="meter"><i id="meterEl"></i></div>
@@ -1118,6 +1135,89 @@ var fd=Math.floor(sr*.005);
 for(i=0;i<fd&&i<out.length;i++){out[i]*=i/fd;out[out.length-1-i]*=i/fd}
 var buf=AC.createBuffer(1,out.length,sr);buf.getChannelData(0).set(out);return buf}
 return genLoop(type,key,scale,bars,bpm)}
+
+
+// === MORE UNIQUE EFFECTS ===
+// PHASER - sweeping phase effect
+var nPhaser=null,nPhaserLFO=null,nPhaserMix=null,phaserOn=false;
+function togglePhaser(){
+if(!AC)return;
+phaserOn=!phaserOn;
+if(phaserOn&&!nPhaser){
+nPhaser=AC.createBiquadFilter();nPhaser.type="allpass";nPhaser.frequency.value=1000;nPhaser.Q.value=5;
+nPhaserMix=AC.createGain();nPhaserMix.gain.value=.4;
+nPhaserLFO=AC.createOscillator();nPhaserLFO.frequency.value=.3;
+var lfoGain=AC.createGain();lfoGain.gain.value=800;
+nPhaserLFO.connect(lfoGain);lfoGain.connect(nPhaser.frequency);nPhaserLFO.start();
+log("Phaser ON","ok")}
+if(nPhaserMix)nPhaserMix.gain.value=phaserOn?.4:0}
+// FLANGER - jet-like sweep
+var nFlanger=null,nFlangerDel=null,nFlangerFb=null,nFlangerMix=null,flangerOn=false;
+function toggleFlanger(){
+if(!AC)return;
+flangerOn=!flangerOn;
+if(flangerOn&&!nFlangerDel){
+nFlangerDel=AC.createDelay(.02);nFlangerDel.delayTime.value=.005;
+nFlangerFb=AC.createGain();nFlangerFb.gain.value=.7;
+nFlangerMix=AC.createGain();nFlangerMix.gain.value=.4;
+nFlangerDel.connect(nFlangerFb);nFlangerFb.connect(nFlangerDel);nFlangerDel.connect(nFlangerMix);
+var lfo=AC.createOscillator();lfo.frequency.value=.2;
+var lg=AC.createGain();lg.gain.value=.003;
+lfo.connect(lg);lg.connect(nFlangerDel.delayTime);lfo.start();
+log("Flanger ON","ok")}
+if(nFlangerMix)nFlangerMix.gain.value=flangerOn?.4:0}
+// TREMOLO - amplitude modulation
+var nTrem=null,nTremLFO=null,tremOn=false;
+function toggleTremolo(){
+if(!AC)return;
+tremOn=!tremOn;
+if(tremOn&&!nTrem){
+nTrem=AC.createGain();nTrem.gain.value=1;
+nTremLFO=AC.createOscillator();nTremLFO.frequency.value=6;
+var tg=AC.createGain();tg.gain.value=.4;
+nTremLFO.connect(tg);tg.connect(nTrem.gain);nTremLFO.start();
+log("Tremolo ON","ok")}
+if(nTrem)nTrem.gain.value=tremOn?1:0}
+// PITCH SHIFT DOWN (octave)
+function pitchDown(){var bk=S.banks[S.bank];if(!bk)return;
+bk.pitch=Math.max(-24,bk.pitch-12);
+$("piR").value=bk.pitch;$("piV").textContent=bk.pitch;log("⬇️ Octave down","ok")}
+// PITCH SHIFT UP
+function pitchUp(){var bk=S.banks[S.bank];if(!bk)return;
+bk.pitch=Math.min(24,bk.pitch+12);
+$("piR").value=bk.pitch;$("piV").textContent=bk.pitch;log("⬆️ Octave up","ok")}
+// HALF TIME
+function halfTime(){var bk=S.banks[S.bank];if(!bk)return;
+bk.speed=Math.max(.25,bk.speed*.5);
+$("spR").value=Math.round(bk.speed*100);$("spV").textContent=bk.speed.toFixed(2);log("🐌 Half time","ok")}
+// DOUBLE TIME
+function doubleTime(){var bk=S.banks[S.bank];if(!bk)return;
+bk.speed=Math.min(4,bk.speed*2);
+$("spR").value=Math.round(bk.speed*100);$("spV").textContent=bk.speed.toFixed(2);log("🐇 Double time","ok")}
+// REVERSE ALL SLICES
+function reverseAll(){var bk=S.banks[S.bank];if(!bk||!bk.buf)return;
+var d=bk.buf.getChannelData(0);
+Array.prototype.reverse.call(d);
+bk.slices=sliceBuf(bk.buf,S.sens);
+renderWave();renderPads();log("🔄 Reversed buffer","ok")}
+// CHOP into equal slices
+function chopEqual(n){var bk=S.banks[S.bank];if(!bk||!bk.buf)return;
+var len=bk.buf.length,chunk=Math.floor(len/n);
+bk.slices=[];
+for(var i=0;i<n;i++){bk.slices.push({i:i,s:i*chunk,e:Math.min((i+1)*chunk,len),d:chunk/bk.buf.sampleRate})}
+renderPads();renderWave();log("✂️ Chopped into "+n,"ok")}
+// SCRAMBLE slices order
+function scrambleSlices(){var bk=S.banks[S.bank];if(!bk||!bk.slices||bk.slices.length<2)return;
+var r=rng(Date.now());
+for(var i=bk.slices.length-1;i>0;i--){var j=Math.floor(r()*(i+1));
+var tmp=bk.slices[i];bk.slices[i]=bk.slices[j];bk.slices[j]=tmp}
+renderPads();log("🔀 Scrambled","ok")}
+// DUPLICATE current bank to next
+function duplicateBank(){var src=S.banks[S.bank],dst=S.banks[(S.bank+1)%8];
+if(!src||!src.buf){log("Nothing to duplicate","er");return}
+dst.buf=src.buf;dst.slices=src.slices.slice();dst.info=src.info;
+dst.pitch=src.pitch;dst.speed=src.speed;dst.atk=src.atk;dst.rel=src.rel;dst.rev=src.rev;
+renderBanks();log("📋 Duplicated to bank "+((S.bank+1)%8+1),"ok")}
 
 })();
 
