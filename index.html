@@ -1003,6 +1003,47 @@ if($("overdubBtn"))$("overdubBtn").onclick=overdub;
 if($("randBtn"))$("randBtn").onclick=randomizeSlices;
 if($("probBtn"))$("probBtn").onclick=playProb;
 
+
+// === SOUND QUALITY ENHANCEMENTS ===
+// Master chain cleanup: gentle EQ + de-harsh + smooth limiter
+var nEQ1=null,nEQ2=null,nEQ3=null,nDeEss=null;
+function setupSoundQuality(){
+if(!AC)return;
+// Gentle presence EQ (reduce harshness at 3-5kHz)
+nEQ1=AC.createBiquadFilter();nEQ1.type="peaking";nEQ1.frequency.value=4000;nEQ1.Q.value=1.5;nEQ1.gain.value=-2;
+// Warm low-mid boost
+nEQ2=AC.createBiquadFilter();nEQ2.type="peaking";nEQ2.frequency.value=250;nEQ2.Q.value=1;nEQ2.gain.value=1;
+// Air boost (gentle high shelf)
+nEQ3=AC.createBiquadFilter();nEQ3.type="highshelf";nEQ3.frequency.value=10000;nEQ3.gain.value=1.5;
+// De-esser (reduce sibilance/harshness)
+nDeEss=AC.createBiquadFilter();nDeEss.type="peaking";nDeEss.frequency.value=6000;nDeEss.Q.value=3;nDeEss.gain.value=-3;
+// Insert into chain
+try{
+if(nComp&&nLim){
+nComp.disconnect();
+nComp.connect(nEQ1);
+nEQ1.connect(nEQ2);
+nEQ2.connect(nEQ3);
+nEQ3.connect(nDeEss);
+nDeEss.connect(nLim);
+}
+}catch(e){}
+log("🎵 Sound quality chain active","ok");
+}
+// Call after audio init
+setTimeout(setupSoundQuality,100);
+// SOFT LIMITER for clean output
+var nSoft=null;
+function addSoftLimit(){
+if(!AC)return;
+nSoft=AC.createWaveShaper();
+var n=4096,c=new Float32Array(n);
+for(var i=0;i<n;i++){var x=i*2/n-1;c[i]=Math.tanh(x*1.2)*.9}
+nSoft.curve=c;
+try{if(nLim&&master){nLim.disconnect();nLim.connect(nSoft);nSoft.connect(master)}}catch(e){}
+}
+setTimeout(addSoftLimit,200);
+
 })();
 
 </script>
