@@ -1,37 +1,94 @@
-# PSY LOOPER - Advanced Loop Manipulator
+# PSY LOOPER PRO
 
-The most advanced looper in the PSY family - 200+ features, ML-powered, Rex-inspired
+The Most Advanced Loop Manipulator in the PSY Family
+
+55 Loops | 13 Generation Types | 15 FX | 50+ Features
+
+LIVE: https://dudududi144-source.github.io/psysampler/
+
+---
+
+## Overview
+
+PSY LOOPER PRO is a professional-grade audio looper.
+
+- Zero dependencies - Single HTML file
+- 55 synthesized loops
+- 13 generation types
+- 15 unique FX
+- Professional sound quality
+- Full MIDI support
+- Offline capable
+
+---
 
 ## Features
 
-- 8 Loop Banks - Like Dr. Octo Rex but better
-- Advanced Slicing - Multi-band transient detection
-- Loop Generation - 8 types: melodic, rhythmic, bass, lead, FX, percussion, chord, atmospheric
-- ML Classification - Auto-detect loop type
-- 4x Oversampling - Highest audio quality in the family
-- REX2 Support - Import/export REX2 files
-- MIDI Integration - Full MIDI in/out/clock
-- Live Looping - Record, overdub, undo/redo
-- Advanced FX Chain - Granular, vocoder, spectral, OTT
-- Deterministic - Byte-identical output every time
-- 1000+ Tests - Most tested device in the family
+### Loop Manipulation
+- 8 independent loop banks
+- Smart slicing
+- 16 slice pads per bank
+- Per-bank controls
+- Real-time visualization
 
-## Quick Start
+### Generation Engine
+13 types: melodic, rhythmic, bass, lead, fx, percussion,
+chord, atmospheric, arp-up, arp-down, arp-rand, chord-stab, melody-walk
 
-```bash
-bun install
-bun run dev
-bun test
-```
+### FX Rack
+15 effects: Filter, Delay, Reverb, Drive, RingMod, Comb,
+Bitcrush, AutoWah, LoFi, Widener, Pump, Freeze, Phaser, Flanger, Tremolo
 
-## Tech Stack
+### Destructive FX
+- Glitch - Chaotic cut/paste
+- Freeze - Grain freeze
+- Stutter - Rapid repeats
+- Tape Stop - Gradual slowdown
 
-- Runtime: Bun >=1.3.0
-- Language: TypeScript 5.6+
-- Audio: Web Audio API, AudioWorklet, ZDF SVF
-- DSP: Phase vocoder, WSOLA, PolyBLEP
-- ML: Contextual bandit, loop classification
-- Tests: bun test (1000+ tests)
-- License: MIT
+### Creative Tools
+Octave, Time, Reverse, Chop, Scramble, Duplicate,
+Morph, Scatter, Build-up, Drop, Performance, Stutter Roll
 
-Part of the PSY family
+---
+
+## Loop Library (55)
+
+Drums (11), Bass (7), Melodic (8), Atmospheric (5),
+FX (7), Chords (2), Full Mixes (2)
+
+---
+
+## Keyboard Shortcuts
+
+- Space: Play/Stop
+- 1-9: Trigger slices
+- F1-F8: Select bank
+- G: Generate
+- E: Export WAV
+- Esc: Panic
+
+---
+
+## Technical Specs
+
+- File Size: 57 KB
+- Dependencies: 0
+- Sample Rate: 44100 Hz
+- Bit Depth: 16-bit
+- Max Slices: 16 per bank
+- Max Banks: 8
+- FX: 15 effects
+- Loops: 55
+- Gen Types: 13
+
+---
+
+## License
+
+MIT License
+
+---
+
+## Credits
+
+Part of the PSY Family by dudududi144-source
