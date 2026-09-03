@@ -1141,6 +1141,81 @@ return out}
 };
 // Extend gen types
 var GEN_TYPES=["melodic","rhythmic","bass","lead","fx","percussion","chord","atmospheric","arp-up","arp-down","arp-rand","chord-stab","melody-walk"];
+function genLoop(type,key,scale,bars,bpm){
+var sr=AC.sampleRate,beat=60/bpm,six=beat/4,N=Math.floor(bars*4*beat*sr);
+var out=new Float32Array(N);
+var root=(typeof KEYS!=="undefined"&&KEYS[key])?KEYS[key]:69;
+var sc=(typeof SCALES!=="undefined"&&SCALES[scale])?SCALES[scale]:[0,2,3,5,7,8,10];
+var i,j,s,L,jj,f,env;
+
+if(type==="melodic"||type==="lead"){
+var pi=Math.floor(Math.random()*sc.length);
+for(i=0;i<bars*16;i++){
+if(Math.random()<.65){
+pi=Math.max(0,Math.min(sc.length-1,pi+Math.floor(Math.random()*5)-2));
+f=440*Math.pow(2,(root+12+sc[pi]-69)/12);
+s=Math.floor(i*six*sr);L=Math.floor(six*.9*sr);
+if(s+L>N)break;
+for(jj=0;jj<L&&s+jj<N;jj++){
+var t=jj/sr;
+env=Math.min(1,jj/(.005*sr))*Math.exp(-t*4);
+out[s+jj]+=(Math.sin(2*Math.PI*f*t)+.3*Math.sin(2*Math.PI*f*2*t))*env*.18;
+}}}
+}else if(type==="bass"){
+var pat=[0,0,12,0,0,0,12,3,0,0,12,0,0,3,12,0];
+for(i=0;i<bars*16;i++){
+s=Math.floor(i*six*sr);L=Math.floor(six*.8*sr);
+if(s+L>N)break;
+f=440*Math.pow(2,(root-12+sc[pat[i%16]%sc.length]-69)/12);
+for(jj=0;jj<L&&s+jj<N;jj++){
+var t2=jj/sr;
+env=Math.min(1,jj/(.003*sr))*Math.exp(-t2*6);
+out[s+jj]+=(Math.sign(Math.sin(2*Math.PI*f*t2))*.15+Math.sin(2*Math.PI*f*t2)*.4)*env*.5;
+}}
+}else if(type==="rhythmic"||type==="percussion"){
+for(i=0;i<bars*16;i++){
+s=Math.floor(i*six*sr);
+if(i%4===0){L=Math.floor(.3*sr);if(s+L>N)break;
+for(jj=0;jj<L&&s+jj<N;jj++){
+var t3=jj/sr;f=38+90*Math.exp(-t3*28);
+out[s+jj]+=Math.sin(2*Math.PI*f*t3)*Math.exp(-t3*11)*.7;}}
+if(i%8===4){L=Math.floor(.12*sr);if(s+L>N)break;
+for(jj=0;jj<L&&s+jj<N;jj++){out[s+jj]+=(Math.random()*2-1)*Math.exp(-jj/sr*25)*.35;}}
+if(i%2===0){L=Math.floor(.02*sr);if(s+L>N)break;
+for(jj=0;jj<L&&s+jj<N;jj++){out[s+jj]+=(Math.random()*2-1)*Math.exp(-jj/sr*200)*.12;}}
+}
+}else if(type==="fx"){
+for(i=0;i<N;i++){var p=i/N;
+f=100+p*p*5000;
+out[i]+=Math.sin(2*Math.PI*f*i/sr)*p*.25+(Math.random()*2-1)*p*p*.15;}
+}else if(type==="chord"){
+var progs=[[0,3,4,0],[0,5,3,4]];
+var prog=progs[Math.floor(Math.random()*progs.length)];
+for(var bar=0;bar<bars;bar++){
+var cr=sc[prog[bar%4]%sc.length];
+var notes=[cr,cr+3,cr+7];
+s=Math.floor(bar*beat*4*sr);L=Math.floor(beat*4*.9*sr);
+if(s+L>N)break;
+for(var n=0;n<notes.length;n++){
+f=440*Math.pow(2,(root+notes[n]-69)/12);
+for(jj=0;jj<L&&s+jj<N;jj++){
+var t4=jj/sr;
+out[s+jj]+=Math.sin(2*Math.PI*f*t4)*Math.min(1,t4/.01)*Math.exp(-t4*2)*.12;}}}
+}else{
+for(i=0;i<N;i++){
+var t5=i/sr;
+out[i]+=Math.sin(2*Math.PI*110*t5)*.05+(Math.random()*2-1)*.01;}
+}
+
+var pk=0;for(i=0;i<N;i++)pk=Math.max(pk,Math.abs(out[i]));
+if(pk>0){var nm=.82/pk;for(i=0;i<N;i++)out[i]*=nm;}
+var fd=Math.floor(sr*.008);
+for(i=0;i<fd&&i<N;i++){out[i]*=i/fd;out[N-1-i]*=i/fd;}
+var buf=AC.createBuffer(1,N,sr);
+buf.getChannelData(0).set(out);
+return buf;
+}
+
 function genLoopV2(type,key,scale,bars,bpm){
 var sr=AC.sampleRate,root=(KEYS[key]||69),sc=SCALES[scale]||SCALES.minor;
 if(EXTRA_GEN[type]){
