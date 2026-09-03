@@ -257,6 +257,11 @@ select{background:var(--p3);color:var(--txt);border:1px solid var(--brd);border-
 // Defensive coding - all access guarded
 // ============================================================
 (function(){
+
+// === MUSIC THEORY (must be before genLoopV2) ===
+var KEYS={C:60,"C#":61,D:62,"D#":63,E:64,F:65,"F#":66,G:67,"G#":68,A:69,"A#":70,B:71};
+var SCALES={minor:[0,2,3,5,7,8,10],major:[0,2,4,5,7,9,11],phrygian:[0,1,3,5,7,8,10],dorian:[0,2,3,5,7,9,10],mixolydian:[0,2,4,5,7,9,10]};
+function m2f(m){return 440*Math.pow(2,(m-69)/12)}
 "use strict";
 
 // === STATE (initialized FIRST, before anything else) ===
@@ -1145,7 +1150,7 @@ var pk=0;for(var i=0;i<out.length;i++)pk=Math.max(pk,Math.abs(out[i]));
 if(pk>0){var nm=.82/pk;for(i=0;i<out.length;i++)out[i]*=nm}
 var fd=Math.floor(sr*.008);
 for(i=0;i<fd&&i<out.length;i++){out[i]*=i/fd;out[out.length-1-i]*=i/fd}
-var fd=Math.floor(sr*.005);
+fd=Math.floor(sr*.005);
 for(i=0;i<fd&&i<out.length;i++){out[i]*=i/fd;out[out.length-1-i]*=i/fd}
 var buf=AC.createBuffer(1,out.length,sr);buf.getChannelData(0).set(out);return buf}
 return genLoop(type,key,scale,bars,bpm)}
