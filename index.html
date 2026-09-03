@@ -939,6 +939,65 @@ if($("xyE"))setupXY();
 renderSeqEl();
 if($("seqPlayBtn"))$("seqPlayBtn").onclick=function(){seqState.on=!seqState.on;this.classList.toggle("on");if(seqState.on){seqState.pos=0;seqSched()}};
 if($("seqClrBtn"))$("seqClrBtn").onclick=function(){seqState.steps.fill(false);renderSeqEl()};
+
+// === ADVANCED FEATURES ===
+// SAVE/LOAD to localStorage
+function saveProject(){try{
+var data={bpm:S.bpm,swing:S.swing,bank:S.bank,vol:S.vol,sens:S.sens,hum:S.hum,genType:S.genType,fx:S.fx,fxP:S.fxP,
+banks:S.banks.map(function(b){return{pitch:b.pitch,speed:b.speed,atk:b.atk,rel:b.rel,rev:b.rev,hasBuf:!!b.buf}})};
+localStorage.setItem("psyLooperSave",JSON.stringify(data));log("💾 Saved","ok")}catch(e){log("Save err","er")}}
+function loadProject(){try{
+var raw=localStorage.getItem("psyLooperSave");if(!raw){log("No save","er");return}
+var data=JSON.parse(raw);
+S.bpm=data.bpm||145;S.swing=data.swing||0;S.bank=data.bank||0;S.vol=data.vol||.8;S.sens=data.sens||50;S.hum=data.hum||0;
+if(data.fx)S.fx=data.fx;if(data.fxP)S.fxP=data.fxP;
+if(data.banks){data.banks.forEach(function(b,i){if(S.banks[i]){
+S.banks[i].pitch=b.pitch;S.banks[i].speed=b.speed;S.banks[i].atk=b.atk;S.banks[i].rel=b.rel;S.banks[i].rev=b.rev}})}
+$("bpmR").value=S.bpm;$("bpmVal").textContent=S.bpm;renderAll();log("📂 Loaded","ok")}catch(e){log("Load err","er")}}
+// OVERDUB: mix current buffer with generated/new content
+function overdub(){var bk=S.banks[S.bank];if(!bk||!bk.buf){log("Load first","er");return}
+log("🎙️ Overdub: generating layer...","ok");
+var key=$("gKey").value,scale=$("gScale").value;
+setTimeout(function(){
+var newBuf=genLoop(S.genType,key,scale,4,S.bpm);
+// Mix buffers
+var oldData=bk.buf.getChannelData(0);
+var newData=newBuf.getChannelData(0);
+var maxLen=Math.max(oldData.length,newData.length);
+var mixed=AC.createBuffer(1,maxLen,AC.sampleRate);
+var mixedData=mixed.getChannelData(0);
+for(var i=0;i<maxLen;i++){
+var old=i<oldData.length?oldData[i]:0;
+var nw=i<newData.length?newData[i]:0;
+mixedData[i]=(old+nw)*0.7}
+bk.buf=mixed;bk.info=analyze(mixed);bk.slices=sliceBuf(mixed,S.sens);
+log("✅ Overdub complete: "+bk.slices.length+" slices","ok");renderAll()},30)}
+// RANDOMIZE slice parameters
+function randomizeSlices(){var bk=S.banks[S.bank];if(!bk||!bk.buf)return;
+var r=rng(Date.now());
+bk.pitch=Math.floor(r()*25)-12;
+bk.speed=0.5+r()*1.5;
+bk.atk=Math.floor(r()*50);
+bk.rel=20+Math.floor(r()*200);
+bk.rev=r()<0.3;
+$("piR").value=bk.pitch;$("piV").textContent=bk.pitch;
+$("spR").value=Math.round(bk.speed*100);$("spV").textContent=bk.speed.toFixed(1);
+$("atR").value=bk.atk;$("atV").textContent=bk.atk;
+$("rlR").value=bk.rel;$("rlV").textContent=bk.rel;
+log("🎲 Randomized","ok")}
+// SLICE PROBABILITY play (some slices skip randomly)
+function playProb(){var bk=S.banks[S.bank];if(!bk||!bk.slices||!bk.slices.length)return;
+var r=rng(Date.now());
+bk.slices.forEach(function(sl,i){
+if(r()<0.7){setTimeout(function(){playSlice(S.bank,i,0.5+r()*0.5)},i*(60/S.bpm)/bk.slices.length*1000)}})}
+
+
+if($("saveBtn"))$("saveBtn").onclick=saveProject;
+if($("loadPrjBtn"))$("loadPrjBtn").onclick=loadProject;
+if($("overdubBtn"))$("overdubBtn").onclick=overdub;
+if($("randBtn"))$("randBtn").onclick=randomizeSlices;
+if($("probBtn"))$("probBtn").onclick=playProb;
+
 })();
 
 </script>
