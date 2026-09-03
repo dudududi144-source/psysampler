@@ -158,6 +158,13 @@ select{background:var(--p3);color:var(--txt);border:1px solid var(--brd);border-
 <button class="btn" id="freezeBtn">❄️Freeze</button>
 <button class="btn" id="stutterBtn">🔁Stutter</button>
 <button class="btn" id="tapeBtn">📼Tape</button>
+
+<button class="btn" onclick="perfMode()">🎭</button>
+<button class="btn" onclick="morphBanks()">🔀M</button>
+<button class="btn" onclick="granularScatter()">✨</button>
+<button class="btn" onclick="buildUp()">📈</button>
+<button class="btn" onclick="drop()">💥</button>
+
 </div>
 <h3>🎮 XY PAD (Filter/Drive)</h3>
 <div class="xy" id="xyE"><div class="dot" id="xyDot" style="left:50%;top:50%"></div></div>
@@ -1228,6 +1235,57 @@ if(!src||!src.buf){log("Nothing to duplicate","er");return}
 dst.buf=src.buf;dst.slices=src.slices.slice();dst.info=src.info;
 dst.pitch=src.pitch;dst.speed=src.speed;dst.atk=src.atk;dst.rel=src.rel;dst.rev=src.rev;
 renderBanks();log("📋 Duplicated to bank "+((S.bank+1)%8+1),"ok")}
+
+
+// === PERFORMANCE FEATURES ===
+function perfMode(){
+var bk=S.banks[S.bank];if(!bk||!bk.slices||!bk.slices.length)return;
+log("Performance mode","ok");
+var pattern=[0,2,1,3,0,4,2,5,1,3,6,2,4,7,3,5];
+var step=0;
+var perfInterval=setInterval(function(){
+if(!S.playing){clearInterval(perfInterval);return}
+var si=pattern[step%pattern.length]%bk.slices.length;
+var vel=0.5+Math.random()*0.5;
+playSlice(S.bank,si,vel);
+step++},(60/S.bpm)/4*1000)}
+function morphBanks(){
+var src=S.banks[S.bank],dst=S.banks[(S.bank+1)%8];
+if(!src||!src.buf||!dst||!dst.buf){log("Load 2 banks first","er");return}
+log("Morphing...","ok");
+var maxLen=Math.max(src.buf.length,dst.buf.length);
+var mixed=AC.createBuffer(1,maxLen,AC.sampleRate);
+var md=mixed.getChannelData(0);
+var sd=src.buf.getChannelData(0),dd=dst.buf.getChannelData(0);
+for(var i=0;i<maxLen;i++){
+var t=i/maxLen;
+var s=i<sd.length?sd[i]:0;
+var d=i<dd.length?dd[i]:0;
+md[i]=s*(1-t)+d*t}
+src.buf=mixed;src.info=analyze(mixed);src.slices=sliceBuf(mixed,S.sens);
+renderAll();log("Morphed","ok")}
+function granularScatter(){
+var bk=S.banks[S.bank];if(!bk||!bk.slices||!bk.slices.length)return;
+log("Scatter","ok");
+var r=rng(Date.now());
+for(var i=0;i<bk.slices.length;i++){
+setTimeout(function(){
+var si=Math.floor(r()*bk.slices.length);
+playSlice(S.bank,si,0.3+r()*0.7)},i*50)}}
+function buildUp(){
+var bk=S.banks[S.bank];if(!bk||!bk.slices||!bk.slices.length)return;
+log("Build-up","ok");
+var n=bk.slices.length;
+for(var i=0;i<n*2;i++){
+(function(idx){
+setTimeout(function(){
+var si=idx%n;
+var vel=0.2+0.8*(idx/(n*2));
+playSlice(S.bank,si,vel)},idx*(60/S.bpm)/n*500)})(i)}}
+function drop(){
+var bk=S.banks[S.bank];if(!bk||!bk.slices||!bk.slices.length)return;
+log("DROP!","ok");
+for(var i=0;i<bk.slices.length;i++){playSlice(S.bank,i,1)}}
 
 })();
 
