@@ -262,6 +262,62 @@ select{background:var(--p3);color:var(--txt);border:1px solid var(--brd);border-
 var KEYS={C:60,"C#":61,D:62,"D#":63,E:64,F:65,"F#":66,G:67,"G#":68,A:69,"A#":70,B:71};
 var SCALES={minor:[0,2,3,5,7,8,10],major:[0,2,4,5,7,9,11],phrygian:[0,1,3,5,7,8,10],dorian:[0,2,3,5,7,9,10],mixolydian:[0,2,4,5,7,9,10]};
 function m2f(m){return 440*Math.pow(2,(m-69)/12)}
+
+// === ANALYZE: Audio analysis ===
+function analyze(buf){
+if(!buf)return null;
+var d=buf.getChannelData(0),sr=buf.sampleRate;
+var sum=0,pk=0,i;
+for(i=0;i<d.length;i++){sum+=d[i]*d[i];pk=Math.max(pk,Math.abs(d[i]));}
+var rms=Math.sqrt(sum/d.length);
+// Tempo detection via onset autocorrelation
+var hop=512,ens=[],e,j;
+for(i=0;i+hop<d.length;i+=hop){e=0;for(j=0;j<hop;j++)e+=d[i+j]*d[i+j];ens.push(e/hop);}
+var fps=sr/hop,best=145,bc=-1,bpm,lag,c;
+for(bpm=60;bpm<=200;bpm++){
+lag=Math.round(60/bpm*fps);
+if(lag>=ens.length/2)continue;
+c=0;for(i=0;i<ens.length-lag;i++)c+=ens[i]*ens[i+lag];
+if(c>bc){bc=c;best=bpm;}
+}
+return{dur:buf.duration,rms:rms,peak:pk,tempo:best};
+}
+
+// === SLICEBUF: Transient-based slice detection ===
+function sliceBuf(buf,sens){
+if(!buf)return[];
+var d=buf.getChannelData(0),sr=buf.sampleRate;
+var thr=1-(sens||50)/100;
+var hop=512,fr=1024,flux=[],i,j,e;
+for(i=0;i+fr<d.length;i+=hop){e=0;for(j=0;j<fr;j++)e+=d[i+j]*d[i+j];flux.push(e/fr);}
+var mx=0;for(i=0;i<flux.length;i++)mx=Math.max(mx,flux[i]);
+if(mx===0)return[{i:0,s:0,e:d.length,d:buf.duration}];
+var th=mx*thr,pts=[0],pos,zc;
+for(i=1;i<flux.length-1;i++){
+if(flux[i]>th&&flux[i]>flux[i-1]&&flux[i]>=flux[i+1]){
+pos=i*hop;zc=pos;
+for(j=pos;j<Math.min(pos+80,d.length-1);j++){if(d[j]*d[j+1]<=0){zc=j;break;}}
+if(pts.length===0||zc-pts[pts.length-1]>sr*.05)pts.push(zc);
+}}
+while(pts.length>16){
+var mg=1e9,mi=1,g;
+for(i=1;i<pts.length;i++){g=pts[i]-pts[i-1];if(g<mg){mg=g;mi=i;}}
+pts.splice(mi,1);
+}
+var res=[],end;
+for(i=0;i<pts.length;i++){
+end=i<pts.length-1?pts[i+1]:d.length;
+res.push({i:i,s:pts[i],e:end,d:(end-pts[i])/sr});
+}
+return res;
+}
+
+// === DISTCURVE: Distortion curve generator ===
+function distCurve(k){
+var n=4096,c=new Float32Array(n),i,x;
+for(i=0;i<n;i++){x=i*2/n-1;c[i]=k===0?x:Math.tanh(x*k/10)*.9;}
+return c;
+}
 "use strict";
 
 // === STATE (initialized FIRST, before anything else) ===
