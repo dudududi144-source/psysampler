@@ -71,6 +71,14 @@ select{background:var(--p3);color:var(--txt);border:1px solid var(--brd);border-
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--brd);margin-right:4px}
 .dot.on{background:var(--acc);box-shadow:0 0 4px var(--acc)}
 @media(max-width:900px){.main{grid-template-columns:1fr}}
+
+.fx-btns{display:flex;gap:3px;flex-wrap:wrap;margin:4px 0}
+.xy{width:100%;aspect-ratio:1;background:var(--p1);border:1px solid var(--bd);border-radius:var(--r);position:relative;cursor:crosshair;margin:4px 0}
+.xy .dot{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc);transform:translate(-50%,-50%);pointer-events:none}
+.seq{display:grid;grid-template-columns:repeat(16,1fr);gap:1px;margin:4px 0}
+.sq{aspect-ratio:1;background:var(--p2);border:1px solid var(--bd);border-radius:3px;cursor:pointer}
+.sq.on{background:var(--acc);border-color:var(--acc)}
+.sq.play{box-shadow:0 0 6px var(--cy);border-color:var(--cy)}
 </style>
 </head>
 <body>
@@ -143,7 +151,24 @@ select{background:var(--p3);color:var(--txt);border:1px solid var(--brd);border-
       <div class="ctrl"><label>Release <span id="relV">80</span>ms</label><input type="range" id="relR" min="10" max="500" value="80" style="width:100%"></div>
     </div>
     
-    <h3>📈 SPECTRUM</h3>
+    
+<h3>🌀 UNIQUE FX</h3>
+<div class="fx-btns">
+<button class="btn" id="glitchBtn">⚡Glitch</button>
+<button class="btn" id="freezeBtn">❄️Freeze</button>
+<button class="btn" id="stutterBtn">🔁Stutter</button>
+<button class="btn" id="tapeBtn">📼Tape</button>
+</div>
+<h3>🎮 XY PAD (Filter/Drive)</h3>
+<div class="xy" id="xyE"><div class="dot" id="xyDot" style="left:50%;top:50%"></div></div>
+<h3>🔢 SLICE SEQUENCER</h3>
+<div class="seq" id="seqE"></div>
+<div style="display:flex;gap:4px">
+<button class="btn" id="seqPlayBtn" style="font-size:9px">SEQ▶</button>
+<button class="btn" id="seqClrBtn" style="font-size:9px">CLR</button>
+</div>
+
+<h3>📈 SPECTRUM</h3>
     <div class="wave" style="height:60px"><canvas id="specCv"></canvas></div>
     <div class="meter"><i id="meterEl"></i></div>
   </div>
@@ -843,6 +868,62 @@ if(document.readyState==="loading"){
   init();
 }
 
+
+// === UNIQUE FX: Glitch, Freeze, Stutter, Tape ===
+function glitchFX(){var bk=S.banks[S.bank];if(!bk||!bk.buf)return;log("GLITCH!","ok");
+var d=bk.buf.getChannelData(0),sr=bk.buf.sampleRate,r=rng(Date.now());
+for(var g=0;g<8;g++){var gs=Math.floor(r()*d.length),gl=Math.floor(sr*(.01+r()*.05));
+if(gs+gl>d.length)continue;var chunk=new Float32Array(gl);
+for(var i=0;i<gl;i++)chunk[i]=d[gs+i];
+for(var rep=1;rep<4&&gs+gl*(rep+1)<d.length;rep++){for(i=0;i<gl;i++)d[gs+gl*rep+i]=chunk[i%gl]*(rep%2===0?1:-1)*.7}}renderWave()}
+function freezeFX(){var bk=S.banks[S.bank];if(!bk||!bk.buf)return;log("FREEZE","ok");
+var d=bk.buf.getChannelData(0),sr=bk.buf.sampleRate;
+var win=Math.floor(sr*.08),start=Math.floor(Math.random()*(d.length-win));
+var grain=new Float32Array(win);for(var i=0;i<win;i++)grain[i]=d[start+i];
+for(var pos=win;pos+win<d.length;pos+=win){for(i=0;i<win;i++)d[pos+i]=grain[i]*(1-pos/d.length)}renderWave()}
+function stutterFX(){var bk=S.banks[S.bank];if(!bk||!bk.buf)return;log("STUTTER","ok");
+var d=bk.buf.getChannelData(0),sr=bk.buf.sampleRate,cl=Math.floor(sr*.04);
+for(var c=0;c<10;c++){var cs=Math.floor(Math.random()*(d.length-cl*2));
+if(Math.random()<.6){for(var i=0;i<cl;i++)d[cs+cl+i]=d[cs+i]}}renderWave()}
+function tapeFX(){var bk=S.banks[S.bank];if(!bk||!bk.buf)return;log("TAPE STOP","ok");
+var d=bk.buf.getChannelData(0),sr=bk.buf.sampleRate;
+var sl=Math.floor(sr*1.2);if(sl>d.length)sl=d.length;var st=d.length-sl;
+for(var i=0;i<sl;i++){var t=i/sl,rate=Math.max(.01,1-t);
+var si=st+Math.floor(i*rate);if(si<d.length)d[st+i]=d[si]*(1-t)}renderWave()}
+// === XY PAD ===
+var xyOn=false;
+function setupXY(){var xy=$("xyE");if(!xy)return;
+xy.addEventListener("pointerdown",function(e){xyOn=true;xyMove(e)});
+document.addEventListener("pointermove",function(e){if(xyOn)xyMove(e)});
+document.addEventListener("pointerup",function(){xyOn=false});
+function xyMove(e){var rc=xy.getBoundingClientRect(),x=(e.clientX-rc.left)/rc.width,y=(e.clientY-rc.top)/rc.height;
+x=Math.max(0,Math.min(1,x));y=Math.max(0,Math.min(1,y));
+var dot=$("xyDot");if(dot){dot.style.left=(x*100)+"%";dot.style.top=(y*100)+"%"}
+if(nFil)nFil.frequency.setTargetAtTime(200+x*14800,AC.currentTime,.02);
+if(nDist)nDist.curve=dCurve(y*50)}}
+// === SLICE SEQUENCER ===
+var seqState={on:false,steps:new Array(16).fill(false),pos:0};
+function renderSeqEl(){var e=$("seqE");if(!e)return;e.innerHTML="";
+for(var i=0;i<16;i++){var d=document.createElement("div");d.className="sq"+(seqState.steps[i]?" on":"");
+(function(x){d.onclick=function(){seqState.steps[x]=!seqState.steps[x];this.classList.toggle("on")}})(i);
+e.appendChild(d)}}
+function seqSched(){if(!seqState.on)return;var bk=S.banks[S.bank];
+if(bk&&bk.slices&&bk.slices.length&&seqState.steps[seqState.pos]){
+playSlice(S.bank,seqState.pos%bk.slices.length)}
+var sqs=document.querySelectorAll(".sq");sqs.forEach(function(s){s.classList.remove("play")});
+if(sqs[seqState.pos])sqs[seqState.pos].classList.add("play");
+seqState.pos=(seqState.pos+1)%16;
+setTimeout(seqSched,(60/S.bpm)/4*1000)}
+
+// Bind new features
+if($("glitchBtn"))$("glitchBtn").onclick=glitchFX;
+if($("freezeBtn"))$("freezeBtn").onclick=freezeFX;
+if($("stutterBtn"))$("stutterBtn").onclick=stutterFX;
+if($("tapeBtn"))$("tapeBtn").onclick=tapeFX;
+if($("xyE"))setupXY();
+renderSeqEl();
+if($("seqPlayBtn"))$("seqPlayBtn").onclick=function(){seqState.on=!seqState.on;this.classList.toggle("on");if(seqState.on){seqState.pos=0;seqSched()}};
+if($("seqClrBtn"))$("seqClrBtn").onclick=function(){seqState.steps.fill(false);renderSeqEl()};
 })();
 
 </script>
