@@ -175,6 +175,17 @@ select{background:var(--p3);color:var(--txt);border:1px solid var(--brd);border-
 <button class="btn" id="seqClrBtn" style="font-size:9px">CLR</button>
 </div>
 
+<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px">
+<button class="btn" onclick="seqRandomize()" style="font-size:7px">🎲Rnd</button>
+<button class="btn" onclick="seqClear()" style="font-size:7px">🗑️Clr</button>
+<button class="btn" onclick="seqEuclidean(3,16)" style="font-size:7px">E3</button>
+<button class="btn" onclick="seqEuclidean(5,16)" style="font-size:7px">E5</button>
+<button class="btn" onclick="seqEuclidean(7,16)" style="font-size:7px">E7</button>
+<button class="btn" onclick="seqEuclidean(11,16)" style="font-size:7px">E11</button>
+</div>
+<div style="font-size:6px;color:var(--tx2);margin-top:2px">Click=toggle Shift=velocity Alt=prob DblClick=reverse</div>
+
+
 
 <h3>🎛️ CREATIVE TOOLS</h3>
 <div class="fx-btns">
@@ -925,7 +936,7 @@ function init(){
   renderInfo();
   renderFX();
   renderLib();
-  if(typeof renderSeq==="function")renderSeq();
+  if(typeof renderSeqAdvanced==="function")renderSeqAdvanced();else if(typeof renderSeq==="function")renderSeq();
   bindEvents();
   log("PSY LOOPER PRO v4.0 ready","ok");
   log("100 loops | 13 gen types | 15 FX | 8 presets","ok");
@@ -994,7 +1005,7 @@ if($("stutterBtn"))$("stutterBtn").onclick=stutterFX;
 if($("tapeBtn"))$("tapeBtn").onclick=tapeFX;
 if($("xyE"))setupXY();
 renderSeqEl();
-if($("seqPlayBtn"))$("seqPlayBtn").onclick=function(){seqState.on=!seqState.on;this.classList.toggle("on");if(seqState.on){seqState.pos=0;seqSched()}};
+if($("seqPlayBtn"))$("seqPlayBtn").onclick=function(){seqState.on=!seqState.on;this.classList.toggle("on");if(seqState.on){seqState.pos=0;seqSchedAdvanced()}};
 if($("seqClrBtn"))$("seqClrBtn").onclick=function(){seqState.steps.fill(false);renderSeqEl()};
 
 // === ADVANCED FEATURES ===
@@ -1451,6 +1462,115 @@ if($("lfoRate"))$("lfoRate").oninput=function(){
 var rate=this.value/20;
 if($("lfoHz"))$("lfoHz").textContent=rate.toFixed(1)+"Hz";
 };
+
+
+// === ADVANCED STEP SEQUENCER ===
+var seqVel=new Array(16).fill(0.8);
+var seqProb=new Array(16).fill(1.0);
+var seqRev=new Array(16).fill(false);
+var seqPitch=new Array(16).fill(0);
+function renderSeqAdvanced(){
+var e=$("seqE");if(!e)return;
+e.innerHTML="";
+for(var i=0;i<16;i++){
+var d=document.createElement("div");
+d.className="sq"+(seqState.steps[i]?" on":"");
+d.title="Vel:"+Math.round(seqVel[i]*100)+"% Prob:"+Math.round(seqProb[i]*100)+"%";
+(function(x){
+d.onclick=function(ev){
+if(ev.shiftKey){
+// Shift+click: cycle velocity
+seqVel[x]=(seqVel[x]+0.25)%1.25;
+if(seqVel[x]===0)seqVel[x]=0.25;
+this.title="Vel:"+Math.round(seqVel[x]*100)+"%";
+this.style.opacity=0.5+seqVel[x]*0.5;
+}else if(ev.altKey){
+// Alt+click: cycle probability
+seqProb[x]=(seqProb[x]+0.25)%1.25;
+if(seqProb[x]===0)seqProb[x]=0.25;
+this.title="Prob:"+Math.round(seqProb[x]*100)+"%";
+}else{
+seqState.steps[x]=!seqState.steps[x];
+this.classList.toggle("on");
+}
+};
+d.ondblclick=function(){
+seqRev[x]=!seqRev[x];
+this.style.borderColor=seqRev[x]?"var(--mg)":"var(--bd)";
+};
+})(i);
+e.appendChild(d);
+}
+}
+// Override seqSched with advanced version
+function seqSchedAdvanced(){
+if(!seqState.on)return;
+var bk=S.banks[S.bank];
+if(bk&&bk.slices&&bk.slices.length){
+var si=seqState.pos%bk.slices.length;
+if(seqState.steps[seqState.pos]&&Math.random()<seqProb[seqState.pos]){
+// Apply velocity
+var vel=seqVel[seqState.pos];
+// Apply reverse if set
+var origRev=bk.rev;
+if(seqRev[seqState.pos])bk.rev=!bk.rev;
+// Apply pitch offset
+var origPitch=bk.pitch;
+bk.pitch+=seqPitch[seqState.pos];
+playSlice(S.bank,si,vel);
+bk.rev=origRev;
+bk.pitch=origPitch;
+}
+}
+var sqs=document.querySelectorAll(".sq");
+sqs.forEach(function(s){s.classList.remove("play")});
+if(sqs[seqState.pos])sqs[seqState.pos].classList.add("play");
+seqState.pos=(seqState.pos+1)%16;
+setTimeout(seqSchedAdvanced,(60/S.bpm)/4*1000);
+}
+// Randomize sequencer
+function seqRandomize(){
+for(var i=0;i<16;i++){
+seqState.steps[i]=Math.random()<0.4;
+seqVel[i]=0.5+Math.random()*0.5;
+seqProb[i]=Math.random()<0.2?0.5:1.0;
+seqRev[i]=Math.random()<0.15;
+}
+renderSeqAdvanced();
+log("Seq randomized","ok");
+}
+// Clear sequencer
+function seqClear(){
+for(var i=0;i<16;i++){
+seqState.steps[i]=false;
+seqVel[i]=0.8;
+seqProb[i]=1.0;
+seqRev[i]=false;
+seqPitch[i]=0;
+}
+renderSeqAdvanced();
+log("Seq cleared","ok");
+}
+// Euclidean rhythm generator
+function seqEuclidean(pulses,steps){
+steps=steps||16;pulses=pulses||5;
+var pattern=[];
+var bucket=0;
+for(var i=0;i<steps;i++){
+bucket+=pulses;
+if(bucket>=steps){
+bucket-=steps;
+pattern.push(true);
+}else{
+pattern.push(false);
+}
+}
+for(var i=0;i<16;i++){
+seqState.steps[i]=pattern[i%pattern.length];
+}
+renderSeqAdvanced();
+log("Euclidean: "+pulses+"/"+steps,"ok");
+}
 
 })();
 
