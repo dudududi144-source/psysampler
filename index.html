@@ -489,6 +489,12 @@ if(nDist)nDist.curve=mkDistCurve(S.fx.dist?S.fxP.distD*50:0);
 // Sync delay time to BPM
 if(nDel)nDel.delayTime.setTargetAtTime((60/S.bpm)*0.75,AC.currentTime,.05);
 }
+// Compatibility aliases for old code
+var nFilter=nFil;
+var nDelay=nDel;
+var nDelayMix=nDelMix;
+var nVerbMix=nVerbMix;
+
 // Compatibility aliases
 var nFilter=nFil;
 var nDelay=nDel;
