@@ -409,6 +409,7 @@ log("Audio engine ready @ "+sr+"Hz","ok");
 return true;
 }catch(e){
 log("Audio init error: "+e.message,"er");
+console.error("AUDIO INIT FAILED:", e);
 return false;
 }
 }
@@ -646,6 +647,7 @@ var nVerbMix_old=nVerbMix;
 
 
 function playAll(){
+if(!AC&&!initAudio())return;
   var bank=S.banks[S.bank];
   if(!bank||!bank.slices||!bank.slices.length)return;
   var iv=(60/S.bpm)/Math.max(1,bank.slices.length);
@@ -670,6 +672,7 @@ function play(){
   log("Playing @ "+S.bpm+" BPM","ok");
 }
 function schedLoop(){
+if(!AC)return;
   if(!S.playing)return;
   var bank=S.banks[S.bank],sDur=(60/S.bpm)/4;
   while(seqNext<AC.currentTime+0.1){
@@ -684,6 +687,7 @@ function schedLoop(){
   seqT=setTimeout(schedLoop,25);
 }
 function stop(){
+  if(!AC)return;
   S.playing=false;
   // Smooth master ramp down to prevent click
   if(AC&&master){master.gain.cancelScheduledValues(AC.currentTime);
@@ -1669,6 +1673,7 @@ e.appendChild(d);
 }
 // Override seqSched with advanced version
 function seqSchedAdvanced(){
+if(!AC)return;
 if(!seqState.on)return;
 var bk=S.banks[S.bank];
 if(bk&&bk.slices&&bk.slices.length){
