@@ -344,6 +344,7 @@ function initAudio(){
 if(AC)return true;
 try{
 AC=new(window.AudioContext||window.webkitAudioContext)();
+if(AC.state==='suspended'){AC.resume();}
 var sr=AC.sampleRate;
 
 master=AC.createGain();
