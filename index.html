@@ -294,6 +294,8 @@ select{width:100%;padding:5px 8px;background:var(--panel2);color:var(--text);bor
 </div>
 
 <script>
+console.log('PSY LOOPER: script loaded');
+
 
 // === AUDIO ENGINE (CLEAN CHAIN) ===
 var AC=null,master=null,analyser=null;
@@ -1058,6 +1060,7 @@ renderAll()},50)}}
 
 // === INIT ===
 function init(){
+if(window._initDone)return;window._initDone=true;
 try{
 // Initialize banks
 if(S.banks.length===0){for(var bi=0;bi<8;bi++){S.banks.push({buf:null,slices:[],info:null,pitch:0,speed:1,atk:3,rel:60,rev:false});}}
@@ -1077,11 +1080,16 @@ if(S.banks.length===0){for(var bi=0;bi<8;bi++){S.banks.push({buf:null,slices:[],
 }
 
 // Start
+
+// Always call init - try multiple methods to guarantee it runs
 if(document.readyState==="loading"){
-  document.addEventListener("DOMContentLoaded",init);
+  document.addEventListener("DOMContentLoaded",function(){try{init()}catch(e){console.error("INIT:",e)}});
 }else{
-  init();
+  try{init()}catch(e){console.error("INIT:",e)}
 }
+// Fallback: also try on window load
+window.addEventListener("load",function(){try{if(!window._initDone){window._initDone=true;init()}}catch(e){}});
+
 
 
 // === UNIQUE FX: Glitch, Freeze, Stutter, Tape ===
