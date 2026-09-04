@@ -1039,6 +1039,8 @@ renderAll()},50)}}
 
 // === INIT ===
 function init(){
+// Initialize banks
+if(S.banks.length===0){for(var bi=0;bi<8;bi++){S.banks.push({buf:null,slices:[],info:null,pitch:0,speed:1,atk:3,rel:60,rev:false});}}
   renderBanks();
   renderPads();
   renderWave();
