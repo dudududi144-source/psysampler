@@ -249,7 +249,14 @@ select{background:var(--p3);color:var(--txt);border:1px solid var(--brd);border-
 <button class="btn" onclick="macroTension()">Tension</button>
 <button class="btn" onclick="macroReset()">Reset</button>
 </div>
-    <h3>🎶 LOOP LIBRARY (120)</h3>
+    
+    <h3>SLICE PARAMS</h3>
+    <div class="ctrl"><label>Pitch <span id="piV">0</span> st</label><input type="range" id="piR" min="-24" max="24" value="0" style="width:100%"></div>
+    <div class="ctrl"><label>Speed <span id="spV">1.0</span>x</label><input type="range" id="spR" min="25" max="400" value="100" style="width:100%"></div>
+    <div class="ctrl"><label>Attack <span id="atV">3</span>ms</label><input type="range" id="atR" min="0" max="100" value="3" style="width:100%"></div>
+    <div class="ctrl"><label>Release <span id="rlV">60</span>ms</label><input type="range" id="rlR" min="5" max="500" value="60" style="width:100%"></div>
+
+<h3>🎶 LOOP LIBRARY (120)</h3>
     <div id="libEl" style="max-height:220px;overflow-y:auto"></div>
     
     <h3>⌨️ KEYS</h3>
@@ -1749,6 +1756,9 @@ srcs.forEach(function(s){try{s.stop()}catch(e){}});
 srcs=[];
 log("PANIC: all audio stopped","er");
 }
+
+
+function renderSeq(){if(typeof renderSeqAdvanced==="function"){renderSeqAdvanced();}}
 
 })();
 
