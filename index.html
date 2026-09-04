@@ -1775,4 +1775,18 @@ function renderSeq(){if(typeof renderSeqAdvanced==="function"){renderSeqAdvanced
 
 ();
 
+
 </script>
+<div style="display:none">
+<input type="range" id="bpmR" min="60" max="200" value="145">
+<select id="gKey"><option selected>A</option></select>
+<select id="gScale"><option value="minor" selected>minor</option></select>
+<select id="gBars"><option value="4" selected>4</option></select>
+<input type="range" id="pitchR" min="-24" max="24" value="0"><span id="pitchV">0</span>
+<input type="range" id="speedR" min="25" max="400" value="100"><span id="speedV">1.0</span>
+<input type="range" id="atkR" min="0" max="100" value="3"><span id="atkV">3</span>
+<input type="range" id="relR" min="5" max="500" value="60"><span id="relV">60</span>
+<span id="midiDot"></span>
+</div>
+</body>
+</html>
