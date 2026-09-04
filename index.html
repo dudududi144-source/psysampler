@@ -1052,6 +1052,7 @@ renderAll()},50)}}
 
 // === INIT ===
 function init(){
+try{
 // Initialize banks
 if(S.banks.length===0){for(var bi=0;bi<8;bi++){S.banks.push({buf:null,slices:[],info:null,pitch:0,speed:1,atk:3,rel:60,rev:false});}}
   renderBanks();
@@ -1066,6 +1067,7 @@ if(S.banks.length===0){for(var bi=0;bi<8;bi++){S.banks.push({buf:null,slices:[],
   log("120 loops | 13 gen types | 15 FX | 8 presets | 4 macros","ok");
   log("Space=Play G=Generate 1-9=Slices F1-F8=Banks","ok");
   requestAnimationFrame(renderSpectrum);
+}catch(e){console.error('INIT ERROR:',e);if(document.body)document.body.innerHTML='<div style="color:red;padding:20px;font-family:monospace">INIT ERROR: '+e.message+'</div>';}
 }
 
 // Start
