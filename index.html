@@ -295,6 +295,123 @@ select{width:100%;padding:5px 8px;background:var(--panel2);color:var(--text);bor
 
 <script>
 
+// === AUDIO ENGINE (CLEAN CHAIN) ===
+var AC=null,master=null,analyser=null;
+var nFil=null,nHP=null,nDist=null,nComp=null,nSoft=null;
+var nDel=null,nDelFb=null,nDelMix=null;
+var nVerb=null,nVerbMix=null;
+var srcs=[];
+var S_fx={filter:true,delay:false,reverb:false,dist:false};
+var S_fxP={filterF:12000,delayM:.3,reverbM:.25,distD:.3};
+
+function mkDistCurve(k){
+var n=4096,c=new Float32Array(n),i,x;
+for(i=0;i<n;i++){x=i*2/n-1;c[i]=k===0?x:Math.tanh(x*k/10)*.9;}
+return c;
+}
+
+function mkIR(sec,sr){
+var len=Math.floor(sec*sr),buf=AC.createBuffer(2,len,sr);
+for(var ch=0;ch<2;ch++){
+var d=buf.getChannelData(ch);
+var seed=12345+ch;
+for(var i=0;i<len;i++){
+seed=(seed*1664525+1013904223)&0xFFFFFFFF;
+var r=((seed>>>0)/4294967296)*2-1;
+d[i]=r*Math.pow(1-i/len,2.5);
+}}
+return buf;
+}
+
+function initAudio(){
+if(AC)return true;
+try{
+AC=new(window.AudioContext||window.webkitAudioContext)();
+var sr=AC.sampleRate;
+
+master=AC.createGain();
+master.gain.value=S.vol||0.8;
+
+analyser=AC.createAnalyser();
+analyser.fftSize=2048;
+
+nSoft=AC.createWaveShaper();
+var nn=4096,cc=new Float32Array(nn);
+for(var i=0;i<nn;i++){var x=i*2/nn-1;cc[i]=Math.tanh(x*1.2)*.92;}
+nSoft.curve=cc;
+
+nComp=AC.createDynamicsCompressor();
+nComp.threshold.value=-12;
+nComp.knee.value=10;
+nComp.ratio.value=4;
+nComp.attack.value=0.003;
+nComp.release.value=0.15;
+
+nFil=AC.createBiquadFilter();
+nFil.type="lowpass";
+nFil.frequency.value=12000;
+nFil.Q.value=0.7;
+
+nHP=AC.createBiquadFilter();
+nHP.type="highpass";
+nHP.frequency.value=25;
+nHP.Q.value=0.5;
+
+nDist=AC.createWaveShaper();
+nDist.curve=mkDistCurve(0);
+nDist.oversample="4x";
+
+nDel=AC.createDelay(2.0);
+nDel.delayTime.value=(60/(S.bpm||145))*0.75;
+nDelFb=AC.createGain();
+nDelFb.gain.value=0.4;
+nDelMix=AC.createGain();
+nDelMix.gain.value=0;
+nDel.connect(nDelFb);
+nDelFb.connect(nDel);
+nDel.connect(nDelMix);
+
+nVerb=AC.createConvolver();
+nVerb.buffer=mkIR(2.5,sr);
+nVerbMix=AC.createGain();
+nVerbMix.gain.value=0;
+nVerb.connect(nVerbMix);
+
+// CHAIN: nHP -> nFil -> nDist -> nComp -> nSoft -> master -> analyser -> out
+nHP.connect(nFil);
+nFil.connect(nDist);
+nDist.connect(nComp);
+nComp.connect(nSoft);
+nSoft.connect(master);
+master.connect(analyser);
+analyser.connect(AC.destination);
+
+// Parallel sends
+nDelMix.connect(nHP);
+nVerbMix.connect(nHP);
+
+log("Audio engine ready @ "+sr+"Hz","ok");
+return true;
+}catch(e){
+log("Audio init error: "+e.message,"er");
+return false;
+}
+}
+
+function distCurve(k){return mkDistCurve(k);}
+
+function applyFX(){
+if(!AC)return;
+if(nFil)nFil.frequency.setTargetAtTime(S.fx.filter?S.fxP.filterF:20000,AC.currentTime,.02);
+if(nDelMix)nDelMix.gain.setTargetAtTime(S.fx.delay?S.fxP.delayM:0,AC.currentTime,.02);
+if(nVerbMix)nVerbMix.gain.setTargetAtTime(S.fx.reverb?S.fxP.revM:0,AC.currentTime,.02);
+if(nDist)nDist.curve=mkDistCurve(S.fx.dist?S.fxP.distD*50:0);
+if(nDel)nDel.delayTime.setTargetAtTime((60/S.bpm)*0.75,AC.currentTime,.05);
+}
+
+
+
+
 // ============================================================
 // PSY LOOPER v2.0 - Professional Audio Engine
 // Defensive coding - all access guarded
