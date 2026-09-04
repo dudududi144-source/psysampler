@@ -787,6 +787,16 @@ function renderFX(){
   });
 }
 
+var LIB=[
+{n:"Drums Full",f:"loops/pro/drums-full-145.wav",t:"drums"},
+{n:"Chords Am",f:"loops/pro/chords-145-Am.wav",t:"chord"},
+{n:"FX Riser",f:"loops/pro/fx-riser-145.wav",t:"fx"},
+{n:"Arp Lead",f:"loops/pro/arp-lead-145-Am.wav",t:"lead"},
+{n:"Atmo Pad",f:"loops/pro/atmo-pad-145-Am.wav",t:"atmo"},
+{n:"Percussion",f:"loops/pro/perc-145.wav",t:"drums"},
+{n:"Sub Bass",f:"loops/pro/sub-bass-145.wav",t:"bass"}
+];
+
 function renderLib(){
   var el=$("libEl");if(!el)return;el.innerHTML="";
   if(typeof LIB==="undefined")return;
@@ -803,8 +813,8 @@ function renderAll(){
   renderBanks();renderPads();renderWave();renderFX();renderLib();
   var info=$("infoEl");
   if(info){
-    var bank=S.banks[S.bank,
-{n:"Drums Full",f:"loops/pro/drums-full-145.wav",t:"drums"},
+    var bank=S.banks[S.bank];
+,
 {n:"Chords Am",f:"loops/pro/chords-145-Am.wav",t:"chord"},
 {n:"FX Riser",f:"loops/pro/fx-riser-145.wav",t:"fx"},
 {n:"Arp Lead",f:"loops/pro/arp-lead-145-Am.wav",t:"lead"},
