@@ -385,101 +385,10 @@ var sources=[], seqT=null, seqStep=0, seqNext=0, taps=[];
 
 // === UTILITIES ===
 function $(id){return document.getElementById(id)}
-function log(m,c){var el=$("logEl");if(!el)return;var d=document.createElement("div");d.className=c||"";d.textContent="> "+m;el.appendChild(d);el.scrollTop=el.scrollHeight;if(el.children.length>40)el.removeChild(el.firstChild)}
-
-function rng(seed){var s=seed;return function(){s=(s*1664525+1013904223)&0xFFFFFFFF;return(s>>>0)/4294967296}}
-
-// === AUDIO INIT ===
-
-// === CLEAN AUDIO ENGINE v2 ===
-var AC=null,master=null,analyser=null;
-var nFil=null,nHP=null,nDist=null,nComp=null,nLim=null;
-var nDel=null,nDelFb=null,nDelMix=null;
-var nVerb=null,nVerbMix=null;
-var nEQ=null,nSoft=null;
-var srcs=[];
-var S_fx={filter:true,delay:false,reverb:false,dist:false};
-var S_fxP={filterF:12000,delayM:.3,reverbM:.25,distD:.3};
-
-function initAudio(){
-if(AC)return true;
-try{
-AC=new(window.AudioContext||window.webkitAudioContext)();
-var sr=AC.sampleRate;
-
-// Master chain: simple and clean
-master=AC.createGain();
-master.gain.value=S.vol||0.8;
-
-// Analyser (for visualization)
-analyser=AC.createAnalyser();
-analyser.fftSize=2048;
-
-// Soft limiter
-nSoft=AC.createWaveShaper();
-var nn=4096,cc=new Float32Array(nn);
-for(var i=0;i<nn;i++){var x=i*2/nn-1;cc[i]=Math.tanh(x*1.2)*.92}
-nSoft.curve=cc;
-
-// Compressor
-nComp=AC.createDynamicsCompressor();
-nComp.threshold.value=-12;
-nComp.knee.value=10;
-nComp.ratio.value=4;
-nComp.attack.value=0.003;
-nComp.release.value=0.15;
-
-// Main filter
-nFil=AC.createBiquadFilter();
-nFil.type="lowpass";
-nFil.frequency.value=12000;
-nFil.Q.value=0.7;
-
-// DC blocker
-nHP=AC.createBiquadFilter();
-nHP.type="highpass";
-nHP.frequency.value=25;
-nHP.Q.value=0.5;
-
-// Distortion
-nDist=AC.createWaveShaper();
-nDist.curve=mkDistCurve(0);
-nDist.oversample="4x";
-
-// Delay (parallel send)
-nDel=AC.createDelay(2.0);
-nDel.delayTime.value=(60/(S.bpm||145))*0.75;
-nDelFb=AC.createGain();
-nDelFb.gain.value=0.4;
-nDelMix=AC.createGain();
-nDelMix.gain.value=0;
-nDel.connect(nDelFb);
-nDelFb.connect(nDel);
-nDel.connect(nDelMix);
-
-// Reverb (parallel send)
-nVerb=AC.createConvolver();
-nVerb.buffer=mkIR(2.5,sr);
-nVerbMix=AC.createGain();
-nVerbMix.gain.value=0;
-nVerb.connect(nVerbMix);
-
-// === CONNECT THE CHAIN ===
-// Signal flow: source -> nHP -> nFil -> nDist -> nComp -> nSoft -> master -> analyser -> out
-nHP.connect(nFil);
-nFil.connect(nDist);
-nDist.connect(nComp);
-nComp.connect(nSoft);
-nSoft.connect(master);
-master.connect(analyser);
-analyser.connect(AC.destination);
-
-// Parallel sends connect to nHP (start of chain)
-nDelMix.connect(nHP);
-nVerbMix.connect(nHP);
-
-log("Audio engine ready @ "+sr+"Hz","ok");
-return true;
+function log(msg,type){
+var el=$("logEl");if(!el)return;
+el.textContent="> "+msg;
+el.className="log-msg"+(type?" "+type:"");
 }catch(e){
 log("Audio init error: "+e.message,"er");
 return false;
@@ -813,65 +722,70 @@ el.appendChild(d);
 }
 
 function renderWave(){
-  var cv=$("waveCv");if(!cv)return;
-  var rect=cv.parentElement.getBoundingClientRect();
-  cv.width=rect.width||600;cv.height=rect.height||100;
-  var ctx=cv.getContext("2d");
-  ctx.fillStyle="#0f0f1a";ctx.fillRect(0,0,cv.width,cv.height);
-  
-  var bank=S.banks[S.bank];
-  if(!bank||!bank.buf){
-    ctx.fillStyle="#555";ctx.font="12px sans-serif";ctx.textAlign="center";
-    ctx.fillText("Generate or Load a loop",cv.width/2,cv.height/2);
-    return;
-  }
-  var d=bank.buf.getChannelData(0),step=Math.ceil(d.length/cv.width);
-  ctx.strokeStyle="#00ff88";ctx.lineWidth=1;ctx.beginPath();
-  for(var i=0;i<cv.width;i++){
-    var mn=1,mx=-1;
-    for(var j=0;j<step&&i*step+j<d.length;j++){
-      var v=d[i*step+j];
-      if(v<mn)mn=v;if(v>mx)mx=v;
-    }
-    ctx.moveTo(i,(1-mx)*cv.height/2);
-    ctx.lineTo(i,(1-mn)*cv.height/2);
-  }
-  ctx.stroke();
+var cv=$("waveCv");if(!cv)return;
+var wrap=cv.parentElement;
+cv.width=wrap.clientWidth||600;cv.height=wrap.clientHeight||110;
+var ctx=cv.getContext("2d");
+ctx.fillStyle="#0a0a0f";ctx.fillRect(0,0,cv.width,cv.height);
+var bank=S.banks[S.bank];
+if(!bank||!bank.buf){
+ctx.fillStyle="#484858";ctx.font="10px 'JetBrains Mono',monospace";ctx.textAlign="center";
+ctx.fillText("NO AUDIO LOADED",cv.width/2,cv.height/2);
+return;
+}
+var d=bank.buf.getChannelData(0);
+var step=Math.ceil(d.length/cv.width);
+ctx.strokeStyle="#00e676";ctx.lineWidth=1.5;ctx.globalAlpha=0.9;
+ctx.beginPath();
+for(var i=0;i<cv.width;i++){
+var mn=1,mx=-1;
+for(var j=0;j<step&&i*step+j<d.length;j++){
+var v=d[i*step+j];if(v<mn)mn=v;if(v>mx)mx=v;
+}
+ctx.moveTo(i,(1-mx)*cv.height/2);
+ctx.lineTo(i,(1-mn)*cv.height/2);
+}
+ctx.stroke();ctx.globalAlpha=1;
+// Draw slice markers
+var mk=$("marksEl");if(mk){
+mk.innerHTML="";
+if(bank.slices&&bank.slices.length){
+var tl=bank.buf.length;
+bank.slices.forEach(function(s){
+var m=document.createElement("div");
+m.style.cssText="position:absolute;top:0;bottom:0;width:1px;background:#00e676;opacity:0.3;left:"+(s.s/tl*100)+"%";
+mk.appendChild(m);
+});
+}
+}
 }
 
 function renderInfo(){
-  var el=$("infoEl");if(!el)return;
-  var bank=S.banks[S.bank];
-  if(!bank||!bank.info){el.textContent="No loop loaded";return}
-  var inf=bank.info;
-  el.innerHTML="Duration: "+inf.dur.toFixed(2)+"s<br>"+
-    "Tempo: ~"+inf.tempo+" BPM<br>"+
-    "Slices: "+bank.slices.length+"<br>"+
-    "Peak: "+(inf.peak*100).toFixed(0)+"%<br>"+
-    "RMS: "+(inf.rms*100).toFixed(1)+"%";
+var bank=S.banks[S.bank];
+if(!bank||!bank.info)return;
 }
 
 function renderSpectrum(){
-  // Throttle to ~30fps
-  if(renderSpectrum._t&&performance.now()-renderSpectrum._t<33){requestAnimationFrame(renderSpectrum);return}
-  renderSpectrum._t=performance.now();
-  var cv=$("specCv");if(!cv||!analyser)return;
-  var rect=cv.parentElement.getBoundingClientRect();
-  cv.width=rect.width||600;cv.height=rect.height||60;
-  var ctx=cv.getContext("2d");
-  var fd=new Uint8Array(analyser.frequencyBinCount);
-  analyser.getByteFrequencyData(fd);
-  ctx.fillStyle="#0f0f1a";ctx.fillRect(0,0,cv.width,cv.height);
-  var bw=cv.width/64;
-  for(var i=0;i<64;i++){
-    var v=fd[i*4]/255;
-    ctx.fillStyle="hsl("+(140+v*100)+",100%,"+(30+v*40)+"%)";
-    ctx.fillRect(i*bw,cv.height-v*cv.height,bw-1,v*cv.height);
-  }
-  var sum=0;for(var k=0;k<fd.length;k++)sum+=fd[k];
-  var avg=sum/fd.length/255;
-  var meter=$("meterEl");if(meter)meter.style.width=(avg*100)+"%";
-  requestAnimationFrame(renderSpectrum);
+if(renderSpectrum._t&&performance.now()-renderSpectrum._t<33){requestAnimationFrame(renderSpectrum);return}
+renderSpectrum._t=performance.now();
+var cv=$("specCv");if(!cv||!analyser){requestAnimationFrame(renderSpectrum);return}
+var wrap=cv.parentElement;
+cv.width=wrap.clientWidth||600;cv.height=wrap.clientHeight||60;
+var ctx=cv.getContext("2d");
+var fd=new Uint8Array(analyser.frequencyBinCount);
+analyser.getByteFrequencyData(fd);
+ctx.fillStyle="#0a0a0f";ctx.fillRect(0,0,cv.width,cv.height);
+var bw=cv.width/64;
+for(var i=0;i<64;i++){
+var v=fd[i*4]/255;
+var hue=140+v*80;
+ctx.fillStyle="hsla("+hue+",80%,"+(30+v*40)+"%,0.9)";
+ctx.fillRect(i*bw,cv.height-v*cv.height,bw-1,v*cv.height);
+}
+var sum=0;for(var k=0;k<fd.length;k++)sum+=fd[k];
+var avg=sum/fd.length/255;
+var m=$("meterEl");if(m)m.style.width=(avg*100)+"%";
+requestAnimationFrame(renderSpectrum);
 }
 
 function renderFX(){
@@ -1595,20 +1509,20 @@ var seqProb=new Array(16).fill(1.0);
 var seqRev=new Array(16).fill(false);
 var seqPitch=new Array(16).fill(0);
 function renderSeqAdvanced(){
-var e=$("seqE");if(!e)return;
-e.innerHTML="";
+var e=$("seqE");if(!e)return;e.innerHTML="";
 for(var i=0;i<16;i++){
 var d=document.createElement("div");
 d.className="sq"+(seqState.steps[i]?" on":"");
-d.title="Vel:"+Math.round(seqVel[i]*100)+"% Prob:"+Math.round(seqProb[i]*100)+"%";
 (function(x){
 d.onclick=function(ev){
-if(ev.shiftKey){
-// Shift+click: cycle velocity
-seqVel[x]=(seqVel[x]+0.25)%1.25;
-if(seqVel[x]===0)seqVel[x]=0.25;
-this.title="Vel:"+Math.round(seqVel[x]*100)+"%";
-this.style.opacity=0.5+seqVel[x]*0.5;
+if(ev.shiftKey){seqVel[x]=(seqVel[x]+0.25)%1.25;if(seqVel[x]===0)seqVel[x]=0.25;this.style.opacity=0.5+seqVel[x]*0.5}
+else if(ev.altKey){seqProb[x]=(seqProb[x]+0.25)%1.25;if(seqProb[x]===0)seqProb[x]=0.25}
+else{seqState.steps[x]=!seqState.steps[x];this.classList.toggle("on")}
+};
+d.ondblclick=function(){seqRev[x]=!seqRev[x];this.style.borderColor=seqRev[x]?"var(--accent)":""}
+})(i);
+e.appendChild(d);
+}
 }else if(ev.altKey){
 // Alt+click: cycle probability
 seqProb[x]=(seqProb[x]+0.25)%1.25;
