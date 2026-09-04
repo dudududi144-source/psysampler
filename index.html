@@ -1636,24 +1636,7 @@ d.ondblclick=function(){seqRev[x]=!seqRev[x];this.style.borderColor=seqRev[x]?"v
 })(i);
 e.appendChild(d);
 }
-}else if(ev.altKey){
-// Alt+click: cycle probability
-seqProb[x]=(seqProb[x]+0.25)%1.25;
-if(seqProb[x]===0)seqProb[x]=0.25;
-this.title="Prob:"+Math.round(seqProb[x]*100)+"%";
-}else{
-seqState.steps[x]=!seqState.steps[x];
-this.classList.toggle("on");
 }
-};
-d.ondblclick=function(){
-seqRev[x]=!seqRev[x];
-this.style.borderColor=seqRev[x]?"var(--mg)":"var(--bd)";
-};
-)(i);
-e.appendChild(d);
-
-
 // Override seqSched with advanced version
 function seqSchedAdvanced(){
 if(!seqState.on)return;
