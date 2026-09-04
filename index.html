@@ -506,10 +506,6 @@ function log(msg,type){
 var el=$("logEl");if(!el)return;
 el.textContent="> "+msg;
 el.className="log-msg"+(type?" "+type:"");
-}catch(e){
-log("Audio init error: "+e.message,"er");
-return false;
-}
 }
 
 function mkDistCurve(k){
