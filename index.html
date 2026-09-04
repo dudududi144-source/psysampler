@@ -655,14 +655,16 @@ function playAll(){
 // === TRANSPORT ===
 function play(){
   if(!AC&&!initAudio())return;
-  if(AC&&AC.state==="suspended")AC.resume();
+  if(!AC)return;
+  if(AC.state==="suspended")AC.resume();
   
   if(S.playing)return;
   S.playing=true;
   // Smooth master ramp to prevent click
-  if(master){master.gain.cancelScheduledValues(AC.currentTime);
+  if(master&&AC){master.gain.cancelScheduledValues(AC.currentTime);
   master.gain.setValueAtTime(0,AC.currentTime);
-  master.gain.linearRampToValueAtTime(S.vol,AC.currentTime+0.01);}seqStep=0;seqNext=AC.currentTime+0.05;
+  master.gain.linearRampToValueAtTime(S.vol,AC.currentTime+0.01);}
+  seqStep=0;seqNext=AC.currentTime+0.05;
   schedLoop();
   $("playBtn").textContent="⏸ Pause";$("playBtn").classList.add("on");
   log("Playing @ "+S.bpm+" BPM","ok");
