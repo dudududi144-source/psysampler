@@ -3,274 +3,294 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title> PSY LOOPER PRO  - Advanced Loop Manipulator</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎛️</text></svg>">
+<title>PSY LOOPER PRO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+:root{
+--bg:#0a0a0f;--panel:#14141a;--panel2:#1c1c24;--panel3:#222230;
+--border:#2a2a35;--border2:#3a3a45;
+--text:#e0e0e8;--text2:#686878;--text3:#484858;
+--accent:#00e676;--accent2:#00e67633;--accent3:#00e67618;
+--warn:#ff6b35;--err:#ff3d5a;--info:#4dabf7;
+--mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#080810;--p1:#0f0f1a;--p2:#161625;--p3:#1e1e32;--acc:#00ff88;--acc2:#00cc6a;--warn:#ffaa00;--err:#ff3366;--txt:#e8e8f0;--txt2:#7777aa;--brd:#2a2a44;--r:8px}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;display:flex;flex-direction:column}
-button{cursor:pointer;font-family:inherit}
-input,select{font-family:inherit}
-.hd{background:var(--p1);border-bottom:2px solid var(--acc);padding:8px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.hd h1{font-size:1.1rem;color:var(--acc);white-space:nowrap}
-.hd .sub{font-size:.6rem;color:var(--txt2)}
-.btn{padding:6px 12px;border:1px solid var(--brd);border-radius:var(--r);background:var(--p3);color:var(--txt);font-size:.75rem;transition:all .1s}
-.btn:hover{border-color:var(--acc);background:var(--p2)}
-.btn.on{background:var(--acc);color:#000;border-color:var(--acc)}
-.btn.prime{background:var(--acc);color:#000;border-color:var(--acc);font-weight:700}
-.btn.prime:hover{background:var(--acc2)}
-.sep{width:1px;height:24px;background:var(--brd)}
-.bpm-box{font-family:monospace;font-size:1rem;color:var(--acc);background:var(--bg);border:1px solid var(--brd);border-radius:var(--r);padding:4px 10px;min-width:60px;text-align:center}
-.main{flex:1;display:grid;grid-template-columns:260px 1fr 260px;overflow:hidden}
-.col{overflow-y:auto;padding:10px;border-right:1px solid var(--brd)}
-.col:last-child{border-right:none}
-.col h3{font-size:.75rem;color:var(--acc);margin:10px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--brd)}
-.col h3:first-child{margin-top:0}
-.banks{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.bank{padding:8px;background:var(--p3);border:2px solid var(--brd);border-radius:var(--r);text-align:center;cursor:pointer;transition:all .1s;position:relative}
-.bank:hover{border-color:var(--acc)}
-.bank.on{border-color:var(--acc);background:rgba(0,255,136,.08)}
-.bank .n{font-size:1rem;font-weight:700}
-.bank .s{font-size:.55rem;color:var(--txt2)}
-.bank .t{font-size:.55rem;color:var(--acc)}
-.bank.loaded::before{content:'';position:absolute;top:3px;right:3px;width:6px;height:6px;border-radius:50%;background:var(--acc)}
-.pads{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin:8px 0}
-.pad{aspect-ratio:1;background:var(--p3);border:1px solid var(--brd);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;cursor:pointer;transition:all .08s;user-select:none}
-.pad:hover{border-color:var(--acc)}
-.pad.hit{background:var(--acc);color:#000;transform:scale(.9);box-shadow:0 0 10px rgba(0,255,136,.5)}
-.pad.off{opacity:.25;pointer-events:none}
-.wave{background:var(--p1);border:1px solid var(--brd);border-radius:var(--r);height:100px;position:relative;overflow:hidden;margin:6px 0}
-.wave canvas{width:100%;height:100%;display:block}
-.markers{position:absolute;inset:0;pointer-events:none}
-.mk{position:absolute;top:0;bottom:0;width:1px;background:var(--acc);opacity:.5}
-.fx-row{display:flex;align-items:center;gap:6px;padding:5px;background:var(--p3);border:1px solid var(--brd);border-radius:6px;margin-bottom:3px;font-size:.68rem}
-.fx-row .sw{width:16px;height:16px;border-radius:4px;border:1px solid var(--brd);background:var(--bg);cursor:pointer;flex-shrink:0}
-.fx-row .sw.on{background:var(--acc)}
-.fx-row input[type=range]{flex:1;height:4px}
-input[type=range]{-webkit-appearance:none;background:var(--p2);border-radius:2px;outline:none;height:5px}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--acc);border-radius:50%;cursor:pointer}
-select{background:var(--p3);color:var(--txt);border:1px solid var(--brd);border-radius:6px;padding:4px 8px;font-size:.72rem}
-.ctrl{margin-bottom:8px}
-.ctrl label{display:flex;justify-content:space-between;font-size:.65rem;color:var(--txt2);margin-bottom:3px}
-.ctrl label span{color:var(--acc);font-family:monospace}
-.lib-item{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:var(--p3);border:1px solid var(--brd);border-radius:6px;margin-bottom:3px;cursor:pointer;font-size:.65rem;transition:all .1s}
-.lib-item:hover{border-color:var(--acc)}
-.lib-item .tag{font-size:.55rem;color:var(--txt2);background:var(--bg);padding:1px 5px;border-radius:3px}
-.gen-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px}
-.gen-btn{padding:6px;background:var(--p2);border:1px solid var(--brd);border-radius:6px;font-size:.62rem;text-align:center;cursor:pointer;transition:all .1s;color:var(--txt)}
-.gen-btn:hover{border-color:var(--acc)}
-.gen-btn.on{border-color:var(--acc);background:rgba(0,255,136,.1);color:var(--acc)}
-.log{background:var(--bg);border:1px solid var(--brd);border-radius:var(--r);padding:6px;font-family:monospace;font-size:.6rem;max-height:90px;overflow-y:auto;direction:ltr;text-align:left}
-.log div{padding:1px 0;color:var(--txt2)}
-.log .ok{color:var(--acc)}
-.log .er{color:var(--err)}
-.ft{background:var(--p1);border-top:1px solid var(--brd);padding:4px 16px;font-size:.6rem;color:var(--txt2);display:flex;justify-content:space-between}
-.meter{height:3px;background:var(--p2);border-radius:2px;overflow:hidden;margin-top:6px}
-.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--warn),var(--err));width:0%;transition:width .05s}
-.status-bar{font-size:.6rem;background:var(--p1);border-top:1px solid var(--brd);padding:4px 16px;display:flex;justify-content:space-between;color:var(--txt2)}
-.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--brd);margin-right:4px}
-.dot.on{background:var(--acc);box-shadow:0 0 4px var(--acc)}
-@media(max-width:900px){.main{grid-template-columns:1fr}}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);height:100vh;overflow:hidden;font-size:12px}
+button{cursor:pointer;font-family:var(--sans);border:none;outline:none}
+select,input{font-family:var(--sans);outline:none}
+.app{display:flex;flex-direction:column;height:100vh}
 
-.fx-btns{display:flex;gap:3px;flex-wrap:wrap;margin:4px 0}
-.xy{width:100%;aspect-ratio:1;background:var(--p1);border:1px solid var(--bd);border-radius:var(--r);position:relative;cursor:crosshair;margin:4px 0}
-.xy .dot{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc);transform:translate(-50%,-50%);pointer-events:none}
-.seq{display:grid;grid-template-columns:repeat(16,1fr);gap:1px;margin:4px 0}
-.sq{aspect-ratio:1;background:var(--p2);border:1px solid var(--bd);border-radius:3px;cursor:pointer}
-.sq.on{background:var(--acc);border-color:var(--acc)}
-.sq.play{box-shadow:0 0 6px var(--cy);border-color:var(--cy)}
+/* HEADER */
+.hd{background:var(--panel);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hd-left{display:flex;align-items:center;gap:16px}
+.logo{font-size:13px;font-weight:600;letter-spacing:2px;color:var(--text)}
+.logo span{color:var(--accent);font-weight:300}
+.ver{font-size:9px;color:var(--text3);font-family:var(--mono)}
+.transport{display:flex;align-items:center;gap:8px}
+.bpm-box{font-family:var(--mono);font-size:14px;color:var(--accent);background:var(--bg);border:1px solid var(--border);padding:4px 10px;min-width:60px;text-align:center}
+.btn{padding:5px 12px;border-radius:3px;background:var(--panel2);color:var(--text);font-size:10px;letter-spacing:0.5px;transition:all 80ms ease;border:1px solid var(--border)}
+.btn:hover{border-color:var(--border2);background:var(--panel3)}
+.btn:active{transform:scale(0.96)}
+.btn-play{min-width:70px;font-family:var(--mono);font-size:11px}
+.btn-play.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.btn-rec{min-width:60px;font-family:var(--mono);font-size:11px}
+.btn-rec.active{background:var(--err);color:#fff;border-color:var(--err)}
+.btn-sm{padding:4px 8px;font-size:9px}
+.btn-accent{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:500}
+.btn-accent:hover{background:#00c866}
+
+/* MAIN LAYOUT */
+.main{flex:1;display:grid;grid-template-columns:220px 1fr 240px;gap:1px;background:var(--border);overflow:hidden}
+.col{background:var(--panel);overflow-y:auto;padding:12px}
+.col::-webkit-scrollbar{width:4px}
+.col::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.col-center{background:var(--bg);padding:12px;overflow-y:auto}
+.col-right{border-left:1px solid var(--border)}
+.col-left{border-right:1px solid var(--border)}
+
+/* SECTION HEADERS */
+.sec{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.sec:first-child{margin-top:0}
+
+/* BANKS */
+.banks-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
+.bank{padding:10px 8px;background:var(--panel2);border:1px solid var(--border);border-radius:3px;text-align:center;cursor:pointer;transition:all 120ms ease;position:relative}
+.bank:hover{border-color:var(--border2)}
+.bank.active{border-color:var(--accent);box-shadow:0 0 8px var(--accent3)}
+.bank .num{font-family:var(--mono);font-size:13px;color:var(--text2)}
+.bank.active .num{color:var(--accent)}
+.bank.loaded::after{content:'';position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+
+/* WAVEFORM */
+.wave-wrap{background:var(--bg);border:1px solid var(--border);border-radius:4px;height:110px;position:relative;overflow:hidden;margin-bottom:12px}
+.wave-wrap canvas{width:100%;height:100%;display:block}
+
+/* PADS */
+.pads-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-bottom:12px}
+.pad{aspect-ratio:1;background:var(--panel2);border:1px solid var(--border);border-radius:3px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 60ms ease-out;font-family:var(--mono);font-size:10px;color:var(--text2)}
+.pad:hover{border-color:var(--border2)}
+.pad.hit{background:var(--accent);color:var(--bg);box-shadow:0 0 16px var(--accent2);transform:scale(0.93)}
+.pad.off{opacity:0.2;pointer-events:none}
+
+/* SEQUENCER */
+.seq-grid{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;margin-bottom:12px}
+.sq{aspect-ratio:1;background:var(--panel2);border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:all 80ms linear}
+.sq.on{background:var(--accent);border-color:var(--accent)}
+.sq.play{border-color:var(--accent);box-shadow:0 0 8px var(--accent3)}
+
+/* TOOLS */
+.tools-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+
+/* FX RACK */
+.fx-card{background:var(--panel2);border:1px solid var(--border);border-radius:3px;padding:8px 10px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.fx-toggle{width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;flex-shrink:0;transition:all 100ms}
+.fx-toggle.on{background:var(--accent);box-shadow:0 0 6px var(--accent2)}
+.fx-name{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);width:50px;flex-shrink:0}
+.fx-card input[type=range]{flex:1;height:3px}
+
+/* MACROS */
+.macro-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin-bottom:12px}
+.macro{padding:8px;background:var(--panel2);border:1px solid var(--border);border-radius:3px;text-align:center;cursor:pointer;transition:all 100ms;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text2)}
+.macro:hover{border-color:var(--border2);color:var(--text)}
+.macro:active{transform:scale(0.96);border-color:var(--accent);color:var(--accent)}
+
+/* SLIDERS */
+.ctrl{margin-bottom:8px}
+.ctrl label{display:flex;justify-content:space-between;font-size:9px;letter-spacing:0.5px;color:var(--text2);margin-bottom:4px}
+.ctrl label span{font-family:var(--mono);color:var(--accent);font-size:10px}
+input[type=range]{width:100%;height:3px;-webkit-appearance:none;background:var(--border);border-radius:2px;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;background:var(--accent);border-radius:50%;cursor:pointer}
+select{width:100%;padding:5px 8px;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:3px;font-size:10px;cursor:pointer}
+
+/* LIBRARY */
+.lib-item{background:var(--panel2);border:1px solid var(--border);border-radius:3px;padding:6px 10px;margin-bottom:3px;cursor:pointer;transition:all 100ms;display:flex;justify-content:space-between;align-items:center}
+.lib-item:hover{border-color:var(--accent)}
+.lib-item .name{font-size:10px;color:var(--text)}
+.lib-item .tag{font-size:8px;font-family:var(--mono);color:var(--text3);background:var(--bg);padding:2px 5px;border-radius:2px}
+
+/* GEN */
+.gen-row{display:flex;gap:4px;margin-bottom:4px}
+.gen-row select{flex:1}
+
+/* XY PAD */
+.xy-pad{width:100%;aspect-ratio:1;background:var(--panel2);border:1px solid var(--border);border-radius:4px;position:relative;cursor:crosshair;margin-bottom:12px}
+.xy-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent2);transform:translate(-50%,-50%);pointer-events:none}
+
+/* LFO */
+.lfo-row{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.lfo-row select{width:60px}
+.lfo-row input[type=range]{flex:1}
+.lfo-row span{font-family:var(--mono);font-size:9px;color:var(--accent);min-width:35px}
+.lfo-viz{height:20px;background:var(--panel2);border:1px solid var(--border);border-radius:3px;overflow:hidden;margin-bottom:12px}
+.lfo-viz canvas{width:100%;height:100%;display:block}
+
+/* LOG */
+.log-bar{background:var(--panel);border-top:1px solid var(--border);padding:6px 16px;font-family:var(--mono);font-size:9px;color:var(--text3);display:flex;justify-content:space-between}
+.log-bar .log-msg{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%}
+.log-bar .log-msg.ok{color:var(--accent)}
+.log-bar .log-msg.er{color:var(--err)}
+.log-bar .log-msg.info{color:var(--info)}
+
+/* METER */
+.meter{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--warn),var(--err));width:0%;transition:width 40ms}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.main{grid-template-columns:180px 1fr 200px}}
+@media(max-width:800px){.main{grid-template-columns:1fr;grid-template-rows:auto auto auto}}
 </style>
 </head>
 <body>
+<div class="app">
 
+<!-- HEADER -->
 <div class="hd">
-  <div><h1>🎛️ PSY LOOPER</h1><div class="sub">PSY Family • v2.0</div></div>
-  <div class="sep"></div>
-  <button class="btn" id="playBtn">▶ Play</button>
-  <button class="btn" id="stopBtn">⏹ Stop</button>
-  <div class="bpm-box" id="bpmVal">145
-<input type="range" id="bpmR" min="60" max="200" value="145" style="width:80px"></div>
-  <input type="range" id="bpmRange" min="60" max="200" value="145" style="width:80px">
-  <button class="btn" id="tapBtn">TAP</button>
-  <div class="sep"></div>
-  <button class="btn" id="loadBtn">📂 Load</button>
-  <button class="btn" id="exportBtn">💾 WAV</button>
-  <button class="btn" id="midiBtn">🎹 MIDI</button>
-
-<button class="btn" id="expBtn">EXPORT</button>
-<button class="btn" id="panicBtn">PANIC</button>
-<button class="btn" id="saveBtn">SAVE</button>
-<button class="btn" id="loadPrjBtn">LOAD</button>
-<button class="btn" id="overdubBtn">OD</button>
-<button class="btn" id="randBtn">RND</button>
-<button class="btn" id="probBtn">PROB</button>
-
-  <input type="file" id="fileIn" accept="audio/*" style="display:none">
+<div class="hd-left">
+<div class="logo">PSY LOOPER <span>PRO</span></div>
+<div class="ver">v5.0</div>
+</div>
+<div class="transport">
+<div class="bpm-box" id="bpmVal">145</div>
+<input type="range" id="bpmRange" min="60" max="200" value="145" style="width:80px">
+<button class="btn btn-sm" id="tapBtn">TAP</button>
+<button class="btn btn-play" id="playBtn">PLAY</button>
+<button class="btn" id="stopBtn">STOP</button>
+<button class="btn btn-rec" id="recBtn">REC</button>
+</div>
+<div class="transport">
+<button class="btn btn-sm" id="loadBtn">LOAD</button>
+<button class="btn btn-sm" id="expBtn">EXPORT</button>
+<button class="btn btn-sm" id="exportBtn">WAV</button>
+<button class="btn btn-sm" id="midiBtn">MIDI</button>
+<button class="btn btn-sm" id="saveBtn">SAVE</button>
+<button class="btn btn-sm" id="loadPrjBtn">LOAD PRJ</button>
+<button class="btn btn-sm" id="overdubBtn">OD</button>
+<button class="btn btn-sm" id="panicBtn" style="color:var(--err)">PANIC</button>
+<input type="file" id="fileIn" accept="audio/*" style="display:none">
+</div>
 </div>
 
+<!-- MAIN -->
 <div class="main">
-  <!-- LEFT -->
-  <div class="col">
-    <h3>🎛️ BANKS (F1-F8)</h3>
-    <div class="banks" id="banksEl"></div>
-    
-    <h3>🎵 GENERATE</h3>
-    <div class="gen-grid" id="genGrid">
-      <div class="gen-btn on" data-t="melodic">🎹 Melodic</div>
-      <div class="gen-btn" data-t="rhythmic">🥁 Rhythm</div>
-      <div class="gen-btn" data-t="bass">🎸 Bass</div>
-      <div class="gen-btn" data-t="lead">✨ Lead</div>
-      <div class="gen-btn" data-t="fx">💫 FX</div>
-      <div class="gen-btn" data-t="percussion">🪘 Perc</div>
-      <div class="gen-btn" data-t="chord">🎼 Chord</div>
-      <div class="gen-btn" data-t="atmospheric">🌌 Atmo</div>
-    </div>
-    
-    <div style="display:flex;gap:3px;margin-bottom:3px">
-    <select id="gKey" style="flex:1"><option>C</option><option>C#</option><option>D</option><option>D#</option><option>E</option><option>F</option><option>F#</option><option>G</option><option>G#</option><option selected>A</option><option>A#</option><option>B</option></select>
-    <select id="gScale" style="flex:1"><option value="minor" selected>Minor</option><option value="major">Major</option><option value="phrygian">Phrygian</option><option value="dorian">Dorian</option><option value="mixolydian">Mixolydian</option></select>
-    <select id="gBars" style="flex:1"><option value="2">2bar</option><option value="4" selected>4bar</option><option value="8">8bar</option></select>
-    </div>
-<div style="display:flex;gap:4px;margin:6px 0">
-      <select id="genKey" style="flex:1"><option>C</option><option>C#</option><option>D</option><option>D#</option><option>E</option><option>F</option><option>F#</option><option>G</option><option>G#</option><option selected>A</option><option>A#</option><option>B</option></select>
-      <select id="genScale" style="flex:1"><option value="minor" selected>Minor</option><option value="major">Major</option><option value="phrygian">Phrygian</option><option value="dorian">Dorian</option></select>
-    </div>
-    <button class="btn prime" id="genBtn" style="width:100%">⚡ Generate Loop</button>
-    
-    <h3>📊 INFO</h3>
-    <div style="font-size:.65rem;color:var(--txt2)" id="infoEl">No loop loaded</div>
-    
-    <h3>📋 LOG</h3>
-    <div class="log" id="logEl"></div>
-  </div>
 
-  <!-- CENTER -->
-  <div class="col" style="background:var(--bg)">
-    <h3>🔊 WAVEFORM — Bank <span id="bankLabel">1</span></h3>
-    <div class="wave"><canvas id="waveCv"></canvas><div class="markers" id="marksEl"></div></div>
-    
-    <h3>🎯 SLICE PADS (keys 1-9)</h3>
-    <div class="pads" id="padsEl"></div>
-    
-    <div style="display:flex;gap:4px;flex-wrap:wrap;margin:6px 0">
-      <button class="btn" id="allBtn">▶ All</button>
-      <button class="btn" id="revBtn">🔄 Rev</button>
-      <button class="btn" id="resliceBtn">✂️ Re-Slice</button>
-      <button class="btn" id="clearBtn">🗑️ Clear</button>
-    </div>
-    
-    <h3>⚙️ SLICE CONTROLS</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-      <div class="ctrl"><label>Pitch <span id="pitchV">0</span> st</label><input type="range" id="pitchR" min="-12" max="12" value="0" style="width:100%"></div>
-      <div class="ctrl"><label>Speed <span id="speedV">1.0</span>x</label><input type="range" id="speedR" min="50" max="200" value="100" style="width:100%"></div>
-      <div class="ctrl"><label>Attack <span id="atkV">5</span>ms</label><input type="range" id="atkR" min="1" max="100" value="5" style="width:100%"></div>
-      <div class="ctrl"><label>Release <span id="relV">80</span>ms</label><input type="range" id="relR" min="10" max="500" value="80" style="width:100%"></div>
-    </div>
-    
-    
-<h3>🌀 UNIQUE FX</h3>
-<div class="fx-btns">
-<button class="btn" id="glitchBtn">⚡Glitch</button>
-<button class="btn" id="freezeBtn">❄️Freeze</button>
-<button class="btn" id="stutterBtn">🔁Stutter</button>
-<button class="btn" id="tapeBtn">📼Tape</button>
+<!-- LEFT COLUMN -->
+<div class="col col-left">
+<div class="sec">Banks</div>
+<div class="banks-grid" id="banksEl"></div>
 
-<button class="btn" onclick="perfMode()">🎭</button>
-<button class="btn" onclick="morphBanks()">🔀M</button>
-<button class="btn" onclick="granularScatter()">✨</button>
-<button class="btn" onclick="buildUp()">📈</button>
-<button class="btn" onclick="drop()">💥</button>
-
+<div class="sec">Generate</div>
+<div class="gen-row">
+<select id="genKey"><option>C</option><option>C#</option><option>D</option><option>D#</option><option>E</option><option>F</option><option>F#</option><option>G</option><option>G#</option><option selected>A</option><option>A#</option><option>B</option></select>
+<select id="genScale"><option value="minor" selected>Minor</option><option value="major">Major</option><option value="phrygian">Phrygian</option><option value="dorian">Dorian</option><option value="mixolydian">Mixolydian</option></select>
 </div>
-<h3>🎮 XY PAD (Filter/Drive)</h3>
-<div class="xy" id="xyE"><div class="dot" id="xyDot" style="left:50%;top:50%"></div></div>
-<h3>🔢 SLICE SEQUENCER</h3>
-<div class="seq" id="seqE"></div>
-<div style="display:flex;gap:4px">
-<button class="btn" id="seqPlayBtn" style="font-size:9px">SEQ▶</button>
-<button class="btn" id="seqClrBtn" style="font-size:9px">CLR</button>
+<div class="gen-row">
+<select id="genType">
+<option value="melodic">Melodic</option><option value="rhythmic">Rhythmic</option>
+<option value="bass">Bass</option><option value="lead">Lead</option>
+<option value="fx">FX</option><option value="percussion">Percussion</option>
+<option value="chord">Chord</option><option value="atmospheric">Atmospheric</option>
+<option value="arp-up">Arp Up</option><option value="arp-down">Arp Down</option>
+<option value="arp-rand">Arp Random</option><option value="chord-stab">Chord Stab</option>
+<option value="melody-walk">Melody Walk</option>
+</select>
+<select id="genBars"><option value="2">2 bars</option><option value="4" selected>4 bars</option><option value="8">8 bars</option></select>
+</div>
+<button class="btn btn-accent" id="genBtn" style="width:100%;margin-top:4px">GENERATE</button>
+
+<div class="sec">Library</div>
+<div id="libEl" style="max-height:200px;overflow-y:auto"></div>
 </div>
 
-<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px">
-<button class="btn" onclick="seqRandomize()" style="font-size:7px">🎲Rnd</button>
-<button class="btn" onclick="seqClear()" style="font-size:7px">🗑️Clr</button>
-<button class="btn" onclick="seqEuclidean(3,16)" style="font-size:7px">E3</button>
-<button class="btn" onclick="seqEuclidean(5,16)" style="font-size:7px">E5</button>
-<button class="btn" onclick="seqEuclidean(7,16)" style="font-size:7px">E7</button>
-<button class="btn" onclick="seqEuclidean(11,16)" style="font-size:7px">E11</button>
-</div>
-<div style="font-size:6px;color:var(--tx2);margin-top:2px">Click=toggle Shift=velocity Alt=prob DblClick=reverse</div>
-
-
-
-<h3>🎛️ CREATIVE TOOLS</h3>
-<div class="fx-btns">
-<button class="btn" onclick="pitchDown()">⬇️Oct</button>
-<button class="btn" onclick="pitchUp()">⬆️Oct</button>
-<button class="btn" onclick="halfTime()">🐌½x</button>
-<button class="btn" onclick="doubleTime()">🐇2x</button>
-<button class="btn" onclick="reverseAll()">🔄RevAll</button>
-<button class="btn" onclick="chopEqual(8)">✂️8</button>
-<button class="btn" onclick="chopEqual(16)">✂️16</button>
-<button class="btn" onclick="scrambleSlices()">🔀Scr</button>
-<button class="btn" onclick="duplicateBank()">📋Dup</button>
-<button class="btn" onclick="togglePhaser()">🌀Phaser</button>
-<button class="btn" onclick="toggleFlanger()">✈️Flanger</button>
-<button class="btn" onclick="toggleTremolo()">〰️Trem</button>
+<!-- CENTER COLUMN -->
+<div class="col col-center">
+<div class="sec">Waveform <span id="bankLabel" style="color:var(--accent)">01</span></div>
+<div class="wave-wrap">
+<canvas id="waveCv"></canvas>
+<div id="marksEl" style="position:absolute;inset:0;pointer-events:none"></div>
 </div>
 
-<h3>LFO</h3>
-<div style="display:flex;gap:3px;align-items:center;margin-bottom:3px">
-<select id="lfoWave" style="width:50px"><option value="sine">Sine</option><option value="tri">Tri</option><option value="saw">Saw</option><option value="sq">Sq</option><option value="rnd">Rnd</option></select>
-<input type="range" id="lfoRate" min="1" max="200" value="30" style="flex:1">
-<span style="font-size:8px;color:var(--acc)" id="lfoHz">1.5Hz</span>
-<button class="btn" id="lfoBtn" style="font-size:8px">LFO</button>
+<div class="sec">Slice Pads</div>
+<div class="pads-grid" id="padsEl"></div>
+
+<div class="sec">Tools</div>
+<div class="tools-row">
+<button class="btn btn-sm" id="allBtn">PLAY ALL</button>
+<button class="btn btn-sm" id="revBtn">REVERSE</button>
+<button class="btn btn-sm" id="resliceBtn">RESLICE</button>
+<button class="btn btn-sm" id="clearBtn">CLEAR</button>
+<button class="btn btn-sm" id="randBtn">RANDOM</button>
+<button class="btn btn-sm" id="probBtn">PROB</button>
+</div>
+<div class="tools-row">
+<button class="btn btn-sm" id="glitchBtn">GLITCH</button>
+<button class="btn btn-sm" id="freezeBtn">FREEZE</button>
+<button class="btn btn-sm" id="stutterBtn">STUTTER</button>
+<button class="btn btn-sm" id="tapeBtn">TAPE</button>
+</div>
+
+<div class="sec">Sequencer</div>
+<div class="seq-grid" id="seqE"></div>
+<div class="tools-row">
+<button class="btn btn-sm" id="seqPlayBtn">SEQ PLAY</button>
+<button class="btn btn-sm" id="seqClrBtn">SEQ CLEAR</button>
+</div>
+
+<div class="sec">Spectrum</div>
+<div class="wave-wrap" style="height:60px">
+<canvas id="specCv"></canvas>
+</div>
+<div class="meter"><i id="meterEl"></i></div>
+</div>
+
+<!-- RIGHT COLUMN -->
+<div class="col col-right">
+<div class="sec">FX Rack</div>
+<div id="fxEl"></div>
+
+<div class="sec">Macros</div>
+<div class="macro-grid">
+<div class="macro" id="macroSpace">SPACE</div>
+<div class="macro" id="macroEnergy">ENERGY</div>
+<div class="macro" id="macroTension">TENSION</div>
+<div class="macro" id="macroReset">RESET</div>
+</div>
+
+<div class="sec">XY Control</div>
+<div class="xy-pad" id="xyE">
+<div class="xy-dot" id="xyDot" style="left:50%;top:50%"></div>
+</div>
+
+<div class="sec">LFO</div>
+<div class="lfo-row">
+<select id="lfoWave"><option value="sine">Sine</option><option value="tri">Tri</option><option value="saw">Saw</option><option value="sq">Square</option><option value="rnd">Random</option></select>
+<input type="range" id="lfoRate" min="1" max="200" value="30">
+<span id="lfoHz">1.5Hz</span>
+<button class="btn btn-sm" id="lfoBtn">LFO</button>
 </div>
 <div class="lfo-viz"><canvas id="lfoCv"></canvas></div>
 
-<h3>📈 SPECTRUM</h3>
-    <div class="wave" style="height:60px"><canvas id="specCv"></canvas></div>
-    <div class="meter"><i id="meterEl"></i></div>
-  </div>
+<div class="sec">Master</div>
+<div class="ctrl"><label>VOLUME <span id="volV">80</span></label><input type="range" id="volR" min="0" max="100" value="80"></div>
+<div class="ctrl"><label>SWING <span id="swV">0</span></label><input type="range" id="swR" min="0" max="70" value="0"></div>
+<div class="ctrl"><label>SENSITIVITY <span id="senV">50</span></label><input type="range" id="senR" min="5" max="95" value="50"></div>
 
-  <!-- RIGHT -->
-  <div class="col">
-    <h3>🎚️ MASTER FX</h3>
-    <div id="fxEl"></div>
-    
-    <div class="ctrl" style="margin-top:10px"><label>Master Vol <span id="volV">80</span>%</label><input type="range" id="volR" min="0" max="100" value="80" style="width:100%"></div>
-    <div class="ctrl"><label>Swing <span id="swV">0</span>%</label><input type="range" id="swR" min="0" max="70" value="0" style="width:100%"></div>
-    <div class="ctrl"><label>Sensitivity <span id="senV">50</span>%</label><input type="range" id="senR" min="10" max="90" value="50" style="width:100%"></div>
-    
-    <h3>🎛️ MACROS</h3>
-<div class="fx-btns">
-<button class="btn" onclick="macroSpace()">Space</button>
-<button class="btn" onclick="macroEnergy()">Energy</button>
-<button class="btn" onclick="macroTension()">Tension</button>
-<button class="btn" onclick="macroReset()">Reset</button>
-</div>
-    
-    <h3>SLICE PARAMS</h3>
-    <div class="ctrl"><label>Pitch <span id="piV">0</span> st</label><input type="range" id="piR" min="-24" max="24" value="0" style="width:100%"></div>
-    <div class="ctrl"><label>Speed <span id="spV">1.0</span>x</label><input type="range" id="spR" min="25" max="400" value="100" style="width:100%"></div>
-    <div class="ctrl"><label>Attack <span id="atV">3</span>ms</label><input type="range" id="atR" min="0" max="100" value="3" style="width:100%"></div>
-    <div class="ctrl"><label>Release <span id="rlV">60</span>ms</label><input type="range" id="rlR" min="5" max="500" value="60" style="width:100%"></div>
-
-<h3>🎶 LOOP LIBRARY (120)</h3>
-    <div id="libEl" style="max-height:220px;overflow-y:auto"></div>
-    
-    <h3>⌨️ KEYS</h3>
-    <div style="font-size:.6rem;color:var(--txt2);line-height:1.6">
-      Space=Play/Stop • 1-9=Slices<br>
-      F1-F8=Banks • G=Generate<br>
-      E=Export • Esc=Panic
-    </div>
-  </div>
+<div class="sec">Slice Params</div>
+<div class="ctrl"><label>PITCH <span id="piV">0</span></label><input type="range" id="piR" min="-24" max="24" value="0"></div>
+<div class="ctrl"><label>SPEED <span id="spV">1.0</span></label><input type="range" id="spR" min="25" max="400" value="100"></div>
+<div class="ctrl"><label>ATTACK <span id="atV">3</span></label><input type="range" id="atR" min="0" max="100" value="3"></div>
+<div class="ctrl"><label>RELEASE <span id="rlV">60</span></label><input type="range" id="rlR" min="5" max="500" value="60"></div>
 </div>
 
-<div class="ft">
-  <span><span class="dot on" id="audioDot"></span>Audio <span class="dot" id="midiDot"></span>MIDI <span class="dot on"></span>Deterministic</span>
-  <span>PSY LOOPER v2.0 • 20 Loops • 8 Banks • 6 FX • dudududi144-source</span>
+</div>
+
+<!-- LOG BAR -->
+<div class="log-bar">
+<div class="log-msg" id="logEl">Ready</div>
+<div>PSY LOOPER PRO v5.0 | 120 loops | 13 gen types | 15 FX</div>
+</div>
+
 </div>
 
 <script>
@@ -1763,5 +1783,3 @@ function renderSeq(){if(typeof renderSeqAdvanced==="function"){renderSeqAdvanced
 })();
 
 </script>
-</body>
-</html>
