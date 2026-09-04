@@ -323,6 +323,7 @@ d[i]=r*Math.pow(1-i/len,2.5);
 return buf;
 }
 
+function $(id){return document.getElementById(id)}
 function log(msg,type){
 var el=$("logEl");if(!el)return;
 el.textContent="> "+msg;
@@ -506,7 +507,6 @@ var nVerb=null, nVerbMix=null, nDist=null, nComp=null, nLim=null;
 var sources=[], seqT=null, seqStep=0, seqNext=0, taps=[];
 
 // === UTILITIES ===
-function $(id){return document.getElementById(id)}
 
 
 function mkDistCurve(k){
