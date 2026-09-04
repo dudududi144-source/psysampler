@@ -331,6 +331,14 @@ var el=$("logEl");if(!el)return;
 el.textContent="> "+msg;
 el.className="log-msg"+(type?" "+type:"");
 }
+var S = {
+  bpm: 145, swing: 0, bank: 0, playing: false,
+  vol: 0.8, sens: 50, genType: "melodic",
+  banks: [],
+  fx: {filter:true, delay:false, reverb:false, dist:false, comp:true, lim:true},
+  fxP: {filterF:12000, delayM:0.3, revM:0.25, distD:0.3}
+};
+
 function initAudio(){
 if(AC)return true;
 try{
@@ -489,13 +497,7 @@ return c;
 "use strict";
 
 // === STATE (initialized FIRST, before anything else) ===
-var S = {
-  bpm: 145, swing: 0, bank: 0, playing: false,
-  vol: 0.8, sens: 50, genType: "melodic",
-  banks: [],
-  fx: {filter:true, delay:false, reverb:false, dist:false, comp:true, lim:true},
-  fxP: {filterF:12000, delayM:0.3, revM:0.25, distD:0.3}
-};
+
 // Initialize banks
 for(var bi=0;bi<8;bi++){
   S.banks.push({buf:null,slices:[],info:null,pitch:0,speed:1,atk:5,rel:80,rev:false});
