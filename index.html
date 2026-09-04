@@ -294,6 +294,17 @@ select{width:100%;padding:5px 8px;background:var(--panel2);color:var(--text);bor
 </div>
 
 <script>
+// === GLOBAL ERROR HANDLER ===
+window.onerror = function(msg, url, line, col, error) {
+    console.error('GLOBAL ERROR:', msg, 'at line', line);
+    var el = document.getElementById('logEl');
+    if (el) { el.textContent = '> ERROR: ' + msg; el.className = 'log-msg er'; }
+    return false;
+};
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('UNHANDLED REJECTION:', e.reason);
+});
+
 // PSY LOOPER PRO - Clean Rebuild
 console.log('PSY LOOPER: script loaded');
 
@@ -692,6 +703,7 @@ function renderLib(){
 }
 
 function renderAll(){
+  try{
   renderBanks();renderPads();renderWave();renderFX();renderLib();
   var info=$("infoEl");
   if(info){
@@ -704,14 +716,15 @@ function renderAll(){
   }
 }
 
-// === LOAD ===
+// === LOAD ===  }catch(e){console.error('renderAll error:',e)}
+
 function loadLib(idx){
   if(typeof LIB==="undefined")return;
   var item=LIB[idx];
   if(!item)return;
   if(!AC&&!initAudio())return;
   log("Loading "+item.n+"...");
-  fetch(item.f).then(function(r){
+  try{fetch(item.f).then(function(r){
     if(!r.ok)throw new Error("HTTP "+r.status);
     return r.arrayBuffer();
   }).then(function(ab){
@@ -728,6 +741,7 @@ function loadLib(idx){
 }
 
 function loadFile(file){
+  try{
   if(!AC&&!initAudio())return;
   var reader=new FileReader();
   reader.onload=function(e){
@@ -743,6 +757,7 @@ function loadFile(file){
 
 // === EXPORT ===
 function exportWAV(){
+  try{
   var bank=S.banks[S.bank];
   if(!bank||!bank.buf){log("Nothing to export","er");return}
   var d=bank.buf.getChannelData(0),sr=bank.buf.sampleRate;
@@ -765,6 +780,7 @@ function exportWAV(){
 
 // === BIND EVENTS ===
 function bindEvents(){
+  try{
   var pb=$("playBtn");if(pb)pb.onclick=function(){S.playing?stop():play()};
   var sb=$("stopBtn");if(sb)sb.onclick=stop;
   var br=$("bpmRange");if(br)br.oninput=function(){S.bpm=parseInt(this.value);var bv=$("bpmVal");if(bv)bv.textContent=S.bpm;if(nDel&&AC)nDel.delayTime.setTargetAtTime((60/S.bpm)*0.75,AC.currentTime,.05)};
