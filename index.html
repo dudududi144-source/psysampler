@@ -463,58 +463,155 @@ function genLoop(type,key,scale,bars,bpm){
   var sr=AC.sampleRate,beat=60/bpm,six=beat/4,N=Math.floor(bars*4*beat*sr);
   var out=new Float32Array(N);
   var root=KEYS[key]||69,sc=SCALES[scale]||SCALES.minor;
-  var i,j,jj,f,t,env;
+  var i,j,jj,f,t,env,osc,s,L;
+  
+  // === PROFESSIONAL SYNTHESIS ENGINE ===
+  
+  // Rich waveform generator (additive synthesis)
+  function richWave(phase,brightness){
+    var v=Math.sin(phase);
+    v+=Math.sin(phase*2)*.5*brightness;
+    v+=Math.sin(phase*3)*.33*brightness*brightness;
+    v+=Math.sin(phase*4)*.25*brightness*brightness*brightness;
+    v+=Math.sin(phase*5)*.2*brightness*brightness*brightness*brightness;
+    return v/(1+.5*brightness+.33*brightness*brightness+.25*brightness*brightness*brightness+.2*brightness*brightness*brightness*brightness);
+  }
+  
+  // ADSR envelope
+  function adsr(t,atk,dec,sus,rel,dur){
+    if(t<atk)return t/atk;
+    if(t<atk+dec)return 1-(1-sus)*((t-atk)/dec);
+    if(t<dur-rel)return sus;
+    if(t<dur)return sus*(1-(t-(dur-rel))/rel);
+    return 0;
+  }
+  
+  // Filter envelope (opens then closes)
+  function filterEnv(t,amount){
+    var e=Math.exp(-t*3)*amount;
+    return Math.min(1,.3+e);
+  }
   
   if(type==="melodic"||type==="lead"){
     var pi=Math.floor(Math.random()*sc.length);
+    var bright=type==="lead"?.8:.5;
     for(i=0;i<bars*16;i++){
-      if(Math.random()<.65){
+      if(Math.random()<.7){
         pi=Math.max(0,Math.min(sc.length-1,pi+Math.floor(Math.random()*5)-2));
         f=m2f(root+12+sc[pi]);
-        var s=Math.floor(i*six*sr),L=Math.floor(six*(Math.random()<.3?2:1)*.9*sr);
+        s=Math.floor(i*six*sr);L=Math.floor(six*(Math.random()<.3?2:1)*.9*sr);
         if(s+L>N)break;
         for(jj=0;jj<L&&s+jj<N;jj++){
-          t=jj/sr;env=Math.min(1,jj/(.005*sr))*Math.exp(-t*4);
-          out[s+jj]+=(Math.sin(2*Math.PI*f*t)+.3*Math.sin(2*Math.PI*f*2*t))*env*.18;
+          t=jj/sr;
+          env=adsr(t,.008,.05,.7,.1,L/sr);
+          var fe=filterEnv(t,.6);
+          var phase=2*Math.PI*f*t;
+          osc=richWave(phase,bright*fe);
+          // Stereo detune for width
+          var osc2=richWave(phase*1.003,bright*fe*.7);
+          out[s+jj]+=(osc+osc2)*.5*env*.22;
         }
       }
     }
   }else if(type==="bass"){
     var pat=[0,0,12,0,0,0,12,3,0,0,12,0,0,3,12,0];
     for(i=0;i<bars*16;i++){
-      var s2=Math.floor(i*six*sr),L2=Math.floor(six*.8*sr);
-      if(s2+L2>N)break;
+      s=Math.floor(i*six*sr);L=Math.floor(six*.8*sr);
+      if(s+L>N)break;
       f=m2f(root-12+sc[pat[i%16]%sc.length]);
-      for(jj=0;jj<L2&&s2+jj<N;jj++){
-        t=jj/sr;env=Math.min(1,jj/(.003*sr))*Math.exp(-t*6);
-        out[s2+jj]+=(Math.sign(Math.sin(2*Math.PI*f*t))*.15+Math.sin(2*Math.PI*f*t)*.4)*env*.5;
+      for(jj=0;jj<L&&s+jj<N;jj++){
+        t=jj/sr;
+        env=adsr(t,.003,.03,.8,.05,L/sr);
+        var fe=filterEnv(t,.8);
+        var phase=2*Math.PI*f*t;
+        // Rich bass: fundamental + harmonics + sub
+        osc=richWave(phase,.6*fe);
+        osc+=Math.sin(phase)*.4; // Extra fundamental
+        osc+=Math.sin(phase*.5)*.3; // Sub octave
+        out[s+jj]+=osc*env*.45;
       }
     }
   }else if(type==="rhythmic"||type==="percussion"){
     for(i=0;i<bars*16;i++){
-      var s3=Math.floor(i*six*sr);
-      if(i%4===0){var L3=Math.floor(.3*sr);if(s3+L3>N)break;
-        for(jj=0;jj<L3&&s3+jj<N;jj++){t=jj/sr;f=38+90*Math.exp(-t*28);
-          out[s3+jj]+=Math.sin(2*Math.PI*f*t)*Math.exp(-t*11)*.7}}
-      if(i%8===4){var L4=Math.floor(.12*sr);if(s3+L4>N)break;
-        for(jj=0;jj<L4&&s3+jj<N;jj++){t=jj/sr;out[s3+jj]+=(Math.random()*2-1)*Math.exp(-t*25)*.35}}
-      if(i%2===0){var L5=Math.floor(.02*sr);if(s3+L5>N)break;
-        for(jj=0;jj<L5&&s3+jj<N;jj++){t=jj/sr;out[s3+jj]+=(Math.random()*2-1)*Math.exp(-t*200)*.12}}
+      s=Math.floor(i*six*sr);
+      if(i%4===0){
+        L=Math.floor(.3*sr);if(s+L>N)break;
+        for(jj=0;jj<L&&s+jj<N;jj++){
+          t=jj/sr;
+          f=38+90*Math.exp(-t*28);
+          env=Math.exp(-t*11);
+          out[s+jj]+=Math.sin(2*Math.PI*f*t)*env*.7;
+          // Add click transient
+          if(jj<50)out[s+jj]+=(Math.random()*2-1)*Math.exp(-jj/10)*.3;
+        }
+      }
+      if(i%8===4){
+        L=Math.floor(.12*sr);if(s+L>N)break;
+        for(jj=0;jj<L&&s+jj<N;jj++){
+          t=jj/sr;
+          // Snare: noise + body
+          out[s+jj]+=(Math.random()*2-1)*Math.exp(-t*25)*.35;
+          out[s+jj]+=Math.sin(2*Math.PI*190*t)*Math.exp(-t*30)*.2;
+        }
+      }
+      if(i%2===0){
+        L=Math.floor(.02*sr);if(s+L>N)break;
+        for(jj=0;jj<L&&s+jj<N;jj++){
+          t=jj/sr;
+          // Hi-hat: filtered noise
+          out[s+jj]+=(Math.random()*2-1)*Math.exp(-t*200)*.12;
+        }
+      }
+    }
+  }else if(type==="chord"){
+    var progs=[[0,3,4,0],[0,5,3,4],[5,3,4,0]];
+    var prog=progs[Math.floor(Math.random()*progs.length)];
+    for(var bar=0;bar<bars;bar++){
+      var cr=sc[prog[bar%4]%sc.length];
+      var notes=[cr,cr+3,cr+7];
+      s=Math.floor(bar*beat*4*sr);L=Math.floor(beat*4*.9*sr);
+      if(s+L>N)break;
+      for(var n=0;n<notes.length;n++){
+        f=m2f(root+notes[n]);
+        for(jj=0;jj<L&&s+jj<N;jj++){
+          t=jj/sr;
+          env=adsr(t,.05,.1,.6,.2,L/sr);
+          var phase=2*Math.PI*f*t;
+          osc=richWave(phase,.3);
+          // Stereo spread per note
+          var pan=(n/notes.length-.5)*.4;
+          out[s+jj]+=osc*env*(1-Math.abs(pan))*.15;
+        }
+      }
     }
   }else{
+    // FX/other: sweep
     for(i=0;i<N;i++){
-      t=i/sr;out[i]=Math.sin(2*Math.PI*(100+i/N*5000)*t)*i/N*.25+(Math.random()*2-1)*i/N*.1;
+      t=i/sr;
+      var p=i/N;
+      f=100+p*p*5000;
+      env=p*(1-p)*4; // Fade in and out
+      out[i]=Math.sin(2*Math.PI*f*t)*env*.25+(Math.random()*2-1)*p*.08;
     }
   }
   
+  // Professional mastering chain
   var pk=0;for(i=0;i<N;i++)pk=Math.max(pk,Math.abs(out[i]));
-  if(pk>0){var nm=.82/pk;for(i=0;i<N;i++)out[i]*=nm}
-  var fd=Math.floor(sr*.008);
+  if(pk>0){
+    // Soft clip instead of hard normalize
+    var target=.85;
+    for(i=0;i<N;i++){
+      out[i]=Math.tanh(out[i]/pk*2)*target;
+    }
+  }
+  // Fade in/out
+  var fd=Math.floor(sr*.01);
   for(i=0;i<fd&&i<N;i++){out[i]*=i/fd;out[N-1-i]*=i/fd}
   
   var buf=AC.createBuffer(1,N,sr);
   buf.getChannelData(0).set(out);
   return buf;
+}
 }
 
 function genLoopV2(type,key,scale,bars,bpm){
