@@ -141,6 +141,7 @@ select{width:100%;padding:5px 8px;background:var(--panel2);color:var(--text);bor
 @media(max-width:1100px){.main{grid-template-columns:180px 1fr 200px}}
 @media(max-width:800px){.main{grid-template-columns:1fr;grid-template-rows:auto auto auto}}
 </style>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#127911;</text></svg>">
 </head>
 <body>
 <div style="display:none" id="hiddenCompat"><input type="range" id="bpmR" min="60" max="200" value="145"><select id="gKey"><option selected>A</option></select><select id="gScale"><option value="minor" selected>minor</option></select><select id="gBars"><option value="4" selected>4</option></select><input type="range" id="pitchR" min="-24" max="24" value="0"><span id="pitchV">0</span><input type="range" id="speedR" min="25" max="400" value="100"><span id="speedV">1.0</span><input type="range" id="atkR" min="0" max="100" value="3"><span id="atkV">3</span><input type="range" id="relR" min="5" max="500" value="60"><span id="relV">60</span><span id="midiDot"></span></div>
@@ -536,7 +537,7 @@ return buf;
 // === PLAY SLICE (CLEAN) ===
 function playSlice(bi,si,vel){
 if(!AC&&!initAudio())return;
-if(AC.state==="suspended")AC.resume();
+if(AC&&AC.state==="suspended")AC.resume();
 var bank=S.banks[bi];
 if(!bank||!bank.buf||!bank.slices||!bank.slices[si]){if(!bank||!bank.buf)log("Load or generate a loop first","info");return;}
 
@@ -643,7 +644,7 @@ function playAll(){
 // === TRANSPORT ===
 function play(){
   if(!AC&&!initAudio())return;
-  if(AC.state==="suspended")AC.resume();
+  if(AC&&AC.state==="suspended")AC.resume();
   
   if(S.playing)return;
   S.playing=true;
@@ -791,7 +792,7 @@ var LIB=[
 
 function loadLib(idx){
   if(!AC&&!initAudio())return;
-  if(AC.state==="suspended")AC.resume();
+  if(AC&&AC.state==="suspended")AC.resume();
   var item=LIB[idx];
   if(!item)return;
   log("Loading: "+item.n+"...");
@@ -978,7 +979,7 @@ function bindEvents(){
   $("midiBtn").onclick=initMIDI;
   $("genBtn").onclick=function(){
     if(!AC&&!initAudio())return;
-    if(AC.state==="suspended")AC.resume();
+    if(AC&&AC.state==="suspended")AC.resume();
     var key=$("genKey").value,scale=$("genScale").value;
     log("Generating "+S.genType+" ("+key+" "+scale+")...");
     setTimeout(function(){
