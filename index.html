@@ -983,7 +983,9 @@ function bindEvents(){
     var key=$("genKey").value,scale=$("genScale").value;
     log("Generating "+S.genType+" ("+key+" "+scale+")...");
     setTimeout(function(){
+      if(!AC)return;
       var buf=genLoopV2(S.genType,key,scale,4,S.bpm);
+      if(!buf)return;
       var bank=S.banks[S.bank];
       bank.buf=buf;bank.info=analyze(buf);bank.slices=sliceBuf(buf,S.sens);
       log("Generated! "+bank.slices.length+" slices","ok");
@@ -1240,6 +1242,7 @@ return out}
 // Extend gen types
 var GEN_TYPES=["melodic","rhythmic","bass","lead","fx","percussion","chord","atmospheric","arp-up","arp-down","arp-rand","chord-stab","melody-walk"];
 function genLoop(type,key,scale,bars,bpm){
+if(!AC&&!initAudio())return null;
 var sr=AC.sampleRate,beat=60/bpm,six=beat/4,N=Math.floor(bars*4*beat*sr);
 var out=new Float32Array(N);
 var root=(typeof KEYS!=="undefined"&&KEYS[key])?KEYS[key]:69;
@@ -1315,6 +1318,7 @@ return buf;
 }
 
 function genLoopV2(type,key,scale,bars,bpm){
+if(!AC&&!initAudio())return null;
 var sr=AC.sampleRate,root=(KEYS[key]||69),sc=SCALES[scale]||SCALES.minor;
 if(EXTRA_GEN[type]){
 var out=EXTRA_GEN[type](root,sc,bars,bpm,sr);
