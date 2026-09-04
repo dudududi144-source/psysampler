@@ -88,13 +88,23 @@ select{background:var(--p3);color:var(--txt);border:1px solid var(--brd);border-
   <div class="sep"></div>
   <button class="btn" id="playBtn">▶ Play</button>
   <button class="btn" id="stopBtn">⏹ Stop</button>
-  <div class="bpm-box" id="bpmVal">145</div>
+  <div class="bpm-box" id="bpmVal">145
+<input type="range" id="bpmR" min="60" max="200" value="145" style="width:80px"></div>
   <input type="range" id="bpmRange" min="60" max="200" value="145" style="width:80px">
   <button class="btn" id="tapBtn">TAP</button>
   <div class="sep"></div>
   <button class="btn" id="loadBtn">📂 Load</button>
   <button class="btn" id="exportBtn">💾 WAV</button>
   <button class="btn" id="midiBtn">🎹 MIDI</button>
+
+<button class="btn" id="expBtn">EXPORT</button>
+<button class="btn" id="panicBtn">PANIC</button>
+<button class="btn" id="saveBtn">SAVE</button>
+<button class="btn" id="loadPrjBtn">LOAD</button>
+<button class="btn" id="overdubBtn">OD</button>
+<button class="btn" id="randBtn">RND</button>
+<button class="btn" id="probBtn">PROB</button>
+
   <input type="file" id="fileIn" accept="audio/*" style="display:none">
 </div>
 
@@ -115,7 +125,13 @@ select{background:var(--p3);color:var(--txt);border:1px solid var(--brd);border-
       <div class="gen-btn" data-t="chord">🎼 Chord</div>
       <div class="gen-btn" data-t="atmospheric">🌌 Atmo</div>
     </div>
-    <div style="display:flex;gap:4px;margin:6px 0">
+    
+    <div style="display:flex;gap:3px;margin-bottom:3px">
+    <select id="gKey" style="flex:1"><option>C</option><option>C#</option><option>D</option><option>D#</option><option>E</option><option>F</option><option>F#</option><option>G</option><option>G#</option><option selected>A</option><option>A#</option><option>B</option></select>
+    <select id="gScale" style="flex:1"><option value="minor" selected>Minor</option><option value="major">Major</option><option value="phrygian">Phrygian</option><option value="dorian">Dorian</option><option value="mixolydian">Mixolydian</option></select>
+    <select id="gBars" style="flex:1"><option value="2">2bar</option><option value="4" selected>4bar</option><option value="8">8bar</option></select>
+    </div>
+<div style="display:flex;gap:4px;margin:6px 0">
       <select id="genKey" style="flex:1"><option>C</option><option>C#</option><option>D</option><option>D#</option><option>E</option><option>F</option><option>F#</option><option>G</option><option>G#</option><option selected>A</option><option>A#</option><option>B</option></select>
       <select id="genScale" style="flex:1"><option value="minor" selected>Minor</option><option value="major">Major</option><option value="phrygian">Phrygian</option><option value="dorian">Dorian</option></select>
     </div>
@@ -1047,7 +1063,7 @@ function xyMove(e){var rc=xy.getBoundingClientRect(),x=(e.clientX-rc.left)/rc.wi
 x=Math.max(0,Math.min(1,x));y=Math.max(0,Math.min(1,y));
 var dot=$("xyDot");if(dot){dot.style.left=(x*100)+"%";dot.style.top=(y*100)+"%"}
 if(nFil)nFil.frequency.setTargetAtTime(200+x*14800,AC.currentTime,.02);
-if(nDist)nDist.curve=dCurve(y*50)}}
+if(nDist)nDist.curve=distCurve(y*50)}}
 // === SLICE SEQUENCER ===
 var seqState={on:false,steps:new Array(16).fill(false),pos:0};
 function renderSeqEl(){var e=$("seqE");if(!e)return;e.innerHTML="";
@@ -1461,7 +1477,7 @@ log("MACRO: Space","ok")}
 function macroEnergy(){
 // Energy macro: drive + volume + filter open
 if(!AC)return;
-if(nDist)nDist.curve=dCurve(30);
+if(nDist)nDist.curve=distCurve(30);
 if(master)master.gain.value=Math.min(1,S.vol*1.2);
 if(nFil)nFil.frequency.value=15000;
 log("MACRO: Energy","ok")}
@@ -1475,7 +1491,7 @@ function macroReset(){
 if(!AC)return;
 if(nVerbMix)nVerbMix.gain.setTargetAtTime(S.fx.verb?S.fxP.vm:0,AC.currentTime,.02);
 if(nDelMix)nDelMix.gain.value=S.fx.delay?S.fxP.dm:0;
-if(nDist)nDist.curve=dCurve(S.fx.drive?S.fxP.dd*50:0);
+if(nDist)nDist.curve=distCurve(S.fx.drive?S.fxP.dd*50:0);
 if(nFil){nFil.frequency.value=S.fxP.ff;nFil.Q.value=.7}
 if(master)master.gain.value=S.vol;
 log("MACRO: Reset","ok")}
