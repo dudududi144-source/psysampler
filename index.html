@@ -816,8 +816,11 @@ function loadLib(idx){
     if(!r.ok)throw new Error("HTTP "+r.status);
     return r.arrayBuffer();
   }).then(function(ab){
+    if(!AC)return null;
+    if(!ab||ab.byteLength===0)throw new Error("Empty audio data");
     return AC.decodeAudioData(ab);
   }).then(function(buf){
+    if(!buf)return;
     var bank=S.banks[S.bank];
     bank.buf=buf;
     bank.info=analyze(buf);
