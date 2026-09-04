@@ -1650,10 +1650,10 @@ d.ondblclick=function(){
 seqRev[x]=!seqRev[x];
 this.style.borderColor=seqRev[x]?"var(--mg)":"var(--bd)";
 };
-})(i);
+)(i);
 e.appendChild(d);
-}
-}
+
+
 // Override seqSched with advanced version
 function seqSchedAdvanced(){
 if(!seqState.on)return;
@@ -1773,6 +1773,6 @@ log("PANIC: all audio stopped","er");
 
 function renderSeq(){if(typeof renderSeqAdvanced==="function"){renderSeqAdvanced();}}
 
-})();
+();
 
 </script>
