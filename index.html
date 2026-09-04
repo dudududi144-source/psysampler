@@ -323,6 +323,11 @@ d[i]=r*Math.pow(1-i/len,2.5);
 return buf;
 }
 
+function log(msg,type){
+var el=$("logEl");if(!el)return;
+el.textContent="> "+msg;
+el.className="log-msg"+(type?" "+type:"");
+}
 function initAudio(){
 if(AC)return true;
 try{
@@ -502,11 +507,7 @@ var sources=[], seqT=null, seqStep=0, seqNext=0, taps=[];
 
 // === UTILITIES ===
 function $(id){return document.getElementById(id)}
-function log(msg,type){
-var el=$("logEl");if(!el)return;
-el.textContent="> "+msg;
-el.className="log-msg"+(type?" "+type:"");
-}
+
 
 function mkDistCurve(k){
 var n=4096,c=new Float32Array(n);
