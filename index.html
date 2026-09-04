@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' data: blob:; media-src 'self' data: blob:; worker-src 'self' blob:;">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>PSY LOOPER PRO</title>
@@ -415,6 +417,19 @@ log("Audio init error: "+e.message,"er");
 return false;
 }
 }
+
+
+// Initialize audio on first user interaction (browser requirement)
+var _audioInitialized = false;
+function _ensureAudio() {
+    if (!_audioInitialized) {
+        if (initAudio()) {
+            _audioInitialized = true;
+        }
+    }
+}
+document.addEventListener('click', _ensureAudio, { once: false });
+document.addEventListener('keydown', _ensureAudio, { once: false });
 
 function distCurve(k){return mkDistCurve(k);}
 
