@@ -43,5 +43,8 @@ jobs:
       - name: Generate coverage
         run: bun test --coverage
       
+      - name: Coverage floor (overall, honest)
+        run: bun run coverage:floor
+      
       - name: Upload coverage
         uses: codecov/codecov-action@v3
