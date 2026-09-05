@@ -81,7 +81,8 @@ FX (7), Chords (2), Full Mixes (2)
 - FX: 15 effects
 - Loops: 120
 - Gen Types: 13
-- Tests: 391 (bun), wire conformance included
+- Tests: 392 (bun), wire conformance included — CI green on every push
+- Coverage: honest overall floor 75% (`bun run coverage:floor`; measured 79.4% funcs / 81.6% lines) — bun built-in thresholds are per-file, so the floor is measured by `scripts/coverage-floor.mjs`
 
 ---
 
