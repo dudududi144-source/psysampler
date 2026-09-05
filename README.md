@@ -1,5 +1,7 @@
 # PSY LOOPER PRO
 
+[![CI](https://github.com/dudududi144-source/psysampler/actions/workflows/ci.yml/badge.svg)](https://github.com/dudududi144-source/psysampler/actions/workflows/ci.yml)
+
 The Most Advanced Loop Manipulator in the PSY Family
 
 120 Loops | 13 Generation Types | 15 FX | 50+ Features

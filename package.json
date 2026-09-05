@@ -12,8 +12,9 @@
     "lint": "bunx @biomejs/biome@1.9.4 check .",
     "lint:fix": "bunx @biomejs/biome@1.9.4 check --write .",
     "format": "bunx @biomejs/biome@1.9.4 format --write .",
-    "verify": "bun test && bunx @biomejs/biome@1.9.4 check .",
-    "e2e": "bun scripts/e2e-pipeline.mjs"
+    "verify": "bun test && bunx @biomejs/biome@1.9.4 check . && bun scripts/coverage-floor.mjs",
+    "e2e": "bun scripts/e2e-pipeline.mjs",
+    "coverage:floor": "bun scripts/coverage-floor.mjs"
   },
   "keywords": [
     "looper",
