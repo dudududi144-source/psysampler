@@ -31,10 +31,10 @@
  * mapping), so the version lives at the codec level: `decodeEnvelope` refuses inputs offered as
  * a protocol version other than this one. Exported so hosts/devices can negotiate.
  */
-export const PSYBUS_PROTOCOL_VERSION = 2;
+export const PSYBUS_PROTOCOL_VERSION = 2
 
 /** Monotonic transport revision — "ticks since start" (§"The message envelope"). */
-export type Rev = number;
+export type Rev = number
 
 /**
  * Deterministic seed for this performance (§"The message envelope", §"Design principles" #4:
@@ -44,7 +44,7 @@ export type Rev = number;
  * ARCHITECTURE.md §"Determinism & replay identity"), which exceeds `2^31 - 1`, so validation
  * accepts any safe integer rather than a uint31.
  */
-export type Seed = number;
+export type Seed = number
 
 /**
  * Publisher identity.
@@ -53,19 +53,19 @@ export type Seed = number;
  * The brand is phantom (erased at runtime); validation in envelope.ts is what makes a plain
  * string safe to brand.
  */
-export type DeviceId = string & { readonly __brand: 'DeviceId' };
+export type DeviceId = string & { readonly __brand: 'DeviceId' }
 
 /** Track identity. @provenance psyboss/docs/PSYBUS.md §"The branded types". */
-export type TrackId = string & { readonly __brand: 'TrackId' };
+export type TrackId = string & { readonly __brand: 'TrackId' }
 
 /** Scene identity (per-track scene matrix slot). @provenance psyboss/docs/PSYBUS.md §"The branded types". */
-export type SceneId = string & { readonly __brand: 'SceneId' };
+export type SceneId = string & { readonly __brand: 'SceneId' }
 
 /** Parameter identity (for `param.lock` / `param.set`). @provenance psyboss/docs/PSYBUS.md §"The branded types". */
-export type ParamId = string & { readonly __brand: 'ParamId' };
+export type ParamId = string & { readonly __brand: 'ParamId' }
 
 /** Choke-group identity (hardware-style mute groups). @provenance psyboss/docs/PSYBUS.md §"The branded types". */
-export type ChokeGroupId = string & { readonly __brand: 'ChokeGroupId' };
+export type ChokeGroupId = string & { readonly __brand: 'ChokeGroupId' }
 
 /**
  * Musical key of the performance, e.g. `"A"` / `"F#"`.
@@ -74,7 +74,7 @@ export type ChokeGroupId = string & { readonly __brand: 'ChokeGroupId' };
  * HONESTY NOTE: the spec *references* this type but never defines it. Foundation defines it as
  * a non-empty string; validation enforces that and nothing more.
  */
-export type MusicalKey = string;
+export type MusicalKey = string
 
 /**
  * Musical scale of the performance, e.g. `"phrygian"`.
@@ -82,7 +82,7 @@ export type MusicalKey = string;
  * @provenance psyboss/docs/PSYBUS.md §"The payload discriminated union" (`context.scale: Scale`).
  * HONESTY NOTE: referenced-but-undefined in the spec; foundation defines it as a non-empty string.
  */
-export type Scale = string;
+export type Scale = string
 
 /**
  * Arrangement section label, e.g. `"intro" | "build" | "drop"`.
@@ -91,7 +91,7 @@ export type Scale = string;
  * HONESTY NOTE: referenced-but-undefined in the spec; foundation defines it as a non-empty string
  * (legacy `SectionEvent.section` / `MusicalContext.section` were plain strings too).
  */
-export type Section = string;
+export type Section = string
 
 /**
  * License under which referenced sample bytes may be used.
@@ -108,7 +108,7 @@ export type SampleLicense =
   | 'CC-BY-SA'
   | 'CC-BY-NC'
   | 'commercial-licensed'
-  | 'psboss-dsp';
+  | 'psboss-dsp'
 
 /**
  * Provenance record for sample material. The host refuses to route events whose samples lack
@@ -118,19 +118,19 @@ export type SampleLicense =
  */
 export interface Provenance {
   /** License tag; see {@link SampleLicense}. @provenance PSYBUS.md §"The branded types". */
-  license: SampleLicense;
+  license: SampleLicense
   /** URL or generator id, e.g. `"PSYBOSS DSP generator v1"`. @provenance PSYBUS.md §"The branded types". */
-  source: string;
+  source: string
   /** Optional author string. @provenance PSYBUS.md §"The branded types" (`author?`). */
-  author?: string;
+  author?: string
   /** Epoch ms at which the license was verified. @provenance PSYBUS.md §"The branded types". */
-  verifiedAt: number;
+  verifiedAt: number
   /**
    * Integrity fingerprint of the sample bytes (spec: "sha-256 of sample bytes"); procedural
    * generators emit the `dsp:<soundId>:<seed>` form (ARCHITECTURE.md §L3).
    * @provenance PSYBUS.md §"The branded types".
    */
-  fingerprint: string;
+  fingerprint: string
 }
 
 /**
@@ -142,9 +142,9 @@ export interface Provenance {
  */
 export interface SampleRef {
   /** Sample id within the device's library. @provenance PSYBUS.md §"The branded types". */
-  id: string;
+  id: string
   /** REQUIRED license/integrity record; see {@link Provenance}. @provenance PSYBUS.md §"The branded types". */
-  provenance: Provenance;
+  provenance: Provenance
 }
 
 /**
@@ -156,17 +156,17 @@ export interface SampleRef {
  */
 export interface BusEnvelope<T extends BusPayload = BusPayload> {
   /** Monotonic transport revision, stamped by the host. @provenance PSYBUS.md §"The message envelope" (`rev`). */
-  rev: Rev;
+  rev: Rev
   /** Deterministic performance seed for replay. @provenance PSYBUS.md §"The message envelope" (`seed`). */
-  seed: Seed;
+  seed: Seed
   /** Publisher device id. @provenance PSYBUS.md §"The message envelope" (`src`). */
-  src: DeviceId;
+  src: DeviceId
   /** Target device id or `'broadcast'` for all. @provenance PSYBUS.md §"The message envelope" (`dst`). */
-  dst: DeviceId | 'broadcast';
+  dst: DeviceId | 'broadcast'
   /** Audio-context time (seconds) the event is valid at. @provenance PSYBUS.md §"The message envelope" (`ts`). */
-  ts: number;
+  ts: number
   /** Typed payload; see {@link BusPayload}. @provenance PSYBUS.md §"The message envelope" (`payload`). */
-  payload: T;
+  payload: T
 }
 
 // ---------------------------------------------------------------------------
@@ -182,37 +182,37 @@ export interface BusEnvelope<T extends BusPayload = BusPayload> {
  */
 export interface TransportPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'transport';
+  kind: 'transport'
   /** Tempo in BPM. @provenance PSYBUS.md §payload union (`bpm`). */
-  bpm: number;
+  bpm: number
   /** Absolute beat index. @provenance PSYBUS.md §payload union (`beat`). */
-  beat: number;
+  beat: number
   /** Absolute bar index. @provenance PSYBUS.md §payload union (`bar`). */
-  bar: number;
+  bar: number
   /** Phase within the current beat/bar (spec gives no unit bound; foundation validates ≥ 0 finite). @provenance PSYBUS.md §payload union (`phase`). */
-  phase: number;
+  phase: number
   /** Whether the transport is rolling. @provenance PSYBUS.md §payload union (`playing`). */
-  playing: boolean;
+  playing: boolean
 }
 
 /** `{ kind: 'transport.seek'; beat }` — reposition the one clock. @provenance PSYBUS.md §payload union. */
 export interface TransportSeekPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'transport.seek';
+  kind: 'transport.seek'
   /** Absolute beat to seek to. @provenance PSYBUS.md §payload union (`beat`). */
-  beat: number;
+  beat: number
 }
 
 /** `{ kind: 'transport.start' }` — start the transport. @provenance PSYBUS.md §payload union. */
 export interface TransportStartPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'transport.start';
+  kind: 'transport.start'
 }
 
 /** `{ kind: 'transport.stop' }` — stop the transport. @provenance PSYBUS.md §payload union. */
 export interface TransportStopPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'transport.stop';
+  kind: 'transport.stop'
 }
 
 /**
@@ -224,15 +224,15 @@ export interface TransportStopPayload {
  */
 export interface ContextPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'context';
+  kind: 'context'
   /** Musical key; see {@link MusicalKey}. @provenance PSYBUS.md §payload union (`key`). */
-  key: MusicalKey;
+  key: MusicalKey
   /** Scale; see {@link Scale}. @provenance PSYBUS.md §payload union (`scale`). */
-  scale: Scale;
+  scale: Scale
   /** Energy 0..1 (foundation bound; family convention). @provenance PSYBUS.md §payload union (`energy`). */
-  energy: number;
+  energy: number
   /** Section label; see {@link Section}. @provenance PSYBUS.md §payload union (`section`). */
-  section: Section;
+  section: Section
 }
 
 /**
@@ -244,27 +244,27 @@ export interface ContextPayload {
  */
 export interface NotePayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'note';
+  kind: 'note'
   /** Target track. @provenance PSYBUS.md §payload union (`track`). */
-  track: TrackId;
+  track: TrackId
   /** MIDI note number 0..127 (foundation bound). @provenance PSYBUS.md §payload union (`note`). */
-  note: number;
+  note: number
   /** Velocity 0..1 (foundation bound; family convention). @provenance PSYBUS.md §payload union (`vel`). */
-  vel: number;
+  vel: number
   /** Duration in beats. @provenance PSYBUS.md §payload union (`durBeats`). */
-  durBeats: number;
+  durBeats: number
   /** Numeric channel (spec: `number`; legacy `NoteEvent.channel` was a string — see deprecations.ts). @provenance PSYBUS.md §payload union (`channel`). */
-  channel: number;
+  channel: number
 }
 
 /** `{ kind: 'note.off'; track; note }` — explicit note release (legacy events had no note-off). @provenance PSYBUS.md §payload union. */
 export interface NoteOffPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'note.off';
+  kind: 'note.off'
   /** Target track. @provenance PSYBUS.md §payload union (`track`). */
-  track: TrackId;
+  track: TrackId
   /** MIDI note number to release. @provenance PSYBUS.md §payload union (`note`). */
-  note: number;
+  note: number
 }
 
 /**
@@ -276,95 +276,95 @@ export interface NoteOffPayload {
  */
 export interface TrigPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'trig';
+  kind: 'trig'
   /** Target track. @provenance PSYBUS.md §payload union (`track`). */
-  track: TrackId;
+  track: TrackId
   /** Scene slot to arm/fire. @provenance PSYBUS.md §payload union (`scene`). */
-  scene: SceneId;
+  scene: SceneId
   /** Optional sample reference; REQUIRED to be fully provenanced when present. @provenance PSYBUS.md §payload union (`sampleRef?`). */
-  sampleRef?: SampleRef;
+  sampleRef?: SampleRef
 }
 
 /** `{ kind: 'sidechain.duck'; target; depth; releaseMs }` — device-to-device pumping ("sidechain without a cable"). @provenance PSYBUS.md §payload union + §"What PSYBUS unlocks". */
 export interface SidechainDuckPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'sidechain.duck';
+  kind: 'sidechain.duck'
   /** Track whose gain ducks. @provenance PSYBUS.md §payload union (`target`). */
-  target: TrackId;
+  target: TrackId
   /** Duck depth 0..1 (foundation bound). @provenance PSYBUS.md §payload union (`depth`). */
-  depth: number;
+  depth: number
   /** Release time in milliseconds. @provenance PSYBUS.md §payload union (`releaseMs`). */
-  releaseMs: number;
+  releaseMs: number
 }
 
 /** `{ kind: 'choke'; group; except? }` — hardware-style choke group (e.g. open-hat stops on closed-hat). @provenance PSYBUS.md §payload union + §"What PSYBUS unlocks". */
 export interface ChokePayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'choke';
+  kind: 'choke'
   /** Choke group id. @provenance PSYBUS.md §payload union (`group`). */
-  group: ChokeGroupId;
+  group: ChokeGroupId
   /** Optional device exempted from the choke (e.g. the publisher). @provenance PSYBUS.md §payload union (`except?`). */
-  except?: DeviceId;
+  except?: DeviceId
 }
 
 /** `{ kind: 'param.lock'; track; step; param; value }` — per-step parameter lock "as events; recordable, deterministic, replayable". @provenance PSYBUS.md §payload union + §"What PSYBUS unlocks". */
 export interface ParamLockPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'param.lock';
+  kind: 'param.lock'
   /** Target track. @provenance PSYBUS.md §payload union (`track`). */
-  track: TrackId;
+  track: TrackId
   /** Step index within the pattern. @provenance PSYBUS.md §payload union (`step`). */
-  step: number;
+  step: number
   /** Parameter id. @provenance PSYBUS.md §payload union (`param`). */
-  param: ParamId;
+  param: ParamId
   /** Locked value (foundation validates finite). @provenance PSYBUS.md §payload union (`value`). */
-  value: number;
+  value: number
 }
 
 /** `{ kind: 'param.set'; track; param; value }` — live parameter change. @provenance PSYBUS.md §payload union. */
 export interface ParamSetPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'param.set';
+  kind: 'param.set'
   /** Target track. @provenance PSYBUS.md §payload union (`track`). */
-  track: TrackId;
+  track: TrackId
   /** Parameter id. @provenance PSYBUS.md §payload union (`param`). */
-  param: ParamId;
+  param: ParamId
   /** New value (foundation validates finite). @provenance PSYBUS.md §payload union (`value`). */
-  value: number;
+  value: number
 }
 
 /** `{ kind: 'latency'; device; reportLatencyMs }` — device → host telemetry. @provenance PSYBUS.md §payload union (telemetry/health group). */
 export interface LatencyPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'latency';
+  kind: 'latency'
   /** Reporting device. @provenance PSYBUS.md §payload union (`device`). */
-  device: DeviceId;
+  device: DeviceId
   /** Measured latency in milliseconds. @provenance PSYBUS.md §payload union (`reportLatencyMs`). */
-  reportLatencyMs: number;
+  reportLatencyMs: number
 }
 
 /** `{ kind: 'voice.count'; device; active; stolen }` — device → host telemetry ("no more '16 voices' claims that are actually 6"). @provenance PSYBUS.md §payload union + §"What PSYBUS unlocks". */
 export interface VoiceCountPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'voice.count';
+  kind: 'voice.count'
   /** Reporting device. @provenance PSYBUS.md §payload union (`device`). */
-  device: DeviceId;
+  device: DeviceId
   /** Currently active voices. @provenance PSYBUS.md §payload union (`active`). */
-  active: number;
+  active: number
   /** Voices stolen (oldest-steal policy, ARCHITECTURE.md §"Voice management"). @provenance PSYBUS.md §payload union (`stolen`). */
-  stolen: number;
+  stolen: number
 }
 
 /** `{ kind: 'error'; device; code; message }` — the spec's error frame (device → host). @provenance PSYBUS.md §payload union (telemetry/health group). */
 export interface ErrorPayload {
   /** Discriminator literal. @provenance PSYBUS.md §payload union. */
-  kind: 'error';
+  kind: 'error'
   /** Device reporting the error. @provenance PSYBUS.md §payload union (`device`). */
-  device: DeviceId;
+  device: DeviceId
   /** Machine-readable error code. @provenance PSYBUS.md §payload union (`code`). */
-  code: string;
+  code: string
   /** Human-readable message. @provenance PSYBUS.md §payload union (`message`). */
-  message: string;
+  message: string
 }
 
 /**
@@ -391,10 +391,10 @@ export type BusPayload =
   | ParamSetPayload
   | LatencyPayload
   | VoiceCountPayload
-  | ErrorPayload;
+  | ErrorPayload
 
 /** All `kind` discriminators, in spec declaration order. */
-export type BusPayloadKind = BusPayload['kind'];
+export type BusPayloadKind = BusPayload['kind']
 
 /**
  * Unsubscribe function returned by `PsyBus.subscribe` (§"The host interface").
@@ -403,7 +403,7 @@ export type BusPayloadKind = BusPayload['kind'];
  * in the spec; foundation defines it as the standard `() => void`. Identical in shape to legacy
  * `channel.Unsubscribe`, which is why that legacy alias is NOT deprecated.
  */
-export type Unsubscribe = () => void;
+export type Unsubscribe = () => void
 
 // ---------------------------------------------------------------------------
 // Foundation-side brand casts (ergonomics, not spec).
@@ -414,21 +414,21 @@ export type Unsubscribe = () => void;
 
 /** Brand a validated string as {@link DeviceId}. */
 export function asDeviceId(s: string): DeviceId {
-  return s as DeviceId;
+  return s as DeviceId
 }
 /** Brand a validated string as {@link TrackId}. */
 export function asTrackId(s: string): TrackId {
-  return s as TrackId;
+  return s as TrackId
 }
 /** Brand a validated string as {@link SceneId}. */
 export function asSceneId(s: string): SceneId {
-  return s as SceneId;
+  return s as SceneId
 }
 /** Brand a validated string as {@link ParamId}. */
 export function asParamId(s: string): ParamId {
-  return s as ParamId;
+  return s as ParamId
 }
 /** Brand a validated string as {@link ChokeGroupId}. */
 export function asChokeGroupId(s: string): ChokeGroupId {
-  return s as ChokeGroupId;
+  return s as ChokeGroupId
 }
