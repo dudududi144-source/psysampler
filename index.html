@@ -879,14 +879,7 @@ function renderAll(){
   var info=$("infoEl");
   if(info){
     var bank=S.banks[S.bank];
-,
-{n:"Chords Am",f:"loops/pro/chords-145-Am.wav",t:"chord"},
-{n:"FX Riser",f:"loops/pro/fx-riser-145.wav",t:"fx"},
-{n:"Arp Lead",f:"loops/pro/arp-lead-145-Am.wav",t:"lead"},
-{n:"Atmo Pad",f:"loops/pro/atmo-pad-145-Am.wav",t:"atmo"},
-{n:"Percussion",f:"loops/pro/perc-145.wav",t:"drums"},
-{n:"Sub Bass",f:"loops/pro/sub-bass-145.wav",t:"bass"};
-    if(bank&&bank.info){
+if(bank&&bank.info){
       info.textContent=bank.info.dur.toFixed(2)+"s | "+bank.info.tempo+"bpm | "+bank.slices.length+" slices";
     }else{
       info.textContent="No audio loaded";
