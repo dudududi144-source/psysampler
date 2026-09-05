@@ -26,7 +26,7 @@ describe('CoPilot', () => {
       hasLoop: true,
       loopType: 'melodic',
       bpm: 140,
-      energy: 0.7
+      energy: 0.7,
     };
 
     const context = copilot.getContext(deviceState);
@@ -40,7 +40,7 @@ describe('CoPilot', () => {
     const context = {
       hasLoop: true,
       loopType: 'melodic',
-      energy: 0.5
+      energy: 0.5,
     };
 
     const action = copilot.selectAction(context);

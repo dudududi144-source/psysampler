@@ -6,14 +6,14 @@ import { Synthesizer } from '../src/utils/audio-synthesis.js';
 
 async function advancedRoutingExample() {
   console.log('🔀 Advanced Audio Routing Example');
-  
+
   const audioContext = new AudioContext();
   const router = new AudioRouter(audioContext);
   const synth = new Synthesizer(audioContext);
 
   // Create multiple buses
   console.log('Creating audio buses...');
-  
+
   router.createBus('drums', { gain: 0.8 });
   router.createBus('bass', { gain: 0.9 });
   router.createBus('synth', { gain: 0.7 });
@@ -22,45 +22,45 @@ async function advancedRoutingExample() {
 
   // Create sound sources
   console.log('Creating sound sources...');
-  
+
   // Drum sounds
   router.createNode('kick', 'gain', { gain: 0 });
   router.createNode('snare', 'gain', { gain: 0 });
   router.createNode('hihat', 'gain', { gain: 0 });
 
   // Bass synth
-  router.createNode('bass_osc', 'oscillator', { 
-    type: 'sawtooth', 
-    frequency: 55 
+  router.createNode('bass_osc', 'oscillator', {
+    type: 'sawtooth',
+    frequency: 55,
   });
-  router.createNode('bass_filter', 'filter', { 
-    type: 'lowpass', 
-    frequency: 800, 
-    Q: 5 
+  router.createNode('bass_filter', 'filter', {
+    type: 'lowpass',
+    frequency: 800,
+    Q: 5,
   });
   router.createNode('bass_amp', 'gain', { gain: 0.7 });
 
   // Lead synth
-  router.createNode('lead_osc1', 'oscillator', { 
-    type: 'sawtooth', 
-    frequency: 440 
-  });
-  router.createNode('lead_osc2', 'oscillator', { 
-    type: 'square', 
+  router.createNode('lead_osc1', 'oscillator', {
+    type: 'sawtooth',
     frequency: 440,
-    detune: 7 
+  });
+  router.createNode('lead_osc2', 'oscillator', {
+    type: 'square',
+    frequency: 440,
+    detune: 7,
   });
   router.createNode('lead_mixer', 'gain', { gain: 0.5 });
-  router.createNode('lead_filter', 'filter', { 
-    type: 'lowpass', 
-    frequency: 3000, 
-    Q: 8 
+  router.createNode('lead_filter', 'filter', {
+    type: 'lowpass',
+    frequency: 3000,
+    Q: 8,
   });
 
   // Effects
   router.createNode('reverb', 'convolver');
   router.createNode('reverb_mix', 'gain', { gain: 0.3 });
-  
+
   router.createNode('delay', 'delay', { delayTime: 0.375 });
   router.createNode('delay_feedback', 'gain', { gain: 0.4 });
   router.createNode('delay_mix', 'gain', { gain: 0.25 });
@@ -91,7 +91,7 @@ async function advancedRoutingExample() {
   // Send synth bus to effects
   console.log('Setting up effects sends...');
   const synthBus = router.getBus('synth');
-  
+
   // Send to reverb
   router.connect('lead_filter', 'reverb');
   router.connect('reverb', 'reverb_mix');
@@ -123,7 +123,7 @@ async function advancedRoutingExample() {
 
   // Play some sounds
   console.log('\nPlaying sounds through routing...');
-  
+
   const now = audioContext.currentTime;
 
   // Trigger kick
@@ -133,7 +133,9 @@ async function advancedRoutingExample() {
   // Trigger snare
   setTimeout(() => {
     router.getNode('snare').gain.setValueAtTime(0.6, audioContext.currentTime);
-    router.getNode('snare').gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
+    router
+      .getNode('snare')
+      .gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.15);
   }, 500);
 
   // Play bass note
@@ -158,7 +160,7 @@ async function advancedRoutingExample() {
   console.log('Master → Compressor → Limiter → Output');
 
   console.log('\n✅ Advanced routing example complete');
-  
+
   return router;
 }
 

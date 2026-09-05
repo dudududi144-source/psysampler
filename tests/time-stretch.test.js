@@ -17,9 +17,9 @@ describe('TimeStretcher', () => {
     const buffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1000 / 48000
+      duration: 1000 / 48000,
     };
-    
+
     const result = stretcher.stretch(buffer, 1.0);
     expect(result).toBe(buffer);
   });
@@ -29,13 +29,13 @@ describe('TimeStretcher', () => {
     for (let i = 0; i < inputData.length; i++) {
       inputData[i] = Math.sin(2 * Math.PI * 440 * (i / 48000));
     }
-    
+
     const buffer = {
       getChannelData: () => inputData,
       sampleRate: 48000,
-      duration: 1000 / 48000
+      duration: 1000 / 48000,
     };
-    
+
     const result = stretcher.stretch(buffer, 2.0);
     expect(result.duration).toBeCloseTo(2000 / 48000, 3);
   });
@@ -45,9 +45,9 @@ describe('TimeStretcher', () => {
     const buffer = {
       getChannelData: () => inputData,
       sampleRate: 48000,
-      duration: 1000 / 48000
+      duration: 1000 / 48000,
     };
-    
+
     const result = stretcher.stretch(buffer, 0.5);
     expect(result.duration).toBeCloseTo(500 / 48000, 3);
   });
@@ -55,7 +55,7 @@ describe('TimeStretcher', () => {
   test('correlate calculates similarity', () => {
     const a = [1, 2, 3, 4, 5];
     const b = [1, 2, 3, 4, 5];
-    
+
     const correlation = stretcher.correlate(a, b);
     expect(correlation).toBe(11);
   });
@@ -63,7 +63,7 @@ describe('TimeStretcher', () => {
   test('correlate returns 0 for orthogonal signals', () => {
     const a = [1, 0, 0, 0];
     const b = [0, 1, 0, 0];
-    
+
     const correlation = stretcher.correlate(a, b);
     expect(correlation).toBe(0);
   });
@@ -71,7 +71,7 @@ describe('TimeStretcher', () => {
   test('fft returns spectrum', () => {
     const data = new Float32Array(100);
     const spectrum = stretcher.fft(data);
-    
+
     expect(spectrum.length).toBe(50);
     expect(spectrum[0].mag).toBeDefined();
     expect(spectrum[0].phase).toBeDefined();
@@ -80,9 +80,9 @@ describe('TimeStretcher', () => {
   test('ifft returns time domain', () => {
     const spectrum = [
       { mag: 1, phase: 0 },
-      { mag: 0.5, phase: Math.PI / 4 }
+      { mag: 0.5, phase: Math.PI / 4 },
     ];
-    
+
     const output = stretcher.ifft(spectrum);
     expect(output.length).toBe(4);
   });
@@ -90,7 +90,7 @@ describe('TimeStretcher', () => {
   test('createBuffer returns valid buffer', () => {
     const data = new Float32Array(100);
     const buffer = stretcher.createBuffer(data, 48000);
-    
+
     expect(buffer.sampleRate).toBe(48000);
     expect(buffer.duration).toBeCloseTo(100 / 48000, 3);
     expect(buffer.numberOfChannels).toBe(1);

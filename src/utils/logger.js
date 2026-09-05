@@ -6,7 +6,7 @@ export const LOG_LEVELS = {
   WARN: 1,
   INFO: 2,
   DEBUG: 3,
-  TRACE: 4
+  TRACE: 4,
 };
 
 export class Logger {

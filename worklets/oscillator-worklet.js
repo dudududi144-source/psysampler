@@ -8,7 +8,7 @@ class OscillatorWorklet extends AudioWorkletProcessor {
       { name: 'waveform', defaultValue: 0, minValue: 0, maxValue: 4 },
       { name: 'pulseWidth', defaultValue: 0.5, minValue: 0.01, maxValue: 0.99 },
       { name: 'detune', defaultValue: 0, minValue: -100, maxValue: 100 },
-      { name: 'phase', defaultValue: 0, minValue: 0, maxValue: 1 }
+      { name: 'phase', defaultValue: 0, minValue: 0, maxValue: 1 },
     ];
   }
 
@@ -20,18 +20,19 @@ class OscillatorWorklet extends AudioWorkletProcessor {
 
   polyBlep(t, dt) {
     if (t < dt) {
-      t = t / dt;
-      return t + t - t * t - 1;
-    } else if (t > 1 - dt) {
-      t = (t - 1) / dt;
-      return t * t + t + t + 1;
+      const u = t / dt;
+      return u + u - u * u - 1;
+    }
+    if (t > 1 - dt) {
+      const u = (t - 1) / dt;
+      return u * u + u + u + 1;
     }
     return 0;
   }
 
   process(inputs, outputs, parameters) {
     const output = outputs[0];
-    
+
     if (output[0].length === 0) return true;
 
     const frequency = parameters.frequency[0];
@@ -40,7 +41,7 @@ class OscillatorWorklet extends AudioWorkletProcessor {
     const detune = parameters.detune[0];
     const phaseOffset = parameters.phase[0];
 
-    const freq = frequency * Math.pow(2, detune / 1200);
+    const freq = frequency * 2 ** (detune / 1200);
     const phaseInc = freq / sampleRate;
 
     for (let i = 0; i < output[0].length; i++) {
@@ -64,9 +65,7 @@ class OscillatorWorklet extends AudioWorkletProcessor {
           break;
 
         case 3: // Triangle
-          sample = phaseWithOffset < 0.5 
-            ? 4 * phaseWithOffset - 1 
-            : 3 - 4 * phaseWithOffset;
+          sample = phaseWithOffset < 0.5 ? 4 * phaseWithOffset - 1 : 3 - 4 * phaseWithOffset;
           break;
 
         case 4: // Pulse (variable width)

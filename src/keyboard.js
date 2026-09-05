@@ -5,7 +5,7 @@ export const KEYBOARD_SHORTCUTS = {
   SPACE: { key: ' ', action: 'play-stop', description: 'Play/Stop' },
   T: { key: 't', action: 'tap-tempo', description: 'Tap Tempo' },
   N: { key: 'n', action: 'metronome', description: 'Toggle Metronome' },
-  
+
   // Slices (1-9)
   SLICE_1: { key: '1', action: 'trigger-slice-1', description: 'Trigger Slice 1' },
   SLICE_2: { key: '2', action: 'trigger-slice-2', description: 'Trigger Slice 2' },
@@ -16,25 +16,25 @@ export const KEYBOARD_SHORTCUTS = {
   SLICE_7: { key: '7', action: 'trigger-slice-7', description: 'Trigger Slice 7' },
   SLICE_8: { key: '8', action: 'trigger-slice-8', description: 'Trigger Slice 8' },
   SLICE_9: { key: '9', action: 'trigger-slice-9', description: 'Trigger Slice 9' },
-  
+
   // Banks (F1-F8)
   BANK_1: { key: 'F1', action: 'select-bank-1', description: 'Select Bank 1' },
   BANK_2: { key: 'F2', action: 'select-bank-2', description: 'Select Bank 2' },
   BANK_3: { key: 'F3', action: 'select-bank-3', description: 'Select Bank 3' },
   BANK_4: { key: 'F4', action: 'select-bank-4', description: 'Select Bank 4' },
-  
+
   // Pattern editing
   X: { key: 'x', action: 'randomize', description: 'Randomize (seeded)' },
   C: { key: 'c', action: 'clear', description: 'Clear Pattern' },
   D: { key: 'd', action: 'chord-progression', description: 'Generate Chord Progression' },
-  
+
   // Pattern variations
   A: { key: 'a', action: 'cycle-arpeggio', description: 'Cycle Arpeggio Pattern' },
   B: { key: 'b', action: 'cycle-bass', description: 'Cycle Bass Pattern' },
-  
+
   // Utility
   H: { key: 'h', action: 'help', description: 'Show Help' },
-  ESC: { key: 'Escape', action: 'panic', description: 'Panic (stop all voices)' }
+  ESC: { key: 'Escape', action: 'panic', description: 'Panic (stop all voices)' },
 };
 
 export class KeyboardManager {
@@ -42,7 +42,7 @@ export class KeyboardManager {
     this.device = device;
     this.enabled = true;
     this.handlers = new Map();
-    
+
     // Register default handlers
     this.registerDefaultHandlers();
   }
@@ -86,14 +86,18 @@ export class KeyboardManager {
 
   handleKeydown(e) {
     if (!this.enabled) return;
-    
+
     // Ignore if typing in input
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+    if (
+      e.target.tagName === 'INPUT' ||
+      e.target.tagName === 'SELECT' ||
+      e.target.tagName === 'TEXTAREA'
+    ) {
       return;
     }
-    
+
     const key = e.key;
-    
+
     // Find matching shortcut
     for (const [name, shortcut] of Object.entries(KEYBOARD_SHORTCUTS)) {
       if (shortcut.key === key) {
@@ -102,10 +106,10 @@ export class KeyboardManager {
         return;
       }
     }
-    
+
     // Handle F keys
     if (key.startsWith('F') && key.length <= 3) {
-      const fn = parseInt(key.substring(1));
+      const fn = Number.parseInt(key.substring(1));
       if (fn >= 1 && fn <= 8) {
         e.preventDefault();
         this.trigger(`select-bank-${fn}`);
@@ -115,7 +119,7 @@ export class KeyboardManager {
 
   trigger(action) {
     if (this.handlers.has(action)) {
-      this.handlers.get(action).forEach(handler => handler());
+      this.handlers.get(action).forEach((handler) => handler());
     }
   }
 
@@ -138,11 +142,11 @@ export class KeyboardManager {
     const help = Object.entries(KEYBOARD_SHORTCUTS)
       .map(([name, s]) => `${s.key.padEnd(8)} - ${s.description}`)
       .join('\n');
-    
-    console.log('=== PSY LOOPER Keyboard Shortcuts ===\n' + help);
-    
+
+    console.log(`=== PSY LOOPER Keyboard Shortcuts ===\n${help}`);
+
     // Could show a modal here
-    alert('Keyboard Shortcuts:\n\n' + help);
+    alert(`Keyboard Shortcuts:\n\n${help}`);
   }
 
   enable() {
@@ -154,7 +158,9 @@ export class KeyboardManager {
   }
 
   dispose() {
-    document.removeEventListener('keydown', this.handleKeydown);
+    if (typeof document !== 'undefined' && typeof document.removeEventListener === 'function') {
+      document.removeEventListener('keydown', this.handleKeydown);
+    }
     this.handlers.clear();
   }
 }

@@ -8,7 +8,7 @@ class DelayWorklet extends AudioWorkletProcessor {
       { name: 'feedback', defaultValue: 0.4, minValue: 0, maxValue: 0.95 },
       { name: 'mix', defaultValue: 0.3, minValue: 0, maxValue: 1 },
       { name: 'filterCutoff', defaultValue: 8000, minValue: 200, maxValue: 20000 },
-      { name: 'stereoWidth', defaultValue: 0.5, minValue: 0, maxValue: 1 }
+      { name: 'stereoWidth', defaultValue: 0.5, minValue: 0, maxValue: 1 },
     ];
   }
 
@@ -51,8 +51,12 @@ class DelayWorklet extends AudioWorkletProcessor {
 
       // Simple lowpass filter on feedback
       const filterCoeff = Math.min(cutoff / sampleRate, 0.99);
-      delayedLeft = delayedLeft * filterCoeff + this.leftBuffer[(readPos - 1 + this.bufferSize) % this.bufferSize] * (1 - filterCoeff);
-      delayedRight = delayedRight * filterCoeff + this.rightBuffer[(readPos - 1 + this.bufferSize) % this.bufferSize] * (1 - filterCoeff);
+      delayedLeft =
+        delayedLeft * filterCoeff +
+        this.leftBuffer[(readPos - 1 + this.bufferSize) % this.bufferSize] * (1 - filterCoeff);
+      delayedRight =
+        delayedRight * filterCoeff +
+        this.rightBuffer[(readPos - 1 + this.bufferSize) % this.bufferSize] * (1 - filterCoeff);
 
       // Write to delay buffer with feedback
       this.leftBuffer[this.writePos] = dryLeft + delayedLeft * feedback;

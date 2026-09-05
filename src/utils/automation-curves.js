@@ -11,7 +11,7 @@ export const CURVE_TYPES = {
   SAWTOOTH: 'sawtooth',
   BEZIER: 'bezier',
   STEPPED: 'stepped',
-  SMOOTH: 'smooth'
+  SMOOTH: 'smooth',
 };
 
 export class AutomationCurve {
@@ -24,34 +24,34 @@ export class AutomationCurve {
     switch (this.type) {
       case CURVE_TYPES.LINEAR:
         return t;
-      
+
       case CURVE_TYPES.EXPONENTIAL:
-        return Math.pow(t, 2);
-      
+        return t ** 2;
+
       case CURVE_TYPES.LOGARITHMIC:
         return Math.sqrt(t);
-      
+
       case CURVE_TYPES.SINE:
         return (1 - Math.cos(t * Math.PI)) / 2;
-      
+
       case CURVE_TYPES.TRIANGLE:
         return t < 0.5 ? t * 2 : 2 - t * 2;
-      
+
       case CURVE_TYPES.SQUARE:
         return t < 0.5 ? 0 : 1;
-      
+
       case CURVE_TYPES.SAWTOOTH:
         return t;
-      
+
       case CURVE_TYPES.BEZIER:
         return this.bezierInterpolate(t);
-      
+
       case CURVE_TYPES.STEPPED:
         return Math.floor(t * 4) / 4;
-      
+
       case CURVE_TYPES.SMOOTH:
         return t * t * (3 - 2 * t);
-      
+
       default:
         return t;
     }
@@ -62,13 +62,13 @@ export class AutomationCurve {
     const p1 = this.tension;
     const p2 = 1 - this.tension;
     const p3 = 1;
-    
+
     const u = 1 - t;
     const tt = t * t;
     const uu = u * u;
     const uuu = uu * u;
     const ttt = tt * t;
-    
+
     return uuu * p0 + 3 * uu * t * p1 + 3 * u * tt * p2 + ttt * p3;
   }
 
@@ -116,7 +116,7 @@ export class AutomationLane {
     // Find surrounding points
     let prevPoint = this.points[0];
     let nextPoint = this.points[1];
-    
+
     for (let i = 1; i < this.points.length; i++) {
       if (this.points[i].time > time) {
         nextPoint = this.points[i];
@@ -128,10 +128,10 @@ export class AutomationLane {
     // Calculate interpolation
     const duration = nextPoint.time - prevPoint.time;
     const progress = (time - prevPoint.time) / duration;
-    
+
     const curve = new AutomationCurve(nextPoint.curveType || this.curveType);
     const curvedProgress = curve.interpolate(progress);
-    
+
     return prevPoint.value + (nextPoint.value - prevPoint.value) * curvedProgress;
   }
 
@@ -147,7 +147,7 @@ export class AutomationLane {
     return {
       points: [...this.points],
       curveType: this.curveType,
-      defaultValue: this.defaultValue
+      defaultValue: this.defaultValue,
     };
   }
 

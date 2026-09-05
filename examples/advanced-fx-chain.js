@@ -1,13 +1,13 @@
 // Advanced FX Chain Example
 // Demonstrates complex FX routing and automation
 
-import { LooperDevice } from '../src/looper-device.js';
 import { FX_TYPES } from '../src/fx-chain.js';
+import { LooperDevice } from '../src/looper-device.js';
 import { AutomationLane, CURVE_TYPES } from '../src/utils/automation-curves.js';
 
 async function advancedFXExample() {
   console.log('🎛️ Advanced FX Chain Example');
-  
+
   const looper = new LooperDevice();
   await looper.initialize();
 
@@ -20,7 +20,7 @@ async function advancedFXExample() {
     ratio: 4,
     attack: 5,
     release: 100,
-    knee: 6
+    knee: 6,
   });
 
   // 2. Multi-band EQ
@@ -30,8 +30,8 @@ async function advancedFXExample() {
       { frequency: 250, gain: -2, Q: 1.5, type: 'peaking' },
       { frequency: 1000, gain: 1, Q: 1, type: 'peaking' },
       { frequency: 3000, gain: 2, Q: 1.2, type: 'peaking' },
-      { frequency: 8000, gain: -1, Q: 0.8, type: 'highshelf' }
-    ]
+      { frequency: 8000, gain: -1, Q: 0.8, type: 'highshelf' },
+    ],
   });
 
   // 3. Granular delay
@@ -40,7 +40,7 @@ async function advancedFXExample() {
     grainDensity: 20,
     pitchRandom: 2,
     panSpread: 0.8,
-    wetMix: 0.3
+    wetMix: 0.3,
   });
 
   // 4. Convolution reverb
@@ -48,19 +48,19 @@ async function advancedFXExample() {
     wetMix: 0.25,
     preDelay: 20,
     damping: 0.6,
-    decay: 2.5
+    decay: 2.5,
   });
 
   // 5. Master limiter
   const limiter = await fxChain.addFX(FX_TYPES.LIMITER, {
     ceiling: -0.3,
-    release: 50
+    release: 50,
   });
 
   // Create automation for filter cutoff
   const filterAutomation = new AutomationLane();
   filterAutomation.setCurveType(CURVE_TYPES.SMOOTH);
-  
+
   filterAutomation.addPoint(0, 200);
   filterAutomation.addPoint(2, 5000);
   filterAutomation.addPoint(4, 1000);
@@ -70,7 +70,7 @@ async function advancedFXExample() {
   // Create automation for reverb mix
   const reverbAutomation = new AutomationLane();
   reverbAutomation.setCurveType(CURVE_TYPES.SINE);
-  
+
   reverbAutomation.addPoint(0, 0.1);
   reverbAutomation.addPoint(4, 0.5);
   reverbAutomation.addPoint(8, 0.1);
@@ -78,15 +78,15 @@ async function advancedFXExample() {
   // Apply automation in real-time
   const applyAutomation = () => {
     const time = looper.transport.currentTime;
-    
+
     // Apply filter automation
     const filterValue = filterAutomation.getValueAt(time);
     eq.setParameter('frequency', filterValue, 1); // Band 1
-    
+
     // Apply reverb automation
     const reverbValue = reverbAutomation.getValueAt(time);
     reverb.setParameter('wetMix', reverbValue);
-    
+
     if (looper.transport.playing) {
       requestAnimationFrame(applyAutomation);
     }
@@ -94,7 +94,7 @@ async function advancedFXExample() {
 
   // Load a loop and start playback
   await looper.loadLoop('demo-loop.wav');
-  
+
   looper.transport.on('play', () => {
     applyAutomation();
   });

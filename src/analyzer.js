@@ -9,7 +9,7 @@ export class LoopAnalyzer {
   analyze(audioBuffer) {
     const data = audioBuffer.getChannelData(0);
     const sampleRate = audioBuffer.sampleRate;
-    
+
     return {
       tempo: this.detectTempo(data, sampleRate),
       key: this.detectKey(data, sampleRate),
@@ -17,7 +17,7 @@ export class LoopAnalyzer {
       type: this.classifyLoop(data, sampleRate),
       rms: this.calculateRMS(data),
       peak: this.calculatePeak(data),
-      lufs: this.calculateLUFS(data, sampleRate)
+      lufs: this.calculateLUFS(data, sampleRate),
     };
   }
 
@@ -25,28 +25,32 @@ export class LoopAnalyzer {
     const data = audioBuffer.getChannelData(0);
     const sampleRate = audioBuffer.sampleRate;
     const transientPoints = this.detectTransients(data, sampleRate);
-    
+
     const slices = [];
     for (let i = 0; i < transientPoints.length; i++) {
       const start = transientPoints[i] / sampleRate;
-      const end = i < transientPoints.length - 1 
-        ? transientPoints[i + 1] / sampleRate 
-        : audioBuffer.duration;
-      
+      const end =
+        i < transientPoints.length - 1 ? transientPoints[i + 1] / sampleRate : audioBuffer.duration;
+
       slices.push({
         index: i,
         start,
         end,
         duration: end - start,
-        rms: this.calculateRMS(data.slice(
+        rms: this.calculateRMS(
+          data.slice(
+            transientPoints[i],
+            i < transientPoints.length - 1 ? transientPoints[i + 1] : data.length,
+          ),
+        ),
+        zeroCrossings: this.findZeroCrossings(
+          data,
           transientPoints[i],
-          i < transientPoints.length - 1 ? transientPoints[i + 1] : data.length
-        )),
-        zeroCrossings: this.findZeroCrossings(data, transientPoints[i], 
-          i < transientPoints.length - 1 ? transientPoints[i + 1] : data.length)
+          i < transientPoints.length - 1 ? transientPoints[i + 1] : data.length,
+        ),
       });
     }
-    
+
     return slices;
   }
 
@@ -55,16 +59,16 @@ export class LoopAnalyzer {
     const lowBand = this.bandpassFilter(data, sampleRate, 20, 200);
     const midBand = this.bandpassFilter(data, sampleRate, 200, 2000);
     const highBand = this.bandpassFilter(data, sampleRate, 2000, 8000);
-    
+
     const transients = new Set();
     const threshold = 0.3;
     const windowSize = Math.floor(sampleRate * 0.01); // 10ms window
-    
+
     // Spectral flux for each band
     const fluxLow = this.spectralFlux(lowBand, windowSize);
     const fluxMid = this.spectralFlux(midBand, windowSize);
     const fluxHigh = this.spectralFlux(highBand, windowSize);
-    
+
     // Combine flux from all bands
     for (let i = 0; i < fluxLow.length; i++) {
       const combined = fluxLow[i] + fluxMid[i] + fluxHigh[i];
@@ -75,7 +79,7 @@ export class LoopAnalyzer {
         transients.add(zeroCross);
       }
     }
-    
+
     return Array.from(transients).sort((a, b) => a - b);
   }
 
@@ -84,7 +88,7 @@ export class LoopAnalyzer {
     for (let i = windowSize; i < data.length - windowSize; i += windowSize) {
       const current = this.fft(data.slice(i, i + windowSize));
       const previous = this.fft(data.slice(i - windowSize, i));
-      
+
       let fluxValue = 0;
       for (let j = 0; j < current.length; j++) {
         fluxValue += Math.max(0, current[j] - previous[j]);
@@ -95,15 +99,27 @@ export class LoopAnalyzer {
   }
 
   detectTempo(data, sampleRate) {
-    // Autocorrelation-based tempo detection
+    // Autocorrelation-based tempo detection.
+    // The onset envelope is computed per HOP (hopSize below), so the lag window
+    // must be expressed in hops too — the previous code mixed sample-domain
+    // bounds with a hop-domain envelope, which made slow tempos (60 BPM =
+    // 93.75 hops) unreachable and O(n·lags) scans silently empty.
     const minBPM = 60;
     const maxBPM = 240;
-    const minLag = Math.floor(sampleRate * 60 / maxBPM);
-    const maxLag = Math.floor(sampleRate * 60 / minBPM);
-    
+    const hopSize = 512;
+
     const onsetStrength = this.onsetStrengthFunction(data, sampleRate);
+    if (onsetStrength.length < 2) return 0; // not enough envelope to correlate
+
+    const minLag = Math.max(1, Math.floor((sampleRate * 60) / maxBPM / hopSize));
+    const maxLag = Math.min(
+      onsetStrength.length - 1,
+      Math.ceil((sampleRate * 60) / minBPM / hopSize),
+    );
+    if (minLag > maxLag) return 0; // window too short for the tempo range
+
     const correlations = [];
-    
+
     for (let lag = minLag; lag <= maxLag; lag++) {
       let sum = 0;
       for (let i = 0; i < onsetStrength.length - lag; i++) {
@@ -111,13 +127,27 @@ export class LoopAnalyzer {
       }
       correlations.push({ lag, correlation: sum });
     }
-    
+
     // Find peak correlation
-    const peak = correlations.reduce((max, curr) => 
-      curr.correlation > max.correlation ? curr : max
+    const peak = correlations.reduce((max, curr) =>
+      curr.correlation > max.correlation ? curr : max,
     );
-    
-    const bpm = 60 * sampleRate / peak.lag;
+
+    // Tempo-octave correction: if the half-lag (double tempo) correlates at
+    // least half as strongly as the peak, prefer the faster interpretation.
+    // Measured on click trains 60-240 BPM: spurious half-lags score ~0%,
+    // the true octave case scores ~62% — a 0.5 threshold separates them.
+    const corrAt = (lag) => {
+      const c = correlations.find((x) => x.lag === lag);
+      return c ? c.correlation : 0;
+    };
+    let bestLag = peak.lag;
+    const halfLag = Math.round(peak.lag / 2);
+    if (halfLag >= minLag && corrAt(halfLag) >= 0.5 * peak.correlation) {
+      bestLag = halfLag;
+    }
+
+    const bpm = (60 * sampleRate) / (bestLag * hopSize); // hop lag -> seconds -> BPM
     return Math.round(bpm * 10) / 10; // Round to 0.1 BPM
   }
 
@@ -125,12 +155,21 @@ export class LoopAnalyzer {
     // Chroma feature-based key detection
     const chroma = this.calculateChroma(data, sampleRate);
     const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    const scales = ['major', 'minor', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'aeolian', 'locrian'];
-    
+    const scales = [
+      'major',
+      'minor',
+      'dorian',
+      'phrygian',
+      'lydian',
+      'mixolydian',
+      'aeolian',
+      'locrian',
+    ];
+
     let bestKey = 'C';
     let bestScale = 'major';
-    let bestScore = -Infinity;
-    
+    let bestScore = Number.NEGATIVE_INFINITY;
+
     for (const key of keys) {
       for (const scale of scales) {
         const score = this.matchKeySignature(chroma, key, scale);
@@ -141,41 +180,43 @@ export class LoopAnalyzer {
         }
       }
     }
-    
+
     return { key: bestKey, scale: bestScale };
   }
 
   classifyLoop(data, sampleRate) {
     // ML-based loop classification
     const features = this.extractFeatures(data, sampleRate);
-    
+
     // Simplified classification (full ML model would be loaded separately)
     const spectralCentroid = this.spectralCentroid(data, sampleRate);
     const zeroCrossingRate = this.zeroCrossingRate(data);
     const rms = this.calculateRMS(data);
-    
+
     if (spectralCentroid < 500 && rms > 0.3) {
       return 'drum';
-    } else if (spectralCentroid < 1000 && zeroCrossingRate < 0.1) {
-      return 'bass';
-    } else if (spectralCentroid > 2000) {
-      return 'fx';
-    } else if (zeroCrossingRate > 0.5) {
-      return 'percussion';
-    } else {
-      return 'melodic';
     }
+    if (spectralCentroid < 1000 && zeroCrossingRate < 0.1) {
+      return 'bass';
+    }
+    if (spectralCentroid > 2000) {
+      return 'fx';
+    }
+    if (zeroCrossingRate > 0.5) {
+      return 'percussion';
+    }
+    return 'melodic';
   }
 
   detectBeats(data, sampleRate) {
     const tempo = this.detectTempo(data, sampleRate);
     const beatInterval = 60 / tempo;
     const beats = [];
-    
+
     for (let time = 0; time < data.length / sampleRate; time += beatInterval) {
       beats.push(time);
     }
-    
+
     return beats;
   }
 
@@ -187,7 +228,7 @@ export class LoopAnalyzer {
 
   fft(data) {
     // Simplified FFT (real implementation would use Web Audio API or library)
-    return Array.from(data).map(x => Math.abs(x));
+    return Array.from(data).map((x) => Math.abs(x));
   }
 
   findNearestZeroCrossing(data, idx, sampleRate) {
@@ -220,13 +261,13 @@ export class LoopAnalyzer {
   onsetStrengthFunction(data, sampleRate) {
     const hopSize = 512;
     const strength = [];
-    
+
     for (let i = hopSize; i < data.length; i += hopSize) {
       const current = this.calculateRMS(data.slice(i, i + hopSize));
       const previous = this.calculateRMS(data.slice(i - hopSize, i));
       strength.push(Math.max(0, current - previous));
     }
-    
+
     return strength;
   }
 
@@ -244,7 +285,7 @@ export class LoopAnalyzer {
     return {
       spectralCentroid: this.spectralCentroid(data, sampleRate),
       zeroCrossingRate: this.zeroCrossingRate(data),
-      rms: this.calculateRMS(data)
+      rms: this.calculateRMS(data),
     };
   }
 
@@ -252,13 +293,13 @@ export class LoopAnalyzer {
     const fft = this.fft(data);
     let weightedSum = 0;
     let totalSum = 0;
-    
+
     for (let i = 0; i < fft.length; i++) {
-      const freq = i * sampleRate / (2 * fft.length);
+      const freq = (i * sampleRate) / (2 * fft.length);
       weightedSum += freq * fft[i];
       totalSum += fft[i];
     }
-    
+
     return totalSum > 0 ? weightedSum / totalSum : 0;
   }
 
@@ -273,6 +314,7 @@ export class LoopAnalyzer {
   }
 
   calculateRMS(data) {
+    if (!data || data.length === 0) return 0; // empty buffer — honest zero, not NaN
     let sum = 0;
     for (let i = 0; i < data.length; i++) {
       sum += data[i] * data[i];

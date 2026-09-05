@@ -15,17 +15,17 @@ export class Scheduler {
 
   start() {
     if (this.isRunning) return;
-    
+
     this.isRunning = true;
     this.currentSixteenth = 0;
     this.nextNoteTime = this.transport.startTime / 1000 || 0;
-    
+
     this.timerID = setInterval(() => this.scheduler(), this.lookahead);
   }
 
   stop() {
     if (!this.isRunning) return;
-    
+
     this.isRunning = false;
     if (this.timerID) {
       clearInterval(this.timerID);
@@ -36,7 +36,7 @@ export class Scheduler {
 
   scheduler() {
     const currentTime = performance.now() / 1000;
-    
+
     // Schedule notes while the next note is within the lookahead window
     while (this.nextNoteTime < currentTime + this.scheduleAheadTime) {
       this.scheduleNote(this.currentSixteenth, this.nextNoteTime);
@@ -50,9 +50,9 @@ export class Scheduler {
       sixteenth,
       time,
       bar: this.transport.bar,
-      beat: this.transport.beat
+      beat: this.transport.beat,
     });
-    
+
     // Call callback if provided
     if (this.onSchedule) {
       this.onSchedule(sixteenth, time);
@@ -62,7 +62,7 @@ export class Scheduler {
   nextNote() {
     const secondsPerSixteenth = this.transport.getSixteenthDuration();
     const swingOffset = this.transport.getSwingOffset(this.currentSixteenth);
-    
+
     this.nextNoteTime += secondsPerSixteenth + swingOffset;
     this.currentSixteenth = (this.currentSixteenth + 1) % 16;
   }
@@ -71,15 +71,15 @@ export class Scheduler {
   getEventsToTrigger(currentTime) {
     const events = [];
     const threshold = currentTime + 0.001; // 1ms tolerance
-    
-    this.eventQueue = this.eventQueue.filter(event => {
+
+    this.eventQueue = this.eventQueue.filter((event) => {
       if (event.time <= threshold) {
         events.push(event);
         return false; // Remove from queue
       }
       return true; // Keep in queue
     });
-    
+
     return events;
   }
 
@@ -106,7 +106,7 @@ export class Scheduler {
     return {
       currentSixteenth: this.currentSixteenth,
       nextNoteTime: this.nextNoteTime,
-      eventQueue: [...this.eventQueue]
+      eventQueue: [...this.eventQueue],
     };
   }
 

@@ -1,13 +1,13 @@
 // Performance Optimization Example
 // Demonstrates performance optimization techniques
 
-import { PerformanceOptimizer } from '../src/utils/performance-optimizer.js';
-import { PerformanceMonitor } from '../src/utils/performance-monitor.js';
 import { LooperDevice } from '../src/looper-device.js';
+import { PerformanceMonitor } from '../src/utils/performance-monitor.js';
+import { PerformanceOptimizer } from '../src/utils/performance-optimizer.js';
 
 async function performanceOptimizationExample() {
   console.log('⚡ Performance Optimization Example');
-  
+
   const optimizer = new PerformanceOptimizer();
   const monitor = new PerformanceMonitor();
   const looper = new LooperDevice();
@@ -21,22 +21,22 @@ async function performanceOptimizationExample() {
 
   // Test 1: Task scheduling
   console.log('Test 1: Task Scheduling');
-  
+
   for (let i = 0; i < 100; i++) {
     optimizer.scheduleTask(async () => {
       // Simulate some work
-      await new Promise(resolve => setTimeout(resolve, 1));
+      await new Promise((resolve) => setTimeout(resolve, 1));
     }, i % 3); // Different priorities
   }
 
   // Test 2: Batch updates
   console.log('\nTest 2: Batch Updates');
-  
+
   const updates = [];
   for (let i = 0; i < 1000; i++) {
     updates.push(async () => {
       // Simulate update
-      await new Promise(resolve => setTimeout(resolve, 0.1));
+      await new Promise((resolve) => setTimeout(resolve, 0.1));
     });
   }
 
@@ -47,38 +47,38 @@ async function performanceOptimizationExample() {
 
   // Test 3: Throttling
   console.log('\nTest 3: Throttling');
-  
+
   const throttledFn = optimizer.throttle(() => {
     console.log('Throttled function called');
   }, 100);
 
   for (let i = 0; i < 20; i++) {
     throttledFn();
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
   }
 
   // Test 4: Debouncing
   console.log('\nTest 4: Debouncing');
-  
+
   const debouncedFn = optimizer.debounce(() => {
     console.log('Debounced function called');
   }, 100);
 
   for (let i = 0; i < 10; i++) {
     debouncedFn();
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
   }
 
   // Test 5: Adaptive quality
   console.log('\nTest 5: Adaptive Quality');
-  
+
   const baseQuality = 1.0;
   const adaptedQuality = optimizer.adaptiveQuality(baseQuality);
   console.log(`Base quality: ${baseQuality}`);
   console.log(`Adapted quality: ${adaptedQuality}`);
 
   // Wait a bit for tasks to complete
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
 
   // Get metrics
   console.log('\n📊 Performance Metrics:');
@@ -99,7 +99,7 @@ async function performanceOptimizationExample() {
   monitor.stop();
 
   console.log('\n✅ Performance optimization example complete');
-  
+
   return { optimizer, monitor, metrics };
 }
 

@@ -18,7 +18,7 @@ export function remap(value, fromMin, fromMax, toMin, toMax) {
 }
 
 export function dbToLinear(db) {
-  return Math.pow(10, db / 20);
+  return 10 ** (db / 20);
 }
 
 export function linearToDb(linear) {
@@ -26,7 +26,7 @@ export function linearToDb(linear) {
 }
 
 export function midiToFreq(midi) {
-  return 440 * Math.pow(2, (midi - 69) / 12);
+  return 440 * 2 ** ((midi - 69) / 12);
 }
 
 export function freqToMidi(freq) {
@@ -34,11 +34,11 @@ export function freqToMidi(freq) {
 }
 
 export function beatsToSeconds(beats, bpm) {
-  return beats * 60 / bpm;
+  return (beats * 60) / bpm;
 }
 
 export function secondsToBeats(seconds, bpm) {
-  return seconds * bpm / 60;
+  return (seconds * bpm) / 60;
 }
 
 export function bpmToMs(bpm, subdivision = 4) {
@@ -50,7 +50,7 @@ export function msToBpm(ms, subdivision = 4) {
 }
 
 export function semitonesToRatio(semitones) {
-  return Math.pow(2, semitones / 12);
+  return 2 ** (semitones / 12);
 }
 
 export function ratioToSemitones(ratio) {
@@ -68,11 +68,11 @@ export function smootherstep(edge0, edge1, x) {
 }
 
 export function easeInOut(t) {
-  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  return t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
 }
 
 export function easeOut(t) {
-  return 1 - Math.pow(1 - t, 2);
+  return 1 - (1 - t) ** 2;
 }
 
 export function easeIn(t) {

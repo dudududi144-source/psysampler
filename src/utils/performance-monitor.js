@@ -64,7 +64,8 @@ export class PerformanceMonitor {
   getJitter() {
     if (this.frames.length < 2) return 0;
     const avg = this.getFrameTime();
-    const variance = this.frames.reduce((sum, frame) => sum + Math.pow(frame - avg, 2), 0) / this.frames.length;
+    const variance =
+      this.frames.reduce((sum, frame) => sum + (frame - avg) ** 2, 0) / this.frames.length;
     return Math.sqrt(variance);
   }
 
@@ -72,7 +73,7 @@ export class PerformanceMonitor {
     this.metrics.set(name, {
       startTime: performance.now(),
       count: 0,
-      totalTime: 0
+      totalTime: 0,
     });
   }
 
@@ -113,7 +114,7 @@ export class PerformanceMonitor {
       return {
         usedJSHeapSize: performance.memory.usedJSHeapSize,
         totalJSHeapSize: performance.memory.totalJSHeapSize,
-        jsHeapSizeLimit: performance.memory.jsHeapSizeLimit
+        jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
       };
     }
     return null;
@@ -129,7 +130,7 @@ export class PerformanceMonitor {
       metrics: this.getAllMetrics(),
       cpu: this.getCPUUsage(),
       memory: this.getMemoryUsage(),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 

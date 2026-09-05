@@ -13,7 +13,7 @@ export class REX2Parser {
       tempo: 0,
       signature: { numerator: 4, denominator: 4 },
       slices: [],
-      audio: null
+      audio: null,
     };
 
     // REX2 header (simplified - real format is proprietary)
@@ -22,7 +22,7 @@ export class REX2Parser {
       view.getUint8(0),
       view.getUint8(1),
       view.getUint8(2),
-      view.getUint8(3)
+      view.getUint8(3),
     );
 
     if (magic !== 'REX2') {
@@ -48,7 +48,7 @@ export class REX2Parser {
         start,
         end,
         reverse: (flags & 1) !== 0,
-        mute: (flags & 2) !== 0
+        mute: (flags & 2) !== 0,
       });
     }
 
@@ -100,12 +100,12 @@ export class REX2Parser {
     return {
       tempo: rexData.tempo,
       timeSignature: rexData.signature,
-      slices: rexData.slices.map(s => ({
+      slices: rexData.slices.map((s) => ({
         start: s.start,
         end: s.end,
         reverse: s.reverse,
-        mute: s.mute
-      }))
+        mute: s.mute,
+      })),
     };
   }
 
@@ -115,7 +115,7 @@ export class REX2Parser {
       tempo: internalData.tempo,
       signature: internalData.timeSignature,
       slices: internalData.slices,
-      audio: internalData.audio
+      audio: internalData.audio,
     };
   }
 

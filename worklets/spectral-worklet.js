@@ -8,7 +8,7 @@ class SpectralWorklet extends AudioWorkletProcessor {
       { name: 'freeze', defaultValue: 0, minValue: 0, maxValue: 1 },
       { name: 'spectralBlur', defaultValue: 0, minValue: 0, maxValue: 1 },
       { name: 'harmonizer', defaultValue: 0, minValue: -12, maxValue: 12 },
-      { name: 'wetMix', defaultValue: 0.5, minValue: 0, maxValue: 1 }
+      { name: 'wetMix', defaultValue: 0.5, minValue: 0, maxValue: 1 },
     ];
   }
 
@@ -29,7 +29,7 @@ class SpectralWorklet extends AudioWorkletProcessor {
   createHannWindow(size) {
     const window = new Float32Array(size);
     for (let i = 0; i < size; i++) {
-      window[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / size));
+      window[i] = 0.5 * (1 - Math.cos((2 * Math.PI * i) / size));
     }
     return window;
   }
@@ -54,12 +54,13 @@ class SpectralWorklet extends AudioWorkletProcessor {
 
     // FFT
     for (let len = 2; len <= n; len <<= 1) {
-      const angle = -2 * Math.PI / len;
+      const angle = (-2 * Math.PI) / len;
       const wReal = Math.cos(angle);
       const wImag = Math.sin(angle);
 
       for (let i = 0; i < n; i += len) {
-        let curReal = 1, curImag = 0;
+        let curReal = 1;
+        let curImag = 0;
         for (let j = 0; j < len / 2; j++) {
           const uReal = real[i + j];
           const uImag = imag[i + j];
@@ -147,7 +148,7 @@ class SpectralWorklet extends AudioWorkletProcessor {
     // Compute magnitude and phase
     const magnitude = new Float32Array(this.fftSize / 2);
     const phase = new Float32Array(this.fftSize / 2);
-    
+
     for (let i = 0; i < this.fftSize / 2; i++) {
       magnitude[i] = Math.sqrt(real[i] * real[i] + imag[i] * imag[i]);
       phase[i] = Math.atan2(imag[i], real[i]);
@@ -156,7 +157,10 @@ class SpectralWorklet extends AudioWorkletProcessor {
     // Freeze spectrum
     if (freeze > 0.5) {
       if (!this.frozenSpectrum) {
-        this.frozenSpectrum = { magnitude: new Float32Array(magnitude), phase: new Float32Array(phase) };
+        this.frozenSpectrum = {
+          magnitude: new Float32Array(magnitude),
+          phase: new Float32Array(phase),
+        };
       }
       magnitude.set(this.frozenSpectrum.magnitude);
       phase.set(this.frozenSpectrum.phase);
@@ -176,7 +180,7 @@ class SpectralWorklet extends AudioWorkletProcessor {
       const shift = Math.round(harmonizer);
       const newMagnitude = new Float32Array(magnitude.length);
       const newPhase = new Float32Array(phase.length);
-      
+
       for (let i = 0; i < magnitude.length - Math.abs(shift); i++) {
         if (shift > 0) {
           newMagnitude[i + shift] = magnitude[i];
@@ -186,7 +190,7 @@ class SpectralWorklet extends AudioWorkletProcessor {
           newPhase[i] = phase[i - shift];
         }
       }
-      
+
       magnitude.set(newMagnitude);
       phase.set(newPhase);
     }

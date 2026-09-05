@@ -21,16 +21,16 @@ export class MIDIIntegration {
 
     try {
       this.midiAccess = await navigator.requestMIDIAccess({ sysex: false });
-      
+
       // Enumerate inputs and outputs
       this.inputs = Array.from(this.midiAccess.inputs.values());
       this.outputs = Array.from(this.midiAccess.outputs.values());
-      
+
       // Setup listeners
-      this.inputs.forEach(input => {
+      this.inputs.forEach((input) => {
         input.onmidimessage = (e) => this.handleMIDIMessage(e);
       });
-      
+
       return true;
     } catch (err) {
       console.error('MIDI initialization failed:', err);
@@ -40,8 +40,8 @@ export class MIDIIntegration {
 
   handleMIDIMessage(event) {
     const [status, data1, data2] = event.data;
-    const command = status & 0xF0;
-    const channel = status & 0x0F;
+    const command = status & 0xf0;
+    const channel = status & 0x0f;
 
     switch (command) {
       case 0x90: // Note on
@@ -51,26 +51,26 @@ export class MIDIIntegration {
           this.handleNoteOff(data1);
         }
         break;
-        
+
       case 0x80: // Note off
         this.handleNoteOff(data1);
         break;
-        
-      case 0xB0: // Control change
+
+      case 0xb0: // Control change
         this.handleCC(data1, data2 / 127);
         break;
-        
-      case 0xF8: // MIDI clock
+
+      case 0xf8: // MIDI clock
         if (this.clockEnabled) {
           this.handleClock();
         }
         break;
-        
-      case 0xFA: // Start
+
+      case 0xfa: // Start
         this.handleStart();
         break;
-        
-      case 0xFC: // Stop
+
+      case 0xfc: // Stop
         this.handleStop();
         break;
     }
@@ -140,8 +140,8 @@ export class MIDIIntegration {
 
   startClock() {
     if (this.clockInterval) clearInterval(this.clockInterval);
-    
-    const msPerPulse = (60000 / this.bpm) / 24; // 24 ppqn
+
+    const msPerPulse = 60000 / this.bpm / 24; // 24 ppqn
     this.clockInterval = setInterval(() => {
       this.sendClock();
     }, msPerPulse);
@@ -155,15 +155,15 @@ export class MIDIIntegration {
   }
 
   sendClock() {
-    this.sendMIDIMessage([0xF8]);
+    this.sendMIDIMessage([0xf8]);
   }
 
   sendStart() {
-    this.sendMIDIMessage([0xFA]);
+    this.sendMIDIMessage([0xfa]);
   }
 
   sendStop() {
-    this.sendMIDIMessage([0xFC]);
+    this.sendMIDIMessage([0xfc]);
   }
 
   // MIDI output
@@ -176,11 +176,11 @@ export class MIDIIntegration {
   }
 
   sendCC(cc, value, channel = 0) {
-    this.sendMIDIMessage([0xB0 | channel, cc, Math.floor(value * 127)]);
+    this.sendMIDIMessage([0xb0 | channel, cc, Math.floor(value * 127)]);
   }
 
   sendMIDIMessage(data) {
-    this.outputs.forEach(output => {
+    this.outputs.forEach((output) => {
       output.send(data);
     });
   }
@@ -188,74 +188,87 @@ export class MIDIIntegration {
   // Export MIDI
   exportMIDI(slices) {
     const midiData = [];
-    
+
     // MIDI header
     midiData.push(...this.createMIDIHeader());
-    
+
     // Track with slice triggers
     const track = [];
     let tick = 0;
     const ticksPerBeat = 480;
-    
+
     slices.forEach((slice, idx) => {
       const note = 36 + idx; // Start from C2
       const duration = slice.duration * (this.bpm / 60) * ticksPerBeat;
-      
+
       // Note on
       track.push(...this.encodeVarLength(tick));
       track.push(0x90, note, 100);
-      
+
       // Note off
       track.push(...this.encodeVarLength(Math.floor(duration)));
       track.push(0x80, note, 0);
-      
+
       tick = 0;
     });
-    
+
     // Track header
     midiData.push(...this.createTrackHeader(track.length));
     midiData.push(...track);
-    
+
     return new Uint8Array(midiData);
   }
 
   createMIDIHeader() {
     return [
-      0x4D, 0x54, 0x68, 0x64, // "MThd"
-      0x00, 0x00, 0x00, 0x06, // Header length
-      0x00, 0x00,             // Format 0
-      0x00, 0x01,             // 1 track
-      0x01, 0xE0              // 480 ticks per beat
+      0x4d,
+      0x54,
+      0x68,
+      0x64, // "MThd"
+      0x00,
+      0x00,
+      0x00,
+      0x06, // Header length
+      0x00,
+      0x00, // Format 0
+      0x00,
+      0x01, // 1 track
+      0x01,
+      0xe0, // 480 ticks per beat
     ];
   }
 
   createTrackHeader(length) {
     return [
-      0x4D, 0x54, 0x72, 0x6B, // "MTrk"
-      (length >> 24) & 0xFF,
-      (length >> 16) & 0xFF,
-      (length >> 8) & 0xFF,
-      length & 0xFF
+      0x4d,
+      0x54,
+      0x72,
+      0x6b, // "MTrk"
+      (length >> 24) & 0xff,
+      (length >> 16) & 0xff,
+      (length >> 8) & 0xff,
+      length & 0xff,
     ];
   }
 
   encodeVarLength(value) {
     const bytes = [];
     let v = value;
-    
-    bytes.unshift(v & 0x7F);
+
+    bytes.unshift(v & 0x7f);
     v >>= 7;
-    
+
     while (v > 0) {
-      bytes.unshift((v & 0x7F) | 0x80);
+      bytes.unshift((v & 0x7f) | 0x80);
       v >>= 7;
     }
-    
+
     return bytes;
   }
 
   dispose() {
     this.stopClock();
+    this.clockEnabled = false;
     this.sliceMIDIMap.clear();
     this.cclMap.clear();
   }

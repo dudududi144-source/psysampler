@@ -15,7 +15,7 @@ export class SliceBank {
     this.slices = slices;
     this.analysis = analysis;
     this.hasLoop = true;
-    
+
     // Initialize slice properties
     this.slices.forEach((slice, idx) => {
       slice.volume = 1.0;
@@ -42,7 +42,7 @@ export class SliceBank {
         time: slice.time,
         reverse: slice.reverse,
         attack: slice.attack,
-        release: slice.release
+        release: slice.release,
       };
     }
     return null;
@@ -51,7 +51,7 @@ export class SliceBank {
   getSliceInfo(index) {
     const slice = this.slices[index];
     if (!slice) return null;
-    
+
     return {
       index,
       start: slice.start,
@@ -61,7 +61,7 @@ export class SliceBank {
       pan: slice.pan,
       pitch: slice.pitch,
       time: slice.time,
-      reverse: slice.reverse
+      reverse: slice.reverse,
     };
   }
 
@@ -77,14 +77,14 @@ export class SliceBank {
       hasLoop: this.hasLoop,
       numSlices: this.slices.length,
       analysis: this.analysis,
-      duration: this.audioBuffer?.duration || 0
+      duration: this.audioBuffer?.duration || 0,
     };
   }
 
   export() {
     return {
       index: this.index,
-      slices: this.slices.map(s => ({
+      slices: this.slices.map((s) => ({
         start: s.start,
         end: s.end,
         volume: s.volume,
@@ -93,9 +93,9 @@ export class SliceBank {
         time: s.time,
         reverse: s.reverse,
         attack: s.attack,
-        release: s.release
+        release: s.release,
       })),
-      analysis: this.analysis
+      analysis: this.analysis,
     };
   }
 

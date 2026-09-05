@@ -7,24 +7,21 @@ export class AudioExporter {
   }
 
   bufferToWav(buffer, options = {}) {
-    const {
-      bitDepth = 16,
-      numChannels = buffer.numberOfChannels || 1
-    } = options;
+    const { bitDepth = 16, numChannels = buffer.numberOfChannels || 1 } = options;
 
     const length = buffer.length;
     const bytesPerSample = bitDepth / 8;
     const dataSize = length * numChannels * bytesPerSample;
-    
+
     // Create WAV header
-    const buffer = new ArrayBuffer(44 + dataSize);
-    const view = new DataView(buffer);
+    const arrayBuffer = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(arrayBuffer);
 
     // RIFF identifier
     this.writeString(view, 0, 'RIFF');
     view.setUint32(4, 36 + dataSize, true);
     this.writeString(view, 8, 'WAVE');
-    
+
     // Format chunk
     this.writeString(view, 12, 'fmt ');
     view.setUint32(16, 16, true);
@@ -34,7 +31,7 @@ export class AudioExporter {
     view.setUint32(28, this.sampleRate * numChannels * bytesPerSample, true);
     view.setUint16(32, numChannels * bytesPerSample, true);
     view.setUint16(34, bitDepth, true);
-    
+
     // Data chunk
     this.writeString(view, 36, 'data');
     view.setUint32(40, dataSize, true);
@@ -43,25 +40,21 @@ export class AudioExporter {
     let offset = 44;
     for (let i = 0; i < length; i++) {
       for (let channel = 0; channel < numChannels; channel++) {
-        const sample = buffer.getChannelData ? 
-          buffer.getChannelData(channel)[i] : 
-          buffer[channel][i];
-        
+        const sample = buffer.getChannelData
+          ? buffer.getChannelData(channel)[i]
+          : buffer[channel][i];
+
         const clampedSample = Math.max(-1, Math.min(1, sample));
-        
+
         if (bitDepth === 16) {
-          const intSample = clampedSample < 0 ? 
-            clampedSample * 0x8000 : 
-            clampedSample * 0x7FFF;
+          const intSample = clampedSample < 0 ? clampedSample * 0x8000 : clampedSample * 0x7fff;
           view.setInt16(offset, intSample, true);
           offset += 2;
         } else if (bitDepth === 24) {
-          const intSample = clampedSample < 0 ? 
-            clampedSample * 0x800000 : 
-            clampedSample * 0x7FFFFF;
-          view.setUint8(offset, intSample & 0xFF);
-          view.setUint8(offset + 1, (intSample >> 8) & 0xFF);
-          view.setUint8(offset + 2, (intSample >> 16) & 0xFF);
+          const intSample = clampedSample < 0 ? clampedSample * 0x800000 : clampedSample * 0x7fffff;
+          view.setUint8(offset, intSample & 0xff);
+          view.setUint8(offset + 1, (intSample >> 8) & 0xff);
+          view.setUint8(offset + 2, (intSample >> 16) & 0xff);
           offset += 3;
         } else if (bitDepth === 32) {
           view.setFloat32(offset, clampedSample, true);
@@ -85,7 +78,7 @@ export class AudioExporter {
       sampleRate: this.sampleRate,
       length: buffer.length,
       numberOfChannels: buffer.numberOfChannels || 1,
-      data: this.bufferToFloat32Array(buffer)
+      data: this.bufferToFloat32Array(buffer),
     };
   }
 

@@ -1,14 +1,19 @@
 // Validation Utilities
 // Input validation and sanitization functions
 
-export function validateNumber(value, min = -Infinity, max = Infinity, defaultValue = 0) {
-  if (typeof value !== 'number' || isNaN(value)) {
+export function validateNumber(
+  value,
+  min = Number.NEGATIVE_INFINITY,
+  max = Number.POSITIVE_INFINITY,
+  defaultValue = 0,
+) {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
     return defaultValue;
   }
   return Math.max(min, Math.min(max, value));
 }
 
-export function validateString(value, maxLength = Infinity, defaultValue = '') {
+export function validateString(value, maxLength = Number.POSITIVE_INFINITY, defaultValue = '') {
   if (typeof value !== 'string') {
     return defaultValue;
   }
@@ -44,21 +49,26 @@ export function validateEnum(value, validValues, defaultValue) {
 }
 
 export function validateRange(value, min, max) {
-  if (typeof value !== 'number' || isNaN(value)) {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
     return min;
   }
   return Math.max(min, Math.min(max, value));
 }
 
-export function validateInteger(value, min = -Infinity, max = Infinity, defaultValue = 0) {
-  if (typeof value !== 'number' || isNaN(value)) {
+export function validateInteger(
+  value,
+  min = Number.NEGATIVE_INFINITY,
+  max = Number.POSITIVE_INFINITY,
+  defaultValue = 0,
+) {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
     return defaultValue;
   }
   return Math.max(min, Math.min(max, Math.floor(value)));
 }
 
 export function validatePositiveNumber(value, defaultValue = 0) {
-  return validateNumber(value, 0, Infinity, defaultValue);
+  return validateNumber(value, 0, Number.POSITIVE_INFINITY, defaultValue);
 }
 
 export function validateUnitInterval(value, defaultValue = 0) {

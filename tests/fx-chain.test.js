@@ -6,22 +6,22 @@ import { FXChain } from '../src/fx-chain.js';
 const mockContext = {
   createGain: () => ({
     connect: () => {},
-    gain: { value: 1 }
+    gain: { value: 1 },
   }),
   createBiquadFilter: () => ({
     connect: () => {},
     type: '',
     frequency: { value: 1000 },
     Q: { value: 1 },
-    gain: { value: 0 }
+    gain: { value: 0 },
   }),
   createDelay: () => ({
     connect: () => {},
-    delayTime: { value: 0.5 }
+    delayTime: { value: 0.5 },
   }),
   createConvolver: () => ({
     connect: () => {},
-    buffer: null
+    buffer: null,
   }),
   createDynamicsCompressor: () => ({
     connect: () => {},
@@ -29,19 +29,19 @@ const mockContext = {
     knee: { value: 30 },
     ratio: { value: 4 },
     attack: { value: 0.003 },
-    release: { value: 0.25 }
+    release: { value: 0.25 },
   }),
   createWaveShaper: () => ({
     connect: () => {},
-    curve: null
+    curve: null,
   }),
   createBuffer: (channels, length, sampleRate) => ({
     getChannelData: () => new Float32Array(length),
     numberOfChannels: channels,
     length,
-    sampleRate
+    sampleRate,
   }),
-  sampleRate: 48000
+  sampleRate: 48000,
 };
 
 describe('FXChain', () => {
@@ -55,9 +55,9 @@ describe('FXChain', () => {
     const fx = fxChain.createFX('filter', {
       type: 'lowpass',
       frequency: 1000,
-      Q: 1
+      Q: 1,
     });
-    
+
     expect(fx.type).toBe('filter');
     expect(fx.input).toBeDefined();
     expect(fx.output).toBeDefined();
@@ -67,9 +67,9 @@ describe('FXChain', () => {
     const fx = fxChain.createFX('delay', {
       time: 0.5,
       feedback: 0.5,
-      mix: 0.5
+      mix: 0.5,
     });
-    
+
     expect(fx.type).toBe('delay');
     expect(fx.input).toBeDefined();
     expect(fx.output).toBeDefined();
@@ -78,9 +78,9 @@ describe('FXChain', () => {
   test('creates reverb effect', () => {
     const fx = fxChain.createFX('reverb', {
       decay: 2.0,
-      mix: 0.3
+      mix: 0.3,
     });
-    
+
     expect(fx.type).toBe('reverb');
     expect(fx.input).toBeDefined();
     expect(fx.output).toBeDefined();
@@ -89,9 +89,9 @@ describe('FXChain', () => {
   test('creates compressor effect', () => {
     const fx = fxChain.createFX('compressor', {
       threshold: -24,
-      ratio: 4
+      ratio: 4,
     });
-    
+
     expect(fx.type).toBe('compressor');
     expect(fx.input).toBeDefined();
     expect(fx.output).toBeDefined();
@@ -99,9 +99,9 @@ describe('FXChain', () => {
 
   test('creates saturation effect', () => {
     const fx = fxChain.createFX('saturation', {
-      drive: 1.5
+      drive: 1.5,
     });
-    
+
     expect(fx.type).toBe('saturation');
     expect(fx.input).toBeDefined();
     expect(fx.output).toBeDefined();
@@ -109,9 +109,9 @@ describe('FXChain', () => {
 
   test('creates limiter effect', () => {
     const fx = fxChain.createFX('limiter', {
-      threshold: -1
+      threshold: -1,
     });
-    
+
     expect(fx.type).toBe('limiter');
     expect(fx.input).toBeDefined();
     expect(fx.output).toBeDefined();
@@ -123,12 +123,21 @@ describe('FXChain', () => {
 
   test('creates all 12 FX types', () => {
     const types = [
-      'transient-shaper', 'filter', 'delay', 'reverb',
-      'bitcrusher', 'formant', 'vocoder', 'granular',
-      'ott', 'compressor', 'saturation', 'limiter'
+      'transient-shaper',
+      'filter',
+      'delay',
+      'reverb',
+      'bitcrusher',
+      'formant',
+      'vocoder',
+      'granular',
+      'ott',
+      'compressor',
+      'saturation',
+      'limiter',
     ];
-    
-    types.forEach(type => {
+
+    types.forEach((type) => {
       const fx = fxChain.createFX(type);
       expect(fx.type).toBe(type);
     });

@@ -39,7 +39,7 @@ export class ErrorHandler {
       stack: error.stack,
       context,
       timestamp: Date.now(),
-      name: error.name || 'Error'
+      name: error.name || 'Error',
     };
 
     this.errors.push(errorInfo);
@@ -99,7 +99,7 @@ export class ErrorHandler {
   }
 
   notifyListeners(errorInfo) {
-    this.listeners.forEach(callback => {
+    this.listeners.forEach((callback) => {
       try {
         callback(errorInfo);
       } catch (e) {
@@ -113,7 +113,7 @@ export class ErrorHandler {
   }
 
   getErrorsByContext(context) {
-    return this.errors.filter(e => e.context === context);
+    return this.errors.filter((e) => e.context === context);
   }
 
   clearErrors() {

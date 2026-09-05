@@ -17,11 +17,11 @@ describe('LooperDevice', () => {
 
   test('exports and imports project', () => {
     const project = device.exportProject();
-    
+
     expect(project.version).toBe('1.0.0');
     expect(project.banks).toBeDefined();
     expect(project.banks.length).toBe(8);
-    
+
     device.importProject(project);
     expect(device.determinism.seed).toBe(project.seed);
   });
@@ -52,19 +52,21 @@ describe('LooperDevice', () => {
     device.on('test', () => {
       eventFired = true;
     });
-    
+
     device.emit('test', {});
     expect(eventFired).toBe(true);
   });
 
   test('off removes event handler', () => {
     let count = 0;
-    const handler = () => { count++; };
-    
+    const handler = () => {
+      count++;
+    };
+
     device.on('test', handler);
     device.emit('test', {});
     expect(count).toBe(1);
-    
+
     device.off('test', handler);
     device.emit('test', {});
     expect(count).toBe(1);
@@ -83,7 +85,23 @@ describe('LooperDevice', () => {
   });
 
   test('PsyDevice contract - onContext', () => {
-    const mockContext = { sampleRate: 48000 };
+    // Faithful minimal AudioContext mock: audio-graph.init builds
+    // 8 buses (gains) + master chain (EQ uses createBiquadFilter).
+    const makeGain = () => ({ connect: () => {}, disconnect: () => {}, gain: { value: 1 } });
+    const mockContext = {
+      sampleRate: 48000,
+      currentTime: 0,
+      destination: { connect: () => {} },
+      createGain: makeGain,
+      createBiquadFilter: () => ({
+        connect: () => {},
+        disconnect: () => {},
+        type: 'peaking',
+        frequency: { value: 0 },
+        Q: { value: 1 },
+        gain: { value: 0 },
+      }),
+    };
     device.onContext(mockContext);
     expect(device.context).toBe(mockContext);
   });

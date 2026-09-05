@@ -2,9 +2,9 @@
 // Build Optimization Script
 // Optimizes the build output for production
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const { execSync } = require('node:child_process');
 
 console.log('🚀 Starting build optimization...\n');
 
@@ -16,7 +16,7 @@ const config = {
   maxAssetSize: 500 * 1024, // 500KB
   compressImages: true,
   minifyHTML: true,
-  generateSW: true
+  generateSW: true,
 };
 
 // Utility functions
@@ -30,7 +30,7 @@ function formatBytes(bytes) {
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
 }
 
 // Step 1: Clean dist directory
@@ -68,11 +68,13 @@ function walkDir(dir) {
 walkDir(config.distDir);
 
 let totalSize = 0;
-const fileSizes = files.map(file => {
-  const size = getFileSize(file);
-  totalSize += size;
-  return { file, size };
-}).sort((a, b) => b.size - a.size);
+const fileSizes = files
+  .map((file) => {
+    const size = getFileSize(file);
+    totalSize += size;
+    return { file, size };
+  })
+  .sort((a, b) => b.size - a.size);
 
 console.log(`Total build size: ${formatBytes(totalSize)}`);
 console.log(`Number of files: ${files.length}`);
@@ -83,12 +85,14 @@ fileSizes.slice(0, 10).forEach(({ file, size }) => {
 });
 
 // Warn about large files
-const largeFiles = fileSizes.filter(f => f.size > config.maxAssetSize);
+const largeFiles = fileSizes.filter((f) => f.size > config.maxAssetSize);
 if (largeFiles.length > 0) {
   console.log('\n⚠️  Warning: Large files detected:');
   largeFiles.forEach(({ file, size }) => {
     const relativePath = path.relative(config.distDir, file);
-    console.log(`  ${relativePath}: ${formatBytes(size)} (limit: ${formatBytes(config.maxAssetSize)})`);
+    console.log(
+      `  ${relativePath}: ${formatBytes(size)} (limit: ${formatBytes(config.maxAssetSize)})`,
+    );
   });
 }
 console.log('');
@@ -100,13 +104,10 @@ if (fs.existsSync(config.workletDir)) {
   if (!fs.existsSync(workletDistDir)) {
     fs.mkdirSync(workletDistDir, { recursive: true });
   }
-  
+
   const worklets = fs.readdirSync(config.workletDir);
-  worklets.forEach(worklet => {
-    fs.copyFileSync(
-      path.join(config.workletDir, worklet),
-      path.join(workletDistDir, worklet)
-    );
+  worklets.forEach((worklet) => {
+    fs.copyFileSync(path.join(config.workletDir, worklet), path.join(workletDistDir, worklet));
   });
   console.log(`✅ Copied ${worklets.length} worklets\n`);
 }
@@ -153,7 +154,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 `;
-  
+
   fs.writeFileSync(path.join(config.distDir, 'sw.js'), swContent);
   console.log('✅ Service worker generated\n');
 }
@@ -163,29 +164,29 @@ console.log('📋 Step 6: Generating asset manifest...');
 const manifest = {
   version: require('./package.json').version,
   buildTime: new Date().toISOString(),
-  files: files.map(file => ({
+  files: files.map((file) => ({
     path: path.relative(config.distDir, file),
-    size: getFileSize(file)
-  }))
+    size: getFileSize(file),
+  })),
 };
 
 fs.writeFileSync(
   path.join(config.distDir, 'asset-manifest.json'),
-  JSON.stringify(manifest, null, 2)
+  JSON.stringify(manifest, null, 2),
 );
 console.log('✅ Asset manifest generated\n');
 
 // Step 7: Create gzip versions
 console.log('🗜️  Step 7: Creating gzip versions...');
-const zlib = require('zlib');
-let gzipped = 0;
+const zlib = require('node:zlib');
+const gzipped = 0;
 
-files.forEach(file => {
+files.forEach((file) => {
   const ext = path.extname(file);
   if (['.js', '.css', '.html', '.json', '.svg'].includes(ext)) {
     const content = fs.readFileSync(file);
-    const gzipped = zlib.gzipSync(content, { level: 9 });
-    fs.writeFileSync(file + '.gz', gzipped);
+    let gzipped = zlib.gzipSync(content, { level: 9 });
+    fs.writeFileSync(`${file}.gz`, gzipped);
     gzipped++;
   }
 });

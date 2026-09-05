@@ -19,7 +19,7 @@ describe('AutomationLane', () => {
     lane.addPoint(2, 0.8);
     lane.addPoint(1, 0.5);
     lane.addPoint(3, 1.0);
-    
+
     expect(lane.points.length).toBe(3);
     expect(lane.points[0].time).toBe(1);
     expect(lane.points[1].time).toBe(2);
@@ -29,9 +29,9 @@ describe('AutomationLane', () => {
   test('removePoint removes point', () => {
     lane.addPoint(1, 0.5);
     lane.addPoint(2, 0.8);
-    
+
     lane.removePoint(0);
-    
+
     expect(lane.points.length).toBe(1);
     expect(lane.points[0].time).toBe(2);
   });
@@ -39,9 +39,9 @@ describe('AutomationLane', () => {
   test('clear removes all points', () => {
     lane.addPoint(1, 0.5);
     lane.addPoint(2, 0.8);
-    
+
     lane.clear();
-    
+
     expect(lane.points.length).toBe(0);
   });
 
@@ -51,7 +51,7 @@ describe('AutomationLane', () => {
 
   test('getValueAt returns value for single point', () => {
     lane.addPoint(1, 0.5);
-    
+
     expect(lane.getValueAt(0)).toBe(0.5);
     expect(lane.getValueAt(1)).toBe(0.5);
     expect(lane.getValueAt(2)).toBe(0.5);
@@ -60,7 +60,7 @@ describe('AutomationLane', () => {
   test('getValueAt interpolates between points', () => {
     lane.addPoint(0, 0);
     lane.addPoint(2, 1);
-    
+
     expect(lane.getValueAt(0)).toBe(0);
     expect(lane.getValueAt(1)).toBeCloseTo(0.5, 2);
     expect(lane.getValueAt(2)).toBe(1);
@@ -69,12 +69,12 @@ describe('AutomationLane', () => {
   test('export and import preserve state', () => {
     lane.addPoint(1, 0.5);
     lane.addPoint(2, 0.8);
-    
+
     const exported = lane.export();
-    
+
     const newLane = new AutomationLane(1, 'pan');
     newLane.import(exported);
-    
+
     expect(newLane.track).toBe(0);
     expect(newLane.param).toBe('volume');
     expect(newLane.points.length).toBe(2);
@@ -90,7 +90,7 @@ describe('AutomationManager', () => {
 
   test('createLane creates new lane', () => {
     const lane = manager.createLane(0, 'volume');
-    
+
     expect(lane).toBeDefined();
     expect(lane.track).toBe(0);
     expect(lane.param).toBe('volume');
@@ -99,16 +99,16 @@ describe('AutomationManager', () => {
   test('createLane returns existing lane', () => {
     const lane1 = manager.createLane(0, 'volume');
     const lane2 = manager.createLane(0, 'volume');
-    
+
     expect(lane1).toBe(lane2);
   });
 
   test('armLane and disarmLane work', () => {
     manager.createLane(0, 'volume');
-    
+
     manager.armLane(0, 'volume');
     expect(manager.armedLanes.size).toBe(1);
-    
+
     manager.disarmLane(0, 'volume');
     expect(manager.armedLanes.size).toBe(0);
   });
@@ -117,9 +117,9 @@ describe('AutomationManager', () => {
     manager.createLane(0, 'volume');
     manager.armLane(0, 'volume');
     manager.startRecording();
-    
+
     manager.recordValue(0, 'volume', 1.0, 0.5);
-    
+
     const lane = manager.getLane(0, 'volume');
     expect(lane.points.length).toBe(1);
   });
@@ -127,9 +127,9 @@ describe('AutomationManager', () => {
   test('recordValue does not add point when not recording', () => {
     manager.createLane(0, 'volume');
     manager.armLane(0, 'volume');
-    
+
     manager.recordValue(0, 'volume', 1.0, 0.5);
-    
+
     const lane = manager.getLane(0, 'volume');
     expect(lane.points.length).toBe(0);
   });
@@ -137,9 +137,9 @@ describe('AutomationManager', () => {
   test('clear removes all lanes', () => {
     manager.createLane(0, 'volume');
     manager.createLane(1, 'pan');
-    
+
     manager.clear();
-    
+
     expect(manager.lanes.size).toBe(0);
   });
 });

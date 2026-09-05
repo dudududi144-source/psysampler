@@ -58,7 +58,7 @@ export class Transport {
       bars: this.bar,
       beat: this.beat,
       sixteenth: this.sixteenth,
-      seconds: this.position * (60 / this.bpm)
+      seconds: this.position * (60 / this.bpm),
     };
   }
 
@@ -79,7 +79,8 @@ export class Transport {
 
   // Get swing offset for a sixteenth note
   getSwingOffset(sixteenthIndex) {
-    if (sixteenthIndex % 2 === 1) { // Off-beat sixteenths
+    if (sixteenthIndex % 2 === 1) {
+      // Off-beat sixteenths
       return this.swing * this.getSixteenthDuration() * 0.5;
     }
     return 0;
@@ -103,23 +104,23 @@ export class Transport {
 
   emit(event, data) {
     if (this.listeners.has(event)) {
-      this.listeners.get(event).forEach(handler => handler(data));
+      this.listeners.get(event).forEach((handler) => handler(data));
     }
   }
 
   // Update position (called by scheduler)
   update(deltaTime) {
     if (!this.isPlaying) return;
-    
+
     const beatsElapsed = this.secondsToBeats(deltaTime);
     this.position += beatsElapsed;
-    
+
     // Calculate bar, beat, sixteenth
     const beatsPerBar = this.timeSignature.numerator;
     this.bar = Math.floor(this.position / beatsPerBar);
     this.beat = Math.floor(this.position % beatsPerBar);
     this.sixteenth = Math.floor((this.position % 1) * 4);
-    
+
     this.emit('tick', this.getPosition());
   }
 
@@ -139,7 +140,7 @@ export class Transport {
       bpm: this.bpm,
       swing: this.swing,
       timeSignature: this.timeSignature,
-      position: this.position
+      position: this.position,
     };
   }
 

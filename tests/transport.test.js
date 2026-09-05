@@ -25,7 +25,7 @@ describe('Transport', () => {
     transport.play();
     transport.update(1);
     transport.stop();
-    
+
     expect(transport.isPlaying).toBe(false);
     expect(transport.position).toBe(0);
   });
@@ -33,10 +33,10 @@ describe('Transport', () => {
   test('setBPM clamps to valid range', () => {
     transport.setBPM(10);
     expect(transport.bpm).toBe(20);
-    
+
     transport.setBPM(500);
     expect(transport.bpm).toBe(300);
-    
+
     transport.setBPM(140);
     expect(transport.bpm).toBe(140);
   });
@@ -44,10 +44,10 @@ describe('Transport', () => {
   test('setSwing clamps to 0-1', () => {
     transport.setSwing(-0.5);
     expect(transport.swing).toBe(0);
-    
+
     transport.setSwing(1.5);
     expect(transport.swing).toBe(1);
-    
+
     transport.setSwing(0.5);
     expect(transport.swing).toBe(0.5);
   });
@@ -98,7 +98,7 @@ describe('Transport', () => {
     transport.on('play', () => {
       eventFired = true;
     });
-    
+
     transport.play();
     expect(eventFired).toBe(true);
   });

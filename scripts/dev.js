@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 // Development server for PSY LOOPER
 
-import { spawn } from 'child_process';
+import { spawn } from 'node:child_process';
 import chokidar from 'chokidar';
 
 console.log('🚀 Starting PSY LOOPER development server...');
@@ -9,13 +9,13 @@ console.log('🚀 Starting PSY LOOPER development server...');
 // Start bun dev server
 const server = spawn('bun', ['run', '--hot', 'src/index.js'], {
   stdio: 'inherit',
-  shell: true
+  shell: true,
 });
 
 // Watch for changes
 const watcher = chokidar.watch(['src', 'worklets', 'public'], {
   ignored: /node_modules/,
-  persistent: true
+  persistent: true,
 });
 
 watcher.on('change', (path) => {

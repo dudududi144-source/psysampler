@@ -20,8 +20,9 @@ export class SliceEngine {
   }
 
   trigger(bank, slice, velocity = 1.0) {
+    if (!this.context) return; // No audio context — cannot create voices (headless-safe)
     const bankObj = this.banks[bank];
-    if (!bankObj.hasLoop) return;
+    if (!bankObj || !bankObj.hasLoop) return;
 
     const sliceData = bankObj.getSlice(slice);
     if (!sliceData) return;
@@ -33,9 +34,9 @@ export class SliceEngine {
 
     const voice = this.createVoice(sliceData, velocity);
     this.activeVoices.push(voice);
-    
+
     voice.play();
-    
+
     // Auto-cleanup when done
     voice.onComplete(() => {
       const idx = this.activeVoices.indexOf(voice);
@@ -46,38 +47,38 @@ export class SliceEngine {
   createVoice(sliceData, velocity) {
     const { audioBuffer, start, end, pitch, time, reverse } = sliceData;
     const ctx = this.context;
-    
+
     const source = ctx.createBufferSource();
     source.buffer = audioBuffer;
-    
+
     // Apply pitch shift
     if (pitch !== 0) {
       source.detune.value = pitch * 100; // cents
     }
-    
+
     // Apply time stretch (simplified - full impl in worklet)
     source.playbackRate.value = time;
-    
+
     // Gain
     const gain = ctx.createGain();
     gain.gain.value = velocity * sliceData.volume;
-    
+
     // Pan
     const panner = ctx.createStereoPanner();
     panner.pan.value = sliceData.pan;
-    
+
     // Connect chain
     source.connect(gain);
     gain.connect(panner);
     panner.connect(this.getOutputNode());
-    
+
     // Envelope
     const attack = sliceData.attack || 0.01;
     const release = sliceData.release || 0.1;
-    
+
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(velocity, ctx.currentTime + attack);
-    
+
     return {
       play: () => {
         if (reverse) {
@@ -90,8 +91,13 @@ export class SliceEngine {
       source,
       onComplete: (cb) => {
         source.onended = cb;
-      }
+      },
     };
+  }
+
+  // Alias matching the PsyDevice contract naming (used by LooperDevice.onEvent + keyboard bindings)
+  triggerSlice(bank, slice, velocity = 1.0) {
+    return this.trigger(bank, slice, velocity);
   }
 
   stealVoice() {
@@ -116,7 +122,7 @@ export class SliceEngine {
 
   stop() {
     this.isPlaying = false;
-    this.activeVoices.forEach(v => v.stop());
+    this.activeVoices.forEach((v) => v.stop());
     this.activeVoices = [];
   }
 

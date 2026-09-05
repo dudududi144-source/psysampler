@@ -1,7 +1,7 @@
 // Generator Tests
 
-import { LoopGenerator } from '../src/generator.js';
 import { Determinism } from '../src/determinism.js';
+import { LoopGenerator } from '../src/generator.js';
 
 describe('LoopGenerator', () => {
   let generator;
@@ -17,7 +17,7 @@ describe('LoopGenerator', () => {
       bpm: 140,
       bars: 4,
       key: 'C',
-      scale: 'minor'
+      scale: 'minor',
     });
 
     expect(result.audio).toBeDefined();
@@ -28,7 +28,7 @@ describe('LoopGenerator', () => {
   test('generates rhythmic loop', async () => {
     const result = await generator.generate('rhythmic', {
       bpm: 128,
-      bars: 4
+      bars: 4,
     });
 
     expect(result.audio).toBeDefined();
@@ -40,7 +40,7 @@ describe('LoopGenerator', () => {
       bpm: 140,
       bars: 4,
       key: 'A',
-      scale: 'minor'
+      scale: 'minor',
     });
 
     expect(result.audio).toBeDefined();
@@ -50,7 +50,7 @@ describe('LoopGenerator', () => {
   test('generates fx loop', async () => {
     const result = await generator.generate('fx', {
       bpm: 140,
-      bars: 4
+      bars: 4,
     });
 
     expect(result.audio).toBeDefined();
@@ -62,7 +62,7 @@ describe('LoopGenerator', () => {
       bpm: 140,
       bars: 4,
       key: 'G',
-      scale: 'major'
+      scale: 'major',
     });
 
     expect(result.audio).toBeDefined();
@@ -72,7 +72,7 @@ describe('LoopGenerator', () => {
   test('generates atmospheric loop', async () => {
     const result = await generator.generate('atmospheric', {
       bpm: 140,
-      bars: 4
+      bars: 4,
     });
 
     expect(result.audio).toBeDefined();

@@ -8,7 +8,7 @@ class ChorusWorklet extends AudioWorkletProcessor {
       { name: 'depth', defaultValue: 5, minValue: 0.5, maxValue: 20 },
       { name: 'mix', defaultValue: 0.5, minValue: 0, maxValue: 1 },
       { name: 'voices', defaultValue: 3, minValue: 1, maxValue: 6 },
-      { name: 'feedback', defaultValue: 0, minValue: 0, maxValue: 0.5 }
+      { name: 'feedback', defaultValue: 0, minValue: 0, maxValue: 0.5 },
     ];
   }
 
@@ -18,7 +18,7 @@ class ChorusWorklet extends AudioWorkletProcessor {
     this.buffer = new Float32Array(this.bufferSize);
     this.writePos = 0;
     this.lfoPhases = [];
-    
+
     // Initialize LFO phases for each voice
     for (let i = 0; i < 6; i++) {
       this.lfoPhases.push(i / 6); // Spread phases evenly
@@ -50,27 +50,27 @@ class ChorusWorklet extends AudioWorkletProcessor {
       for (let voice = 0; voice < numVoices; voice++) {
         // Update LFO phase
         this.lfoPhases[voice] = (this.lfoPhases[voice] + phaseInc) % 1;
-        
+
         // Calculate delay modulation
         const lfo = Math.sin(2 * Math.PI * this.lfoPhases[voice]);
         const delayMs = 10 + lfo * depth; // Base delay + modulation
-        const delaySamples = Math.floor(delayMs * sampleRate / 1000);
-        
+        const delaySamples = Math.floor((delayMs * sampleRate) / 1000);
+
         // Read from buffer with interpolation
         const readPos = (this.writePos - delaySamples + this.bufferSize) % this.bufferSize;
         const readPosInt = Math.floor(readPos);
         const frac = readPos - readPosInt;
-        
+
         const sample1 = this.buffer[readPosInt];
         const sample2 = this.buffer[(readPosInt + 1) % this.bufferSize];
         const delayed = sample1 + frac * (sample2 - sample1);
-        
+
         wet += delayed;
       }
 
       // Normalize and apply feedback
       wet = wet / numVoices;
-      
+
       // Mix dry and wet
       output[0][i] = dry * (1 - mix) + wet * mix;
       if (output[1]) {

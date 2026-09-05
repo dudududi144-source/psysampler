@@ -6,22 +6,22 @@ import { FXChain } from '../src/fx-chain.js';
 const mockContext = {
   createGain: () => ({
     connect: () => {},
-    gain: { value: 1 }
+    gain: { value: 1 },
   }),
   createBiquadFilter: () => ({
     connect: () => {},
     type: '',
     frequency: { value: 1000 },
     Q: { value: 1 },
-    gain: { value: 0 }
+    gain: { value: 0 },
   }),
   createDelay: () => ({
     connect: () => {},
-    delayTime: { value: 0.5 }
+    delayTime: { value: 0.5 },
   }),
   createConvolver: () => ({
     connect: () => {},
-    buffer: null
+    buffer: null,
   }),
   createDynamicsCompressor: () => ({
     connect: () => {},
@@ -29,19 +29,19 @@ const mockContext = {
     knee: { value: 30 },
     ratio: { value: 4 },
     attack: { value: 0.003 },
-    release: { value: 0.25 }
+    release: { value: 0.25 },
   }),
   createWaveShaper: () => ({
     connect: () => {},
-    curve: null
+    curve: null,
   }),
   createBuffer: (channels, length, sampleRate) => ({
     getChannelData: () => new Float32Array(length),
     numberOfChannels: channels,
     length,
-    sampleRate
+    sampleRate,
   }),
-  sampleRate: 48000
+  sampleRate: 48000,
 };
 
 describe('FXChain Extended', () => {
@@ -53,12 +53,21 @@ describe('FXChain Extended', () => {
 
   test('createFX handles all 12 types', () => {
     const types = [
-      'transient-shaper', 'filter', 'delay', 'reverb',
-      'bitcrusher', 'formant', 'vocoder', 'granular',
-      'ott', 'compressor', 'saturation', 'limiter'
+      'transient-shaper',
+      'filter',
+      'delay',
+      'reverb',
+      'bitcrusher',
+      'formant',
+      'vocoder',
+      'granular',
+      'ott',
+      'compressor',
+      'saturation',
+      'limiter',
     ];
-    
-    types.forEach(type => {
+
+    types.forEach((type) => {
       const fx = fxChain.createFX(type);
       expect(fx.type).toBe(type);
       expect(fx.input).toBeDefined();
@@ -70,9 +79,9 @@ describe('FXChain Extended', () => {
     const fx = fxChain.createFX('filter', {
       type: 'lowpass',
       frequency: 500,
-      Q: 2
+      Q: 2,
     });
-    
+
     expect(fx.type).toBe('filter');
     expect(fx.filter).toBeDefined();
   });
@@ -81,18 +90,18 @@ describe('FXChain Extended', () => {
     const fx = fxChain.createFX('delay', {
       time: 0.25,
       feedback: 0.7,
-      mix: 0.4
+      mix: 0.4,
     });
-    
+
     expect(fx.type).toBe('delay');
   });
 
   test('reverb FX has correct parameters', () => {
     const fx = fxChain.createFX('reverb', {
       decay: 3.0,
-      mix: 0.5
+      mix: 0.5,
     });
-    
+
     expect(fx.type).toBe('reverb');
   });
 
@@ -101,34 +110,34 @@ describe('FXChain Extended', () => {
       threshold: -20,
       ratio: 6,
       attack: 0.01,
-      release: 0.1
+      release: 0.1,
     });
-    
+
     expect(fx.type).toBe('compressor');
     expect(fx.compressor).toBeDefined();
   });
 
   test('saturation FX has correct parameters', () => {
     const fx = fxChain.createFX('saturation', {
-      drive: 2.0
+      drive: 2.0,
     });
-    
+
     expect(fx.type).toBe('saturation');
   });
 
   test('limiter FX has correct parameters', () => {
     const fx = fxChain.createFX('limiter', {
       threshold: -3,
-      ceiling: -0.5
+      ceiling: -0.5,
     });
-    
+
     expect(fx.type).toBe('limiter');
   });
 
   test('createBuffer returns valid buffer', () => {
     const data = new Float32Array(100);
     const buffer = fxChain.createBuffer(data, 48000);
-    
+
     expect(buffer.numberOfChannels).toBe(1);
     expect(buffer.length).toBe(100);
     expect(buffer.sampleRate).toBe(48000);

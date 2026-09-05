@@ -34,7 +34,7 @@ export class EventBus {
   emit(event, ...args) {
     if (this.listeners.has(event)) {
       const callbacks = Array.from(this.listeners.get(event));
-      callbacks.forEach(callback => {
+      callbacks.forEach((callback) => {
         try {
           callback(...args);
         } catch (error) {
@@ -71,46 +71,46 @@ export const EVENTS = {
   LOOP_GENERATED: 'loop:generated',
   LOOP_PLAYING: 'loop:playing',
   LOOP_STOPPED: 'loop:stopped',
-  
+
   // Slice events
   SLICE_TRIGGERED: 'slice:triggered',
   SLICE_ADDED: 'slice:added',
   SLICE_REMOVED: 'slice:removed',
   SLICE_UPDATED: 'slice:updated',
-  
+
   // Bank events
   BANK_SELECTED: 'bank:selected',
   BANK_CLEARED: 'bank:cleared',
   BANK_LOADED: 'bank:loaded',
-  
+
   // FX events
   FX_ADDED: 'fx:added',
   FX_REMOVED: 'fx:removed',
   FX_UPDATED: 'fx:updated',
-  
+
   // MIDI events
   MIDI_CONNECTED: 'midi:connected',
   MIDI_DISCONNECTED: 'midi:disconnected',
   MIDI_NOTE_ON: 'midi:note-on',
   MIDI_NOTE_OFF: 'midi:note-off',
   MIDI_CC: 'midi:cc',
-  
+
   // Transport events
   TRANSPORT_PLAY: 'transport:play',
   TRANSPORT_STOP: 'transport:stop',
   TRANSPORT_RECORD: 'transport:record',
-  
+
   // Analysis events
   ANALYSIS_STARTED: 'analysis:started',
   ANALYSIS_COMPLETE: 'analysis:complete',
   ANALYSIS_FAILED: 'analysis:failed',
-  
+
   // Export events
   EXPORT_STARTED: 'export:started',
   EXPORT_COMPLETE: 'export:complete',
   EXPORT_FAILED: 'export:failed',
-  
+
   // UI events
   UI_READY: 'ui:ready',
-  UI_ERROR: 'ui:error'
+  UI_ERROR: 'ui:error',
 };

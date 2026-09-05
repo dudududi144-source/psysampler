@@ -1,7 +1,7 @@
 // Edge Case Tests
 
-import { Determinism } from '../src/determinism.js';
 import { LoopAnalyzer } from '../src/analyzer.js';
+import { Determinism } from '../src/determinism.js';
 import { StepSequencer } from '../src/sequencer.js';
 
 describe('Edge Cases', () => {
@@ -26,7 +26,7 @@ describe('Edge Cases', () => {
   test('LoopAnalyzer handles empty buffer', () => {
     const analyzer = new LoopAnalyzer();
     const data = new Float32Array(0);
-    
+
     const rms = analyzer.calculateRMS(data);
     expect(rms).toBe(0);
   });
@@ -34,7 +34,7 @@ describe('Edge Cases', () => {
   test('LoopAnalyzer handles single sample', () => {
     const analyzer = new LoopAnalyzer();
     const data = new Float32Array([0.5]);
-    
+
     const rms = analyzer.calculateRMS(data);
     expect(rms).toBe(0.5);
   });
@@ -42,10 +42,10 @@ describe('Edge Cases', () => {
   test('LoopAnalyzer handles all zeros', () => {
     const analyzer = new LoopAnalyzer();
     const data = new Float32Array(100);
-    
+
     const rms = analyzer.calculateRMS(data);
     expect(rms).toBe(0);
-    
+
     const peak = analyzer.calculatePeak(data);
     expect(peak).toBe(0);
   });
@@ -53,25 +53,25 @@ describe('Edge Cases', () => {
   test('LoopAnalyzer handles all ones', () => {
     const analyzer = new LoopAnalyzer();
     const data = new Float32Array(100).fill(1.0);
-    
+
     const rms = analyzer.calculateRMS(data);
     expect(rms).toBe(1.0);
-    
+
     const peak = analyzer.calculatePeak(data);
     expect(peak).toBe(1.0);
   });
 
   test('LoopAnalyzer handles NaN values', () => {
     const analyzer = new LoopAnalyzer();
-    const data = new Float32Array([NaN, 0.5, NaN]);
-    
+    const data = new Float32Array([Number.NaN, 0.5, Number.NaN]);
+
     // Should not throw
     expect(() => analyzer.calculateRMS(data)).not.toThrow();
   });
 
   test('StepSequencer handles invalid track index', () => {
     const seq = new StepSequencer(16, 8);
-    
+
     expect(seq.getStep(-1, 0)).toBeNull();
     expect(seq.getStep(100, 0)).toBeNull();
     expect(seq.getStep(0, -1)).toBeNull();
@@ -80,7 +80,7 @@ describe('Edge Cases', () => {
 
   test('StepSequencer setStep ignores invalid indices', () => {
     const seq = new StepSequencer(16, 8);
-    
+
     // Should not throw
     expect(() => seq.setStep(-1, 0, true)).not.toThrow();
     expect(() => seq.setStep(100, 0, true)).not.toThrow();

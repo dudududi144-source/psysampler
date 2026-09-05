@@ -31,7 +31,7 @@ export class AudioVisualizer {
 
   draw() {
     this.animationId = requestAnimationFrame(() => this.draw());
-    
+
     if (!this.ctx) return;
 
     this.analyser.getByteFrequencyData(this.frequencyData);
@@ -46,7 +46,7 @@ export class AudioVisualizer {
 
     const width = this.canvas.width;
     const height = this.canvas.height / 2;
-    
+
     this.ctx.fillStyle = '#000';
     this.ctx.fillRect(0, 0, width, height);
 
@@ -57,7 +57,7 @@ export class AudioVisualizer {
       const value = this.frequencyData[i];
       const percent = value / 255;
       const h = barHeight * percent;
-      
+
       const hue = (i / this.frequencyData.length) * 360;
       this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
       this.ctx.fillRect(i * barWidth, height - h, barWidth - 1, h);
@@ -83,7 +83,7 @@ export class AudioVisualizer {
 
     for (let i = 0; i < this.timeDomainData.length; i++) {
       const value = this.timeDomainData[i] / 128.0;
-      const yPos = y + (value * height / 2);
+      const yPos = y + (value * height) / 2;
 
       if (i === 0) {
         this.ctx.moveTo(x, yPos);
@@ -99,47 +99,47 @@ export class AudioVisualizer {
 
   getPeakFrequency() {
     this.analyser.getByteFrequencyData(this.frequencyData);
-    
+
     let maxIndex = 0;
     let maxValue = 0;
-    
+
     for (let i = 0; i < this.frequencyData.length; i++) {
       if (this.frequencyData[i] > maxValue) {
         maxValue = this.frequencyData[i];
         maxIndex = i;
       }
     }
-    
+
     const nyquist = this.analyser.context.sampleRate / 2;
     return (maxIndex / this.frequencyData.length) * nyquist;
   }
 
   getRMS() {
     this.analyser.getFloatTimeDomainData(this.timeDomainData);
-    
+
     let sum = 0;
     for (let i = 0; i < this.timeDomainData.length; i++) {
       sum += this.timeDomainData[i] * this.timeDomainData[i];
     }
-    
+
     return Math.sqrt(sum / this.timeDomainData.length);
   }
 
   getSpectralCentroid() {
     this.analyser.getFloatFrequencyData(this.frequencyData);
-    
+
     let numerator = 0;
     let denominator = 0;
     const nyquist = this.analyser.context.sampleRate / 2;
-    
+
     for (let i = 0; i < this.frequencyData.length; i++) {
       const frequency = (i / this.frequencyData.length) * nyquist;
-      const magnitude = Math.pow(10, this.frequencyData[i] / 20);
-      
+      const magnitude = 10 ** (this.frequencyData[i] / 20);
+
       numerator += frequency * magnitude;
       denominator += magnitude;
     }
-    
+
     return denominator > 0 ? numerator / denominator : 0;
   }
 }

@@ -8,7 +8,7 @@ class FilterWorklet extends AudioWorkletProcessor {
       { name: 'resonance', defaultValue: 0, minValue: 0, maxValue: 20 },
       { name: 'drive', defaultValue: 1, minValue: 0.1, maxValue: 10 },
       { name: 'filterType', defaultValue: 0, minValue: 0, maxValue: 4 },
-      { name: 'mix', defaultValue: 1, minValue: 0, maxValue: 1 }
+      { name: 'mix', defaultValue: 1, minValue: 0, maxValue: 1 },
     ];
   }
 
@@ -31,7 +31,7 @@ class FilterWorklet extends AudioWorkletProcessor {
     const mix = parameters.mix[0];
 
     // Calculate filter coefficients
-    const g = Math.tan(Math.PI * cutoff / sampleRate);
+    const g = Math.tan((Math.PI * cutoff) / sampleRate);
     const k = 2 - resonance / 10;
     const a1 = 1 / (1 + g * (g + k));
     const a2 = g * a1;
@@ -39,7 +39,7 @@ class FilterWorklet extends AudioWorkletProcessor {
 
     for (let i = 0; i < output[0].length; i++) {
       const inputSample = input[0][i] * drive;
-      
+
       // Apply soft saturation
       const saturated = Math.tanh(inputSample);
 
@@ -47,7 +47,7 @@ class FilterWorklet extends AudioWorkletProcessor {
       const v3 = saturated - this.ic2eq;
       const v1 = a1 * this.ic1eq + a2 * v3;
       const v2 = this.ic2eq + a2 * this.ic1eq + a3 * v3;
-      
+
       this.ic1eq = 2 * v1 - this.ic1eq;
       this.ic2eq = 2 * v2 - this.ic2eq;
 

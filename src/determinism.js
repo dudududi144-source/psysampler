@@ -21,10 +21,11 @@ export class Determinism {
 
   // Mulberry32 PRNG
   next() {
-    let t = this.state += 0x6D2B79F5;
-    t = Math.imul(t ^ t >>> 15, t | 1);
-    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    this.state = (this.state + 0x6d2b79f5) | 0;
+    let t = this.state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   }
 
   nextInt(min, max) {
@@ -66,7 +67,9 @@ export class Determinism {
   }
 
   seededProbability(seed, bar, step) {
-    const combinedSeed = seed ^ (bar * 1000) ^ step;
+    // Instance seed MUST participate: two Determinism instances with different
+    // seeds must diverge even for identical (seed, bar, step) arguments.
+    const combinedSeed = (this.seed ^ (seed * 0x9e3779b1) ^ (bar * 1000) ^ step) | 0;
     const tempState = this.state;
     this.state = combinedSeed;
     const result = this.next();

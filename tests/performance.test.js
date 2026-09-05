@@ -8,7 +8,7 @@ const mockDevice = {
   setBank: jest.fn(),
   play: jest.fn(),
   stop: jest.fn(),
-  currentBank: 0
+  currentBank: 0,
 };
 
 describe('PerformanceMode', () => {
@@ -56,10 +56,10 @@ describe('PerformanceMode', () => {
   test('setMode changes mode', () => {
     perf.setMode('loop');
     expect(perf.activeMode).toBe('loop');
-    
+
     perf.setMode('gate');
     expect(perf.activeMode).toBe('gate');
-    
+
     perf.setMode('slice-sequencer');
     expect(perf.activeMode).toBe('slice-sequencer');
   });
@@ -90,7 +90,7 @@ describe('PerformanceMode', () => {
     perf.setXY(-0.5, 1.5);
     expect(perf.xyPad.x).toBe(0);
     expect(perf.xyPad.y).toBe(1);
-    
+
     perf.setXY(0.5, 0.5);
     expect(perf.xyPad.x).toBe(0.5);
     expect(perf.xyPad.y).toBe(0.5);
@@ -100,11 +100,11 @@ describe('PerformanceMode', () => {
     const events = [
       { time: 0.1, note: 60 },
       { time: 0.35, note: 62 },
-      { time: 0.6, note: 64 }
+      { time: 0.6, note: 64 },
     ];
-    
+
     const quantized = perf.quantizeEvents(events, 16);
-    
+
     expect(quantized[0].time).toBeCloseTo(0.125, 3);
     expect(quantized[1].time).toBeCloseTo(0.375, 3);
     expect(quantized[2].time).toBeCloseTo(0.625, 3);
@@ -113,11 +113,11 @@ describe('PerformanceMode', () => {
   test('humanizeEvents adds variation', () => {
     const events = [
       { time: 0.25, note: 60 },
-      { time: 0.5, note: 62 }
+      { time: 0.5, note: 62 },
     ];
-    
+
     const humanized = perf.humanizeEvents(events, 0.1);
-    
+
     expect(humanized[0].time).not.toBe(0.25);
     expect(humanized[1].time).not.toBe(0.5);
   });
@@ -125,9 +125,9 @@ describe('PerformanceMode', () => {
   test('exportPerformance returns current state', () => {
     perf.setPad(0, { type: 'slice', bank: 0, slice: 0 });
     perf.setXY(0.3, 0.7);
-    
+
     const exported = perf.exportPerformance();
-    
+
     expect(exported.pads[0]).toEqual({ type: 'slice', bank: 0, slice: 0 });
     expect(exported.xyPad.x).toBe(0.3);
     expect(exported.xyPad.y).toBe(0.7);
@@ -138,13 +138,13 @@ describe('PerformanceMode', () => {
       pads: new Array(64).fill(null),
       macros: new Array(8).fill(null),
       xyPad: { x: 0.5, y: 0.5 },
-      mode: 'loop'
+      mode: 'loop',
     };
-    
+
     data.pads[0] = { type: 'slice', bank: 0, slice: 0 };
-    
+
     perf.importPerformance(data);
-    
+
     expect(perf.pads[0]).toEqual({ type: 'slice', bank: 0, slice: 0 });
     expect(perf.activeMode).toBe('loop');
   });

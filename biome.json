@@ -28,10 +28,6 @@
     }
   },
   "files": {
-    "ignore": [
-      "node_modules/**",
-      "dist/**",
-      "coverage/**"
-    ]
+    "ignore": ["node_modules/**", "dist/**", "coverage/**"]
   }
 }

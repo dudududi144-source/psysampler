@@ -6,7 +6,7 @@ import { MIDIIntegration } from '../src/midi-integration.js';
 const mockDevice = {
   triggerSlice: jest.fn(),
   play: jest.fn(),
-  stop: jest.fn()
+  stop: jest.fn(),
 };
 
 describe('MIDIIntegration', () => {
@@ -90,7 +90,7 @@ describe('MIDIIntegration', () => {
   test('createMIDIHeader returns valid header', () => {
     const header = midi.createMIDIHeader();
     expect(header.length).toBe(14);
-    expect(header[0]).toBe(0x4D); // 'M'
+    expect(header[0]).toBe(0x4d); // 'M'
     expect(header[1]).toBe(0x54); // 'T'
     expect(header[2]).toBe(0x68); // 'h'
     expect(header[3]).toBe(0x64); // 'd'
@@ -100,7 +100,7 @@ describe('MIDIIntegration', () => {
     midi.mapSliceToNote(36, 0, 0);
     midi.learnCC(20, 'filter', () => {});
     midi.dispose();
-    
+
     expect(midi.sliceMIDIMap.size).toBe(0);
     expect(midi.cclMap.size).toBe(0);
   });

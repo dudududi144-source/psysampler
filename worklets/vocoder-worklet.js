@@ -7,7 +7,7 @@ class VocoderWorklet extends AudioWorkletProcessor {
       { name: 'bands', defaultValue: 16, minValue: 4, maxValue: 32 },
       { name: 'attack', defaultValue: 5, minValue: 1, maxValue: 50 },
       { name: 'release', defaultValue: 50, minValue: 10, maxValue: 200 },
-      { name: 'mix', defaultValue: 1, minValue: 0, maxValue: 1 }
+      { name: 'mix', defaultValue: 1, minValue: 0, maxValue: 1 },
     ];
   }
 
@@ -21,23 +21,23 @@ class VocoderWorklet extends AudioWorkletProcessor {
   initBands() {
     const minFreq = 80;
     const maxFreq = 8000;
-    
+
     for (let i = 0; i < this.numBands; i++) {
-      const freq = minFreq * Math.pow(maxFreq / minFreq, i / (this.numBands - 1));
+      const freq = minFreq * (maxFreq / minFreq) ** (i / (this.numBands - 1));
       this.bands.push({
         frequency: freq,
         modEnvelope: 0,
         carrierFilter: { x1: 0, x2: 0, y1: 0, y2: 0 },
-        modFilter: { x1: 0, x2: 0, y1: 0, y2: 0 }
+        modFilter: { x1: 0, x2: 0, y1: 0, y2: 0 },
       });
     }
   }
 
   bandpassFilter(input, band, filterState) {
     const Q = 5;
-    const omega = 2 * Math.PI * band.frequency / sampleRate;
+    const omega = (2 * Math.PI * band.frequency) / sampleRate;
     const alpha = Math.sin(omega) / (2 * Q);
-    
+
     const b0 = alpha;
     const b1 = 0;
     const b2 = -alpha;
@@ -45,8 +45,13 @@ class VocoderWorklet extends AudioWorkletProcessor {
     const a1 = -2 * Math.cos(omega);
     const a2 = 1 - alpha;
 
-    const output = (b0 * input + b1 * filterState.x1 + b2 * filterState.x2 
-                    - a1 * filterState.y1 - a2 * filterState.y2) / a0;
+    const output =
+      (b0 * input +
+        b1 * filterState.x1 +
+        b2 * filterState.x2 -
+        a1 * filterState.y1 -
+        a2 * filterState.y2) /
+      a0;
 
     filterState.x2 = filterState.x1;
     filterState.x1 = input;
@@ -58,15 +63,15 @@ class VocoderWorklet extends AudioWorkletProcessor {
 
   envelopeFollower(input, band, attack, release) {
     const abs = Math.abs(input);
-    const attackCoeff = 1 - Math.exp(-1 / (attack * sampleRate / 1000));
-    const releaseCoeff = 1 - Math.exp(-1 / (release * sampleRate / 1000));
-    
+    const attackCoeff = 1 - Math.exp(-1 / ((attack * sampleRate) / 1000));
+    const releaseCoeff = 1 - Math.exp(-1 / ((release * sampleRate) / 1000));
+
     if (abs > band.modEnvelope) {
       band.modEnvelope += attackCoeff * (abs - band.modEnvelope);
     } else {
       band.modEnvelope += releaseCoeff * (abs - band.modEnvelope);
     }
-    
+
     return band.modEnvelope;
   }
 
@@ -92,16 +97,16 @@ class VocoderWorklet extends AudioWorkletProcessor {
 
       for (let b = 0; b < this.numBands; b++) {
         const band = this.bands[b];
-        
+
         // Filter modulator
         const modFiltered = this.bandpassFilter(modulator[0][i], band, band.modFilter);
-        
+
         // Envelope follower
         const envelope = this.envelopeFollower(modFiltered, band, attack, release);
-        
+
         // Filter carrier
         const carrierFiltered = this.bandpassFilter(carrier[0][i], band, band.carrierFilter);
-        
+
         // Apply envelope to carrier
         vocodedSample += carrierFiltered * envelope;
       }

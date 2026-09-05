@@ -8,7 +8,7 @@ class GranularWorklet extends AudioWorkletProcessor {
       { name: 'grainDensity', defaultValue: 20, minValue: 1, maxValue: 100 },
       { name: 'pitchRandom', defaultValue: 0, minValue: 0, maxValue: 12 },
       { name: 'panSpread', defaultValue: 0.5, minValue: 0, maxValue: 1 },
-      { name: 'wetMix', defaultValue: 0.5, minValue: 0, maxValue: 1 }
+      { name: 'wetMix', defaultValue: 0.5, minValue: 0, maxValue: 1 },
     ];
   }
 
@@ -28,7 +28,7 @@ class GranularWorklet extends AudioWorkletProcessor {
       duration,
       pitch,
       pan,
-      age: 0
+      age: 0,
     };
   }
 
@@ -39,7 +39,7 @@ class GranularWorklet extends AudioWorkletProcessor {
   process(inputs, outputs, parameters) {
     const input = inputs[0];
     const output = outputs[0];
-    
+
     if (!input[0] || input[0].length === 0) return true;
 
     const grainSize = parameters.grainSize[0];
@@ -49,15 +49,15 @@ class GranularWorklet extends AudioWorkletProcessor {
     const wetMix = parameters.wetMix[0];
 
     const grainInterval = 1000 / grainDensity;
-    const currentTime = currentTime * 1000;
+    const currentTimeMs = currentTime * 1000; // global AudioWorklet clock (seconds) -> ms
 
     // Create new grains
-    while (this.nextGrainTime <= currentTime) {
+    while (this.nextGrainTime <= currentTimeMs) {
       const readPos = Math.random() * this.bufferSize;
       const duration = grainSize + (Math.random() - 0.5) * grainSize * 0.2;
-      const pitch = 1 + (Math.random() - 0.5) * pitchRandom / 12;
+      const pitch = 1 + ((Math.random() - 0.5) * pitchRandom) / 12;
       const pan = (Math.random() - 0.5) * 2 * panSpread;
-      
+
       this.grains.push(this.createGrain(readPos, duration, pitch, pan));
       this.nextGrainTime += grainInterval;
     }
@@ -73,30 +73,30 @@ class GranularWorklet extends AudioWorkletProcessor {
       let rightOut = 0;
 
       // Process active grains
-      this.grains = this.grains.filter(grain => {
-        grain.age += 1 / sampleRate * 1000;
-        
+      this.grains = this.grains.filter((grain) => {
+        grain.age += (1 / sampleRate) * 1000;
+
         if (grain.age >= grain.duration) {
           return false;
         }
 
         const progress = grain.age / grain.duration;
         const envelope = this.hannWindow(progress);
-        
+
         const readPos = (grain.readPosition + grain.age * grain.pitch) % this.bufferSize;
         const readIndex = Math.floor(readPos);
         const frac = readPos - readIndex;
-        
+
         // Linear interpolation
         const sample1 = this.buffer[readIndex];
         const sample2 = this.buffer[(readIndex + 1) % this.bufferSize];
         const sample = sample1 + frac * (sample2 - sample1);
-        
+
         const grainSample = sample * envelope;
-        
+
         // Apply pan
-        leftOut += grainSample * Math.cos((grain.pan + 1) * Math.PI / 4);
-        rightOut += grainSample * Math.sin((grain.pan + 1) * Math.PI / 4);
+        leftOut += grainSample * Math.cos(((grain.pan + 1) * Math.PI) / 4);
+        rightOut += grainSample * Math.sin(((grain.pan + 1) * Math.PI) / 4);
 
         return true;
       });

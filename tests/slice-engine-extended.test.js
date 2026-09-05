@@ -1,8 +1,8 @@
 // Slice Engine Extended Tests
 
-import { SliceEngine } from '../src/slice-engine.js';
-import { SliceBank } from '../src/slice-bank.js';
 import { Determinism } from '../src/determinism.js';
+import { SliceBank } from '../src/slice-bank.js';
+import { SliceEngine } from '../src/slice-engine.js';
 
 describe('SliceEngine Extended', () => {
   let engine;
@@ -16,27 +16,29 @@ describe('SliceEngine Extended', () => {
       banks.push(new SliceBank(i, determinism));
     }
     engine = new SliceEngine(banks, { maxVoices: 64 });
-    
+
     mockContext = {
       createBufferSource: () => ({
         connect: () => {},
         start: () => {},
         stop: () => {},
         buffer: null,
-        onended: null
+        playbackRate: { value: 1 }, // faithful AudioBufferSourceNode surface
+        detune: { value: 0 },
+        onended: null,
       }),
       createGain: () => ({
         connect: () => {},
-        gain: { value: 1, setValueAtTime: () => {}, linearRampToValueAtTime: () => {} }
+        gain: { value: 1, setValueAtTime: () => {}, linearRampToValueAtTime: () => {} },
       }),
       createStereoPanner: () => ({
         connect: () => {},
-        pan: { value: 0 }
+        pan: { value: 0 },
       }),
       currentTime: 0,
-      destination: {}
+      destination: {},
     };
-    
+
     engine.onContext(mockContext);
   });
 
@@ -44,13 +46,13 @@ describe('SliceEngine Extended', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     banks[0].load(mockBuffer, [{ start: 0, end: 0.5 }], {});
-    
+
     engine.trigger(0, 0, 0.8);
-    
+
     expect(engine.activeVoices.length).toBe(1);
   });
 
@@ -58,13 +60,13 @@ describe('SliceEngine Extended', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     banks[0].load(mockBuffer, [{ start: 0, end: 0.5 }], {});
-    
+
     engine.trigger(0, 0, 0.5);
-    
+
     expect(engine.activeVoices.length).toBe(1);
   });
 
@@ -77,11 +79,11 @@ describe('SliceEngine Extended', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     banks[0].load(mockBuffer, [{ start: 0, end: 0.5 }], {});
-    
+
     engine.trigger(0, 10, 1.0);
     expect(engine.activeVoices.length).toBe(0);
   });
@@ -90,21 +92,21 @@ describe('SliceEngine Extended', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     banks[0].load(mockBuffer, [{ start: 0, end: 0.5 }], {});
-    
+
     // Fill all voices
     for (let i = 0; i < 64; i++) {
       engine.trigger(0, 0, 1.0);
     }
-    
+
     expect(engine.activeVoices.length).toBe(64);
-    
+
     // Trigger one more
     engine.trigger(0, 0, 1.0);
-    
+
     // Should still be 64 (oldest was stolen)
     expect(engine.activeVoices.length).toBe(64);
   });
@@ -113,16 +115,16 @@ describe('SliceEngine Extended', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     banks[0].load(mockBuffer, [{ start: 0, end: 0.5 }], {});
-    
+
     engine.trigger(0, 0, 1.0);
     engine.trigger(0, 0, 1.0);
-    
+
     engine.stop();
-    
+
     expect(engine.activeVoices.length).toBe(0);
     expect(engine.isPlaying).toBe(false);
   });
@@ -131,14 +133,14 @@ describe('SliceEngine Extended', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     banks[0].load(mockBuffer, [{ start: 0, end: 0.5 }], {});
-    
+
     engine.trigger(0, 0, 1.0);
     engine.dispose();
-    
+
     expect(engine.activeVoices.length).toBe(0);
   });
 });

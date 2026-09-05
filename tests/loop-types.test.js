@@ -1,6 +1,13 @@
 // Loop Types Tests
 
-import { LOOP_TYPES, getLoopType, getLoopTypesByCategory, validateLoopType, SCALES, KEYS } from '../src/loop-types.js';
+import {
+  KEYS,
+  LOOP_TYPES,
+  SCALES,
+  getLoopType,
+  getLoopTypesByCategory,
+  validateLoopType,
+} from '../src/loop-types.js';
 
 describe('Loop Types', () => {
   test('has 8 loop types', () => {
@@ -8,7 +15,7 @@ describe('Loop Types', () => {
   });
 
   test('each loop type has required fields', () => {
-    Object.values(LOOP_TYPES).forEach(type => {
+    Object.values(LOOP_TYPES).forEach((type) => {
       expect(type.id).toBeDefined();
       expect(type.name).toBeDefined();
       expect(type.description).toBeDefined();
@@ -24,7 +31,7 @@ describe('Loop Types', () => {
     const melodic = getLoopType('melodic');
     expect(melodic).toBeDefined();
     expect(melodic.name).toBe('Melodic');
-    
+
     const rhythmic = getLoopType('rhythmic');
     expect(rhythmic).toBeDefined();
     expect(rhythmic.name).toBe('Rhythmic');
@@ -37,10 +44,10 @@ describe('Loop Types', () => {
   test('getLoopTypesByCategory filters correctly', () => {
     const musical = getLoopTypesByCategory('musical');
     expect(musical.length).toBe(3); // melodic, lead, bass
-    
+
     const rhythm = getLoopTypesByCategory('rhythm');
     expect(rhythm.length).toBe(2); // rhythmic, percussion
-    
+
     const fx = getLoopTypesByCategory('fx');
     expect(fx.length).toBe(1); // fx
   });
@@ -56,7 +63,7 @@ describe('Loop Types', () => {
   });
 
   test('each scale has 7 notes', () => {
-    Object.values(SCALES).forEach(scale => {
+    Object.values(SCALES).forEach((scale) => {
       expect(scale.length).toBe(7);
     });
   });
@@ -66,7 +73,7 @@ describe('Loop Types', () => {
   });
 
   test('all loop types have valid defaults', () => {
-    Object.values(LOOP_TYPES).forEach(type => {
+    Object.values(LOOP_TYPES).forEach((type) => {
       if (type.defaults.bpm) {
         expect(type.defaults.bpm).toBeGreaterThan(0);
         expect(type.defaults.bpm).toBeLessThan(300);

@@ -7,14 +7,14 @@ const mockContext = {
   createGain: () => ({
     connect: () => {},
     gain: { value: 1 },
-    disconnect: () => {}
+    disconnect: () => {},
   }),
   createBiquadFilter: () => ({
     connect: () => {},
     type: 'peaking',
     frequency: { value: 1000 },
     Q: { value: 1 },
-    gain: { value: 0 }
+    gain: { value: 0 },
   }),
   createDynamicsCompressor: () => ({
     connect: () => {},
@@ -22,10 +22,10 @@ const mockContext = {
     knee: { value: 30 },
     ratio: { value: 4 },
     attack: { value: 0.003 },
-    release: { value: 0.25 }
+    release: { value: 0.25 },
   }),
   destination: {},
-  sampleRate: 48000
+  sampleRate: 48000,
 };
 
 describe('AudioGraph', () => {
@@ -41,7 +41,7 @@ describe('AudioGraph', () => {
   });
 
   test('each bus has input and output', () => {
-    graph.buses.forEach(bus => {
+    graph.buses.forEach((bus) => {
       expect(bus.input).toBeDefined();
       expect(bus.output).toBeDefined();
     });
@@ -72,7 +72,7 @@ describe('AudioGraph', () => {
 
   test('solo mutes other buses', () => {
     graph.setBusSolo(0, true);
-    
+
     expect(graph.buses[0].gain.value).toBe(1);
     expect(graph.buses[1].gain.value).toBe(0);
     expect(graph.buses[2].gain.value).toBe(0);
@@ -81,7 +81,7 @@ describe('AudioGraph', () => {
   test('unsolo restores volumes', () => {
     graph.setBusSolo(0, true);
     graph.setBusSolo(0, false);
-    
+
     expect(graph.buses[0].gain.value).toBe(1);
     expect(graph.buses[1].gain.value).toBe(1);
   });

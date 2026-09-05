@@ -1,6 +1,11 @@
 // Factory Presets Tests
 
-import { FACTORY_PRESETS, getPreset, getAllPresets, getPresetsByType } from '../src/factory-presets.js';
+import {
+  FACTORY_PRESETS,
+  getAllPresets,
+  getPreset,
+  getPresetsByType,
+} from '../src/factory-presets.js';
 
 describe('Factory Presets', () => {
   test('has multiple presets', () => {
@@ -8,7 +13,7 @@ describe('Factory Presets', () => {
   });
 
   test('each preset has required fields', () => {
-    Object.values(FACTORY_PRESETS).forEach(preset => {
+    Object.values(FACTORY_PRESETS).forEach((preset) => {
       expect(preset.name).toBeDefined();
       expect(preset.type).toBeDefined();
       expect(preset.config).toBeDefined();
@@ -29,8 +34,8 @@ describe('Factory Presets', () => {
   test('getAllPresets returns all presets', () => {
     const all = getAllPresets();
     expect(all.length).toBe(Object.keys(FACTORY_PRESETS).length);
-    
-    all.forEach(preset => {
+
+    all.forEach((preset) => {
       expect(preset.id).toBeDefined();
       expect(preset.name).toBeDefined();
       expect(preset.type).toBeDefined();
@@ -40,21 +45,21 @@ describe('Factory Presets', () => {
   test('getPresetsByType filters correctly', () => {
     const melodic = getPresetsByType('melodic');
     expect(melodic.length).toBeGreaterThan(0);
-    
-    melodic.forEach(preset => {
+
+    melodic.forEach((preset) => {
       expect(preset.type).toBe('melodic');
     });
   });
 
   test('all presets have valid configs', () => {
-    Object.values(FACTORY_PRESETS).forEach(preset => {
+    Object.values(FACTORY_PRESETS).forEach((preset) => {
       const config = preset.config;
-      
+
       if (config.bpm) {
         expect(config.bpm).toBeGreaterThan(0);
         expect(config.bpm).toBeLessThan(300);
       }
-      
+
       if (config.bars) {
         expect(config.bars).toBeGreaterThan(0);
       }

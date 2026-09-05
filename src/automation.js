@@ -39,7 +39,8 @@ export class AutomationLane {
     }
 
     if (time <= this.points[0].time) return this.points[0].value;
-    if (time >= this.points[this.points.length - 1].time) return this.points[this.points.length - 1].value;
+    if (time >= this.points[this.points.length - 1].time)
+      return this.points[this.points.length - 1].value;
 
     const duration = nextPoint.time - prevPoint.time;
     if (duration === 0) return prevPoint.value;
@@ -52,7 +53,7 @@ export class AutomationLane {
     return {
       track: this.track,
       param: this.param,
-      points: [...this.points]
+      points: [...this.points],
     };
   }
 
@@ -71,7 +72,7 @@ export class AutomationManager {
   }
 
   createLane(track, param) {
-    const key = track + ':' + param;
+    const key = `${track}:${param}`;
     if (!this.lanes.has(key)) {
       this.lanes.set(key, new AutomationLane(track, param));
     }
@@ -79,7 +80,7 @@ export class AutomationManager {
   }
 
   getLane(track, param) {
-    const key = track + ':' + param;
+    const key = `${track}:${param}`;
     return this.lanes.get(key);
   }
 
@@ -110,7 +111,7 @@ export class AutomationManager {
   recordValue(track, param, time, value) {
     if (!this.recording) return;
     const lane = this.getLane(track, param);
-    if (lane && lane.armed) {
+    if (lane?.armed) {
       lane.addPoint(time, value);
     }
   }

@@ -14,9 +14,9 @@ const mockDevice = {
     analysis: {
       tempo: 140,
       key: { key: 'C', scale: 'minor' },
-      type: 'melodic'
-    }
-  })
+      type: 'melodic',
+    },
+  }),
 };
 
 describe('UIManager', () => {
@@ -24,7 +24,7 @@ describe('UIManager', () => {
 
   beforeEach(() => {
     ui = new UIManager(mockDevice);
-    
+
     // Mock DOM
     global.document = {
       getElementById: jest.fn().mockReturnValue(null),
@@ -33,19 +33,19 @@ describe('UIManager', () => {
         getContext: () => ({
           clearRect: jest.fn(),
           fillRect: jest.fn(),
-          fillStyle: ''
+          fillStyle: '',
         }),
         width: 800,
         height: 100,
         className: '',
         dataset: {},
         addEventListener: jest.fn(),
-        appendChild: jest.fn()
+        appendChild: jest.fn(),
       }),
       body: {
         appendChild: jest.fn(),
-        removeChild: jest.fn()
-      }
+        removeChild: jest.fn(),
+      },
     };
   });
 
@@ -57,21 +57,21 @@ describe('UIManager', () => {
     const mockSlice = {
       classList: {
         add: jest.fn(),
-        remove: jest.fn()
-      }
+        remove: jest.fn(),
+      },
     };
-    
+
     global.document.querySelectorAll = jest.fn().mockReturnValue([mockSlice]);
-    
+
     ui.highlightSlice(0);
-    
+
     expect(mockSlice.classList.add).toHaveBeenCalledWith('playing');
   });
 
   test('dispose clears elements', () => {
     ui.elements.set('test', {});
     ui.dispose();
-    
+
     expect(ui.elements.size).toBe(0);
   });
 });

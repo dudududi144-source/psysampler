@@ -1,10 +1,10 @@
+import path from 'node:path';
 import { defineConfig } from 'vite';
-import path from 'path';
 
 export default defineConfig({
   root: './',
   base: './',
-  
+
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -13,13 +13,13 @@ export default defineConfig({
     terserOptions: {
       compress: {
         drop_console: false,
-        drop_debugger: true
-      }
+        drop_debugger: true,
+      },
     },
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
-        demo: path.resolve(__dirname, 'demo.html')
+        demo: path.resolve(__dirname, 'demo.html'),
       },
       output: {
         manualChunks: {
@@ -27,27 +27,24 @@ export default defineConfig({
             './src/looper-device.js',
             './src/slice-engine.js',
             './src/analyzer.js',
-            './src/generator.js'
+            './src/generator.js',
           ],
-          'audio-fx': [
-            './src/fx-chain.js',
-            './src/audio-graph.js'
-          ],
-          'utils': [
+          'audio-fx': ['./src/fx-chain.js', './src/audio-graph.js'],
+          utils: [
             './src/utils/math-utils.js',
             './src/utils/audio-utils.js',
             './src/utils/logger.js',
-            './src/utils/state-manager.js'
-          ]
-        }
-      }
-    }
+            './src/utils/state-manager.js',
+          ],
+        },
+      },
+    },
   },
 
   server: {
     port: 3000,
     open: true,
-    cors: true
+    cors: true,
   },
 
   resolve: {
@@ -55,11 +52,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
       '@worklets': path.resolve(__dirname, './worklets'),
       '@utils': path.resolve(__dirname, './src/utils'),
-      '@types': path.resolve(__dirname, './src/types')
-    }
+      '@types': path.resolve(__dirname, './src/types'),
+    },
   },
 
   optimizeDeps: {
-    include: []
-  }
+    include: [],
+  },
 });

@@ -11,7 +11,7 @@ export class AudioRouter {
 
   createNode(id, type, options = {}) {
     let node;
-    
+
     switch (type) {
       case 'gain':
         node = this.context.createGain();
@@ -45,7 +45,7 @@ export class AudioRouter {
       default:
         throw new Error(`Unknown node type: ${type}`);
     }
-    
+
     this.nodes.set(id, node);
     return node;
   }
@@ -59,9 +59,9 @@ export class AudioRouter {
     if (node) {
       node.disconnect();
       this.nodes.delete(id);
-      
+
       // Remove connections
-      this.connections.forEach(conn => {
+      this.connections.forEach((conn) => {
         if (conn.from === id || conn.to === id) {
           this.connections.delete(conn);
         }
@@ -72,11 +72,11 @@ export class AudioRouter {
   connect(fromId, toId, outputIndex = 0, inputIndex = 0) {
     const fromNode = this.nodes.get(fromId);
     const toNode = this.nodes.get(toId);
-    
+
     if (!fromNode || !toNode) {
       throw new Error(`Node not found: ${fromId} or ${toId}`);
     }
-    
+
     fromNode.connect(toNode, outputIndex, inputIndex);
     this.connections.add({ from: fromId, to: toId, outputIndex, inputIndex });
   }
@@ -84,7 +84,7 @@ export class AudioRouter {
   disconnect(fromId, toId) {
     const fromNode = this.nodes.get(fromId);
     const toNode = this.nodes.get(toId);
-    
+
     if (fromNode && toNode) {
       fromNode.disconnect(toNode);
       this.connections.delete({ from: fromId, to: toId });
@@ -94,9 +94,9 @@ export class AudioRouter {
   createBus(id, options = {}) {
     const input = this.createNode(`${id}_input`, 'gain', { gain: 1 });
     const output = this.createNode(`${id}_output`, 'gain', { gain: 1 });
-    
+
     input.connect(output);
-    
+
     const bus = {
       id,
       input,
@@ -105,16 +105,16 @@ export class AudioRouter {
       sendTo: (targetBusId, amount = 0.5) => {
         const sendGain = this.createNode(`${id}_send_${targetBusId}`, 'gain', { gain: amount });
         input.connect(sendGain);
-        
+
         const targetBus = this.buses.get(targetBusId);
         if (targetBus) {
           sendGain.connect(targetBus.input);
         }
-        
+
         return sendGain;
-      }
+      },
     };
-    
+
     this.buses.set(id, bus);
     return bus;
   }
@@ -126,7 +126,7 @@ export class AudioRouter {
   addToBus(busId, nodeId) {
     const bus = this.buses.get(busId);
     const node = this.nodes.get(nodeId);
-    
+
     if (bus && node) {
       node.connect(bus.input);
     }
@@ -143,12 +143,12 @@ export class AudioRouter {
     return {
       nodes: Array.from(this.nodes.entries()),
       connections: Array.from(this.connections),
-      buses: Array.from(this.buses.entries())
+      buses: Array.from(this.buses.entries()),
     };
   }
 
   clear() {
-    this.nodes.forEach(node => node.disconnect());
+    this.nodes.forEach((node) => node.disconnect());
     this.nodes.clear();
     this.connections.clear();
     this.buses.clear();

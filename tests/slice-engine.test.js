@@ -1,8 +1,8 @@
 // Slice Engine Tests
 
-import { SliceEngine } from '../src/slice-engine.js';
-import { SliceBank } from '../src/slice-bank.js';
 import { Determinism } from '../src/determinism.js';
+import { SliceBank } from '../src/slice-bank.js';
+import { SliceEngine } from '../src/slice-engine.js';
 
 describe('SliceEngine', () => {
   let engine;
@@ -44,11 +44,11 @@ describe('SliceEngine', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     banks[0].load(mockBuffer, [{ start: 0, end: 1 }], {});
-    
+
     // Mock context
     engine.context = {
       createBufferSource: () => ({
@@ -56,20 +56,22 @@ describe('SliceEngine', () => {
         start: () => {},
         stop: () => {},
         buffer: null,
-        onended: null
+        playbackRate: { value: 1 }, // faithful AudioBufferSourceNode surface
+        detune: { value: 0 },
+        onended: null,
       }),
       createGain: () => ({
         connect: () => {},
-        gain: { value: 1, setValueAtTime: () => {}, linearRampToValueAtTime: () => {} }
+        gain: { value: 1, setValueAtTime: () => {}, linearRampToValueAtTime: () => {} },
       }),
       createStereoPanner: () => ({
         connect: () => {},
-        pan: { value: 0 }
+        pan: { value: 0 },
       }),
       currentTime: 0,
-      destination: {}
+      destination: {},
     };
-    
+
     engine.trigger(0, 0, 1.0);
     expect(engine.activeVoices.length).toBeGreaterThan(0);
   });
@@ -78,11 +80,11 @@ describe('SliceEngine', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     banks[0].load(mockBuffer, [{ start: 0, end: 1 }], {});
-    
+
     // Mock context
     engine.context = {
       createBufferSource: () => ({
@@ -90,30 +92,32 @@ describe('SliceEngine', () => {
         start: () => {},
         stop: () => {},
         buffer: null,
-        onended: null
+        playbackRate: { value: 1 }, // faithful AudioBufferSourceNode surface
+        detune: { value: 0 },
+        onended: null,
       }),
       createGain: () => ({
         connect: () => {},
-        gain: { value: 1, setValueAtTime: () => {}, linearRampToValueAtTime: () => {} }
+        gain: { value: 1, setValueAtTime: () => {}, linearRampToValueAtTime: () => {} },
       }),
       createStereoPanner: () => ({
         connect: () => {},
-        pan: { value: 0 }
+        pan: { value: 0 },
       }),
       currentTime: 0,
-      destination: {}
+      destination: {},
     };
-    
+
     // Fill all voices
     for (let i = 0; i < 64; i++) {
       engine.trigger(0, 0, 1.0);
     }
-    
+
     expect(engine.activeVoices.length).toBe(64);
-    
+
     // Trigger one more
     engine.trigger(0, 0, 1.0);
-    
+
     // Should still be 64 (oldest was stolen)
     expect(engine.activeVoices.length).toBe(64);
   });

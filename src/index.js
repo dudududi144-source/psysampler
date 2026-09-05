@@ -2,9 +2,9 @@
 // The most advanced looper in the PSY family
 
 import { LooperDevice } from './looper-device.js';
+import { DEFAULT_CONFIG, loadConfig } from './utils/config-utils.js';
+import { EVENTS, globalBus } from './utils/event-bus.js';
 import { createLogger } from './utils/logger.js';
-import { loadConfig, DEFAULT_CONFIG } from './utils/config-utils.js';
-import { globalBus, EVENTS } from './utils/event-bus.js';
 
 const logger = createLogger('Main');
 
@@ -15,20 +15,20 @@ const logger = createLogger('Main');
  */
 export async function initPSYLooper(options = {}) {
   logger.info('Initializing PSY LOOPER...');
-  
+
   // Load configuration
   const config = loadConfig(DEFAULT_CONFIG);
   const mergedConfig = { ...config, ...options };
-  
+
   // Create device
   const device = new LooperDevice(mergedConfig);
-  
+
   // Initialize audio context
   await device.init();
-  
+
   logger.info('PSY LOOPER initialized successfully');
   globalBus.emit(EVENTS.UI_READY);
-  
+
   return device;
 }
 

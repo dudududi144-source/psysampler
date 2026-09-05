@@ -1,7 +1,7 @@
 // Slice Bank Tests
 
-import { SliceBank } from '../src/slice-bank.js';
 import { Determinism } from '../src/determinism.js';
+import { SliceBank } from '../src/slice-bank.js';
 
 describe('SliceBank', () => {
   let bank;
@@ -22,16 +22,16 @@ describe('SliceBank', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     const slices = [
       { start: 0, end: 0.5 },
-      { start: 0.5, end: 1.0 }
+      { start: 0.5, end: 1.0 },
     ];
-    
+
     bank.load(mockBuffer, slices, {});
-    
+
     expect(bank.hasLoop).toBe(true);
     expect(bank.slices.length).toBe(2);
   });
@@ -40,12 +40,12 @@ describe('SliceBank', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     const slices = [{ start: 0, end: 0.5 }];
     bank.load(mockBuffer, slices, {});
-    
+
     const slice = bank.getSlice(0);
     expect(slice).toBeDefined();
     expect(slice.start).toBe(0);
@@ -62,12 +62,12 @@ describe('SliceBank', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     const slices = [{ start: 0, end: 0.5 }];
     bank.load(mockBuffer, slices, {});
-    
+
     const info = bank.getSliceInfo(0);
     expect(info).toBeDefined();
     expect(info.index).toBe(0);
@@ -80,14 +80,14 @@ describe('SliceBank', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     const slices = [{ start: 0, end: 0.5 }];
     bank.load(mockBuffer, slices, {});
-    
+
     bank.setSliceParam(0, 'volume', 0.8);
-    
+
     const slice = bank.getSlice(0);
     expect(slice.volume).toBe(0.8);
   });
@@ -96,12 +96,12 @@ describe('SliceBank', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     const slices = [{ start: 0, end: 0.5 }];
     bank.load(mockBuffer, slices, {});
-    
+
     const info = bank.getInfo();
     expect(info.index).toBe(0);
     expect(info.hasLoop).toBe(true);
@@ -112,18 +112,18 @@ describe('SliceBank', () => {
     const mockBuffer = {
       getChannelData: () => new Float32Array(1000),
       sampleRate: 48000,
-      duration: 1
+      duration: 1,
     };
-    
+
     const slices = [{ start: 0, end: 0.5 }];
     bank.load(mockBuffer, slices, {});
     bank.setSliceParam(0, 'volume', 0.8);
-    
+
     const exported = bank.export();
-    
+
     const newBank = new SliceBank(1, determinism);
     newBank.import(exported);
-    
+
     expect(newBank.hasLoop).toBe(true);
     expect(newBank.slices.length).toBe(1);
   });

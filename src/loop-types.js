@@ -13,8 +13,8 @@ export const LOOP_TYPES = {
       bpm: 140,
       bars: 4,
       key: 'C',
-      scale: 'minor'
-    }
+      scale: 'minor',
+    },
   },
   RHYTHMIC: {
     id: 'rhythmic',
@@ -27,8 +27,8 @@ export const LOOP_TYPES = {
     defaults: {
       bpm: 140,
       bars: 4,
-      swing: 0.3
-    }
+      swing: 0.3,
+    },
   },
   LEAD: {
     id: 'lead',
@@ -43,8 +43,8 @@ export const LOOP_TYPES = {
       bars: 4,
       key: 'C',
       scale: 'minor',
-      octave: 0
-    }
+      octave: 0,
+    },
   },
   FX: {
     id: 'fx',
@@ -57,8 +57,8 @@ export const LOOP_TYPES = {
     defaults: {
       bpm: 140,
       bars: 4,
-      fxType: 'riser'
-    }
+      fxType: 'riser',
+    },
   },
   PERCUSSION: {
     id: 'percussion',
@@ -71,8 +71,8 @@ export const LOOP_TYPES = {
     defaults: {
       bpm: 140,
       bars: 4,
-      complexity: 0.5
-    }
+      complexity: 0.5,
+    },
   },
   BASS: {
     id: 'bass',
@@ -87,8 +87,8 @@ export const LOOP_TYPES = {
       bars: 4,
       key: 'C',
       scale: 'minor',
-      pattern: 'root'
-    }
+      pattern: 'root',
+    },
   },
   CHORD: {
     id: 'chord',
@@ -103,8 +103,8 @@ export const LOOP_TYPES = {
       bars: 4,
       key: 'C',
       scale: 'major',
-      progression: 'I-IV-V-I'
-    }
+      progression: 'I-IV-V-I',
+    },
   },
   ATMOSPHERIC: {
     id: 'atmospheric',
@@ -117,17 +117,17 @@ export const LOOP_TYPES = {
     defaults: {
       bpm: 140,
       bars: 4,
-      density: 0.5
-    }
-  }
+      density: 0.5,
+    },
+  },
 };
 
 export function getLoopType(id) {
-  return Object.values(LOOP_TYPES).find(t => t.id === id);
+  return Object.values(LOOP_TYPES).find((t) => t.id === id);
 }
 
 export function getLoopTypesByCategory(category) {
-  return Object.values(LOOP_TYPES).filter(t => t.category === category);
+  return Object.values(LOOP_TYPES).filter((t) => t.category === category);
 }
 
 export function getAllLoopTypes() {
@@ -147,14 +147,25 @@ export const SCALES = {
   lydian: [0, 2, 4, 6, 7, 9, 11],
   mixolydian: [0, 2, 4, 5, 7, 9, 10],
   aeolian: [0, 2, 3, 5, 7, 8, 10],
-  locrian: [0, 1, 3, 5, 6, 8, 10]
+  locrian: [0, 1, 3, 5, 6, 8, 10],
+  harmonicMinor: [0, 2, 3, 5, 7, 8, 11],
 };
 
 export const KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 export const KEY_TO_MIDI = {
-  'C': 60, 'C#': 61, 'D': 62, 'D#': 63, 'E': 64, 'F': 65,
-  'F#': 66, 'G': 67, 'G#': 68, 'A': 69, 'A#': 70, 'B': 71
+  C: 60,
+  'C#': 61,
+  D: 62,
+  'D#': 63,
+  E: 64,
+  F: 65,
+  'F#': 66,
+  G: 67,
+  'G#': 68,
+  A: 69,
+  'A#': 70,
+  B: 71,
 };
 
 // Chord progressions
@@ -166,5 +177,5 @@ export const PROGRESSIONS = {
   'ii-V-I': [1, 4, 0],
   'I-IV-vi-V': [0, 3, 5, 4],
   'i-VI-III-VII': [0, 5, 2, 6],
-  'i-iv-v-i': [0, 3, 4, 0]
+  'i-iv-v-i': [0, 3, 4, 0],
 };

@@ -2,7 +2,7 @@
 
 export const FACTORY_PRESETS = {
   // Melodic presets
-  psytrance-melody: {
+  'psytrance-melody': {
     name: 'Psytrance Melody',
     type: 'melodic',
     config: {
@@ -10,10 +10,10 @@ export const FACTORY_PRESETS = {
       bars: 4,
       key: 'C',
       scale: 'minor',
-      density: 0.7
-    }
+      density: 0.7,
+    },
   },
-  progressive-lead: {
+  'progressive-lead': {
     name: 'Progressive Lead',
     type: 'lead',
     config: {
@@ -21,10 +21,10 @@ export const FACTORY_PRESETS = {
       bars: 4,
       key: 'A',
       scale: 'minor',
-      octave: 1
-    }
+      octave: 1,
+    },
   },
-  darkpsy-melody: {
+  'darkpsy-melody': {
     name: 'Darkpsy Melody',
     type: 'melodic',
     config: {
@@ -32,21 +32,21 @@ export const FACTORY_PRESETS = {
       bars: 4,
       key: 'E',
       scale: 'phrygian',
-      density: 0.9
-    }
+      density: 0.9,
+    },
   },
 
   // Rhythmic presets
-  four-on-floor: {
+  'four-on-floor': {
     name: '4-on-Floor',
     type: 'rhythmic',
     config: {
       bpm: 140,
       bars: 4,
-      swing: 0
-    }
+      swing: 0,
+    },
   },
-  rolling-bass: {
+  'rolling-bass': {
     name: 'Rolling Bass',
     type: 'bass',
     config: {
@@ -54,19 +54,19 @@ export const FACTORY_PRESETS = {
       bars: 4,
       key: 'C',
       scale: 'minor',
-      pattern: 'root'
-    }
+      pattern: 'root',
+    },
   },
 
   // FX presets
-  riser-4bars: {
+  'riser-4bars': {
     name: 'Riser (4 bars)',
     type: 'fx',
     config: {
       bpm: 140,
       bars: 4,
-      fxType: 'riser'
-    }
+      fxType: 'riser',
+    },
   },
   impact: {
     name: 'Impact',
@@ -74,20 +74,20 @@ export const FACTORY_PRESETS = {
     config: {
       bpm: 140,
       bars: 1,
-      fxType: 'impact'
-    }
+      fxType: 'impact',
+    },
   },
 
   // Atmospheric presets
-  evolving-pad: {
+  'evolving-pad': {
     name: 'Evolving Pad',
     type: 'atmospheric',
     config: {
       bpm: 140,
       bars: 8,
-      density: 0.5
-    }
-  }
+      density: 0.5,
+    },
+  },
 };
 
 export function getPreset(id) {
@@ -97,10 +97,10 @@ export function getPreset(id) {
 export function getAllPresets() {
   return Object.entries(FACTORY_PRESETS).map(([id, preset]) => ({
     id,
-    ...preset
+    ...preset,
   }));
 }
 
 export function getPresetsByType(type) {
-  return getAllPresets().filter(p => p.type === type);
+  return getAllPresets().filter((p) => p.type === type);
 }

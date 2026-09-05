@@ -9,7 +9,7 @@ export const LOOP_TYPES = {
   FX: 'fx',
   PERCUSSION: 'percussion',
   CHORD: 'chord',
-  ATMOSPHERIC: 'atmospheric'
+  ATMOSPHERIC: 'atmospheric',
 };
 
 // Slice Types
@@ -17,7 +17,7 @@ export const SLICE_TYPES = {
   TRANSIENT: 'transient',
   MANUAL: 'manual',
   BEAT: 'beat',
-  BAR: 'bar'
+  BAR: 'bar',
 };
 
 // FX Types
@@ -33,7 +33,7 @@ export const FX_TYPES = {
   OTT: 'ott',
   COMPRESSOR: 'compressor',
   SATURATION: 'saturation',
-  LIMITER: 'limiter'
+  LIMITER: 'limiter',
 };
 
 // Transport States
@@ -41,20 +41,20 @@ export const TRANSPORT_STATES = {
   STOPPED: 'stopped',
   PLAYING: 'playing',
   RECORDING: 'recording',
-  PAUSED: 'paused'
+  PAUSED: 'paused',
 };
 
 // MIDI Message Types
 export const MIDI_MESSAGES = {
   NOTE_ON: 0x90,
   NOTE_OFF: 0x80,
-  CC: 0xB0,
-  PROGRAM_CHANGE: 0xC0,
-  PITCH_BEND: 0xE0,
-  CLOCK: 0xF8,
-  START: 0xFA,
-  STOP: 0xFC,
-  CONTINUE: 0xFB
+  CC: 0xb0,
+  PROGRAM_CHANGE: 0xc0,
+  PITCH_BEND: 0xe0,
+  CLOCK: 0xf8,
+  START: 0xfa,
+  STOP: 0xfc,
+  CONTINUE: 0xfb,
 };
 
 // Automation Curve Types
@@ -63,7 +63,7 @@ export const CURVE_TYPES = {
   EXPONENTIAL: 'exponential',
   LOGARITHMIC: 'logarithmic',
   SINE: 'sine',
-  TRIANGLE: 'triangle'
+  TRIANGLE: 'triangle',
 };
 
 // Performance Modes
@@ -71,7 +71,7 @@ export const PERFORMANCE_MODES = {
   ONE_SHOT: 'one-shot',
   LOOP: 'loop',
   GATE: 'gate',
-  TOGGLE: 'toggle'
+  TOGGLE: 'toggle',
 };
 
 // Export Formats
@@ -80,14 +80,14 @@ export const EXPORT_FORMATS = {
   AIFF: 'aiff',
   MIDI: 'midi',
   REX2: 'rex2',
-  JSON: 'json'
+  JSON: 'json',
 };
 
 // Bit Depths
 export const BIT_DEPTHS = {
   BIT_16: 16,
   BIT_24: 24,
-  BIT_32: 32
+  BIT_32: 32,
 };
 
 // Sample Rates
@@ -95,7 +95,7 @@ export const SAMPLE_RATES = {
   SR_44100: 44100,
   SR_48000: 48000,
   SR_88200: 88200,
-  SR_96000: 96000
+  SR_96000: 96000,
 };
 
 // Oversampling Factors
@@ -103,5 +103,5 @@ export const OVERSAMPLING = {
   NONE: 1,
   X2: 2,
   X4: 4,
-  X8: 8
+  X8: 8,
 };

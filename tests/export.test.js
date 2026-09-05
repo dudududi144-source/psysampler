@@ -7,11 +7,11 @@ const mockDevice = {
   exportProject: () => ({
     version: '1.0.0',
     banks: [],
-    config: {}
+    config: {},
   }),
   importProject: jest.fn(),
   sliceBanks: [{ hasLoop: false }],
-  currentBank: 0
+  currentBank: 0,
 };
 
 describe('ExportManager', () => {
@@ -24,16 +24,18 @@ describe('ExportManager', () => {
   test('exportProject returns JSON blob', () => {
     const blob = exporter.exportProject();
     expect(blob).toBeInstanceOf(Blob);
-    expect(blob.type).toBe('application/json');
+    // Bun's Blob implementation reports type as 'application/json;charset=utf-8';
+    // browsers report exactly 'application/json' — accept the MIME prefix.
+    expect(blob.type.startsWith('application/json')).toBe(true);
   });
 
   test('createMIDIFile returns valid MIDI', () => {
     const midi = exporter.createMIDIFile();
     expect(midi).toBeInstanceOf(Uint8Array);
     expect(midi.length).toBeGreaterThan(14);
-    
+
     // Check MIDI header
-    expect(midi[0]).toBe(0x4D); // 'M'
+    expect(midi[0]).toBe(0x4d); // 'M'
     expect(midi[1]).toBe(0x54); // 'T'
     expect(midi[2]).toBe(0x68); // 'h'
     expect(midi[3]).toBe(0x64); // 'd'
@@ -50,9 +52,9 @@ describe('ExportManager', () => {
       getChannelData: () => new Float32Array(100),
       numberOfChannels: 1,
       length: 100,
-      sampleRate: 48000
+      sampleRate: 48000,
     };
-    
+
     const wav = exporter.audioBufferToWav(buffer);
     expect(wav).toBeInstanceOf(Blob);
     expect(wav.type).toBe('audio/wav');
@@ -61,9 +63,9 @@ describe('ExportManager', () => {
   test('writeString writes correctly', () => {
     const buffer = new ArrayBuffer(10);
     const view = new DataView(buffer);
-    
+
     exporter.writeString(view, 0, 'RIFF');
-    
+
     expect(view.getUint8(0)).toBe(82); // 'R'
     expect(view.getUint8(1)).toBe(73); // 'I'
     expect(view.getUint8(2)).toBe(70); // 'F'
@@ -74,27 +76,27 @@ describe('ExportManager', () => {
     const mockClick = jest.fn();
     const mockAppend = jest.fn();
     const mockRemove = jest.fn();
-    
+
     global.document = {
       createElement: () => ({
         click: mockClick,
         href: '',
-        download: ''
+        download: '',
       }),
       body: {
         appendChild: mockAppend,
-        removeChild: mockRemove
-      }
+        removeChild: mockRemove,
+      },
     };
-    
+
     global.URL = {
       createObjectURL: () => 'blob:test',
-      revokeObjectURL: () => {}
+      revokeObjectURL: () => {},
     };
-    
+
     const blob = new Blob(['test']);
     exporter.download(blob, 'test.wav');
-    
+
     expect(mockClick).toHaveBeenCalled();
     expect(mockAppend).toHaveBeenCalled();
     expect(mockRemove).toHaveBeenCalled();

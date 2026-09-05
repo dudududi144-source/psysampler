@@ -17,13 +17,13 @@ export class PerformanceMode {
   }
 
   getPad(index) {
-    return this.pads[index];
+    return this.pads[index] ?? null;
   }
 
   triggerPad(index, velocity = 1.0) {
     const pad = this.pads[index];
     if (!pad) return;
-    
+
     switch (pad.type) {
       case 'slice':
         this.device.triggerSlice(pad.bank, pad.slice, velocity);
@@ -64,10 +64,18 @@ export class PerformanceMode {
     }
   }
 
+  triggerFX(fxType) {
+    // Route to the device when it exposes FX triggering; otherwise it is a
+    // no-op so pad grids stay safe in standalone/headless environments.
+    if (this.device && typeof this.device.triggerFX === 'function') {
+      this.device.triggerFX(fxType);
+    }
+  }
+
   triggerMacro(index) {
     const macro = this.macros[index];
     if (!macro) return;
-    
+
     // Apply macro to device parameters
     if (macro.filterCutoff !== undefined) {
       // Set filter cutoff
@@ -84,7 +92,7 @@ export class PerformanceMode {
   setXY(x, y) {
     this.xyPad.x = Math.max(0, Math.min(1, x));
     this.xyPad.y = Math.max(0, Math.min(1, y));
-    
+
     // Map XY to parameters
     this.applyXY();
   }
@@ -93,7 +101,7 @@ export class PerformanceMode {
     // Map X to filter cutoff, Y to reverb mix (example)
     const filterCutoff = this.xyPad.x * 20000;
     const reverbMix = this.xyPad.y;
-    
+
     // Apply to device
   }
 
@@ -122,7 +130,7 @@ export class PerformanceMode {
 
   // Quantize
   quantizeEvents(events, gridSize = 16) {
-    return events.map(event => {
+    return events.map((event) => {
       const quantizedTime = Math.round(event.time * gridSize) / gridSize;
       return { ...event, time: quantizedTime };
     });
@@ -130,7 +138,7 @@ export class PerformanceMode {
 
   // Humanize
   humanizeEvents(events, amount = 0.1) {
-    return events.map(event => {
+    return events.map((event) => {
       const offset = (Math.random() - 0.5) * amount;
       return { ...event, time: event.time + offset };
     });
@@ -142,7 +150,7 @@ export class PerformanceMode {
       pads: this.pads,
       macros: this.macros,
       xyPad: this.xyPad,
-      mode: this.activeMode
+      mode: this.activeMode,
     };
   }
 

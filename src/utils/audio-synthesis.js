@@ -20,7 +20,7 @@ export class Synthesizer {
   createADSR(attack = 0.01, decay = 0.1, sustain = 0.5, release = 0.3) {
     const gain = this.context.createGain();
     gain.gain.value = 0;
-    
+
     return {
       node: gain,
       trigger: (time = this.context.currentTime) => {
@@ -33,7 +33,7 @@ export class Synthesizer {
         gain.gain.cancelScheduledValues(time);
         gain.gain.setValueAtTime(gain.gain.value, time);
         gain.gain.linearRampToValueAtTime(0, time + release);
-      }
+      },
     };
   }
 
@@ -55,29 +55,29 @@ export class Synthesizer {
       filterType = null,
       filterFreq = 2000,
       filterQ = 1,
-      destination = this.context.destination
+      destination = this.context.destination,
     } = options;
 
     const osc = this.createOscillator(type, frequency);
     const envelope = this.createADSR(attack, decay, sustain, release);
-    
+
     let lastNode = osc;
-    
+
     if (filterType) {
       const filter = this.createFilter(filterType, filterFreq, filterQ);
       lastNode.connect(filter);
       lastNode = filter;
     }
-    
+
     lastNode.connect(envelope.node);
     envelope.node.connect(destination);
-    
+
     const now = this.context.currentTime;
     osc.start(now);
     envelope.trigger(now);
     envelope.release(now + duration);
     osc.stop(now + duration + release + 0.1);
-    
+
     return { osc, envelope };
   }
 
@@ -88,32 +88,35 @@ export class Synthesizer {
       diminished: [0, 3, 6],
       augmented: [0, 4, 8],
       sus2: [0, 2, 7],
-      sus4: [0, 5, 7]
+      sus4: [0, 5, 7],
     };
-    
+
     const notes = intervals[chordType] || intervals.major;
-    
-    return notes.map(interval => {
-      const freq = rootFreq * Math.pow(2, interval / 12);
+
+    return notes.map((interval) => {
+      const freq = rootFreq * 2 ** (interval / 12);
       return this.playNote(freq, duration, options);
     });
   }
 
   createArpeggio(rootFreq, pattern = [0, 4, 7, 12], noteDuration = 0.25, options = {}) {
     const now = this.context.currentTime;
-    
+
     pattern.forEach((interval, index) => {
-      const freq = rootFreq * Math.pow(2, interval / 12);
+      const freq = rootFreq * 2 ** (interval / 12);
       const time = now + index * noteDuration;
-      
-      setTimeout(() => {
-        this.playNote(freq, noteDuration * 0.8, options);
-      }, (time - now) * 1000);
+
+      setTimeout(
+        () => {
+          this.playNote(freq, noteDuration * 0.8, options);
+        },
+        (time - now) * 1000,
+      );
     });
   }
 
   midiToFreq(midi) {
-    return 440 * Math.pow(2, (midi - 69) / 12);
+    return 440 * 2 ** ((midi - 69) / 12);
   }
 
   freqToMidi(freq) {
@@ -126,19 +129,19 @@ export class Synthesizer {
       minor: [0, 2, 3, 5, 7, 8, 10],
       pentatonic: [0, 2, 4, 7, 9],
       blues: [0, 3, 5, 6, 7, 10],
-      chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+      chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     };
-    
+
     const intervals = scales[scale] || scales.major;
     const freqs = [];
-    
+
     for (let oct = 0; oct < octaves; oct++) {
-      intervals.forEach(interval => {
+      intervals.forEach((interval) => {
         const midi = rootMidi + oct * 12 + interval;
         freqs.push(this.midiToFreq(midi));
       });
     }
-    
+
     return freqs;
   }
 }

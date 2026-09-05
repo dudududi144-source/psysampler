@@ -10,7 +10,7 @@ const ASSETS = [
   '/src/analyzer.js',
   '/src/generator.js',
   '/worklets/looper-engine.js',
-  '/worklets/fx-processor.js'
+  '/worklets/fx-processor.js',
 ];
 
 // Install event - cache assets
@@ -18,7 +18,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS);
-    })
+    }),
   );
   self.skipWaiting();
 });
@@ -28,11 +28,9 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
+        cacheNames.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name)),
       );
-    })
+    }),
   );
   self.clients.claim();
 });
@@ -44,17 +42,17 @@ self.addEventListener('fetch', (event) => {
       .then((response) => {
         // Clone the response
         const responseToCache = response.clone();
-        
+
         // Cache the fetched response
         caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, responseToCache);
         });
-        
+
         return response;
       })
       .catch(() => {
         // Fall back to cache
         return caches.match(event.request);
-      })
+      }),
   );
 });

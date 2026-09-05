@@ -10,7 +10,7 @@ export class PresetManager {
 
   addPreset(id, preset, category = 'default') {
     this.presets.set(id, { ...preset, id, category });
-    
+
     if (!this.categories.has(category)) {
       this.categories.set(category, new Set());
     }
@@ -35,7 +35,7 @@ export class PresetManager {
   getPresetsByCategory(category) {
     const ids = this.categories.get(category);
     if (!ids) return [];
-    return Array.from(ids).map(id => this.presets.get(id));
+    return Array.from(ids).map((id) => this.presets.get(id));
   }
 
   getAllPresets() {
@@ -86,13 +86,13 @@ export class PresetManager {
       if (oldCategorySet) {
         oldCategorySet.delete(id);
       }
-      
+
       // Add to new category
       if (!this.categories.has(newCategory)) {
         this.categories.set(newCategory, new Set());
       }
       this.categories.get(newCategory).add(id);
-      
+
       preset.category = newCategory;
       return preset;
     }
@@ -101,30 +101,32 @@ export class PresetManager {
 
   searchPresets(query) {
     const lowerQuery = query.toLowerCase();
-    return this.getAllPresets().filter(preset => {
-      return preset.name.toLowerCase().includes(lowerQuery) ||
-             preset.category.toLowerCase().includes(lowerQuery) ||
-             (preset.tags && preset.tags.some(tag => tag.toLowerCase().includes(lowerQuery)));
+    return this.getAllPresets().filter((preset) => {
+      return (
+        preset.name.toLowerCase().includes(lowerQuery) ||
+        preset.category.toLowerCase().includes(lowerQuery) ||
+        preset.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))
+      );
     });
   }
 
   export() {
     return {
       presets: Array.from(this.presets.entries()),
-      currentPreset: this.currentPreset ? this.currentPreset.id : null
+      currentPreset: this.currentPreset ? this.currentPreset.id : null,
     };
   }
 
   import(data) {
     this.presets.clear();
     this.categories.clear();
-    
+
     if (data.presets) {
       data.presets.forEach(([id, preset]) => {
         this.addPreset(id, preset, preset.category || 'default');
       });
     }
-    
+
     if (data.currentPreset) {
       this.setCurrentPreset(data.currentPreset);
     }

@@ -20,7 +20,7 @@ describe('FoundationIntegration', () => {
 
   test('each scale has 7 notes', () => {
     const scales = foundation.getScales();
-    Object.values(scales).forEach(scale => {
+    Object.values(scales).forEach((scale) => {
       expect(scale.length).toBe(7);
     });
   });
@@ -32,9 +32,9 @@ describe('FoundationIntegration', () => {
 
   test('each progression has valid chords', () => {
     const progressions = foundation.getProgressions();
-    Object.values(progressions).forEach(prog => {
+    Object.values(progressions).forEach((prog) => {
       expect(prog.length).toBeGreaterThan(0);
-      prog.forEach(chord => {
+      prog.forEach((chord) => {
         expect(chord).toBeGreaterThanOrEqual(0);
         expect(chord).toBeLessThan(7);
       });
@@ -54,5 +54,16 @@ describe('FoundationIntegration', () => {
     expect(dsp).toHaveProperty('polyBLEP');
     expect(dsp).toHaveProperty('fft');
     expect(dsp).toHaveProperty('lufs');
+  });
+
+  test('getWire exposes the real family wire (Task 18)', async () => {
+    await foundation.init();
+    expect(foundation.available).toBe(true);
+    const wire = foundation.getWire();
+    expect(wire).toBeDefined();
+    expect(typeof wire.hitsToWire).toBe('function');
+    expect(typeof wire.noteGridToWire).toBe('function');
+    expect(typeof wire.wireToRenderNotesBody).toBe('function');
+    expect(wire.WIRE_DEFAULTS.deviceId).toBe('psy-sampler');
   });
 });

@@ -11,18 +11,19 @@ describe('ExportManager - Additional', () => {
       exportProject: () => ({
         version: '1.0.0',
         banks: [],
-        config: {}
+        config: {},
       }),
       importProject: () => {},
       sliceBanks: [{ hasLoop: false }],
-      currentBank: 0
+      currentBank: 0,
     };
     exporter = new ExportManager(mockDevice);
   });
 
   test('exportProject creates valid JSON', () => {
     const blob = exporter.exportProject();
-    expect(blob.type).toBe('application/json');
+    // Bun's Blob reports 'application/json;charset=utf-8' — accept the MIME prefix.
+    expect(blob.type.startsWith('application/json')).toBe(true);
   });
 
   test('createMIDIFile handles empty bank', () => {
@@ -41,9 +42,9 @@ describe('ExportManager - Additional', () => {
       getChannelData: (ch) => new Float32Array(100),
       numberOfChannels: 2,
       length: 100,
-      sampleRate: 48000
+      sampleRate: 48000,
     };
-    
+
     const wav = exporter.audioBufferToWav(buffer);
     expect(wav).toBeInstanceOf(Blob);
   });
@@ -53,9 +54,9 @@ describe('ExportManager - Additional', () => {
       getChannelData: () => new Float32Array(100),
       numberOfChannels: 1,
       length: 100,
-      sampleRate: 48000
+      sampleRate: 48000,
     };
-    
+
     const wav = exporter.audioBufferToWav(buffer, 24);
     expect(wav).toBeInstanceOf(Blob);
   });

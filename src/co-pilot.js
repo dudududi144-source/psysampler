@@ -10,9 +10,9 @@ export class CoPilot {
       'auto-slice',
       'auto-classify',
       'suggest-variation',
-      'suggest-transition'
+      'suggest-transition',
     ];
-    
+
     this.contextFeatures = [];
     this.qTable = new Map();
     this.learningRate = 0.1;
@@ -29,7 +29,7 @@ export class CoPilot {
       loopType: deviceState.loopType,
       bpm: deviceState.bpm,
       energy: deviceState.energy || 0.5,
-      timeInSession: deviceState.timeInSession || 0
+      timeInSession: deviceState.timeInSession || 0,
     };
   }
 
@@ -39,7 +39,7 @@ export class CoPilot {
       // Explore: random action
       return this.actions[Math.floor(Math.random() * this.actions.length)];
     }
-    
+
     // Exploit: best known action
     return this.getBestAction(context);
   }
@@ -47,18 +47,18 @@ export class CoPilot {
   getBestAction(context) {
     const contextKey = this.contextToKey(context);
     let bestAction = this.actions[0];
-    let bestValue = -Infinity;
-    
+    let bestValue = Number.NEGATIVE_INFINITY;
+
     for (const action of this.actions) {
       const key = `${contextKey}:${action}`;
       const value = this.qTable.get(key) || 0;
-      
+
       if (value > bestValue) {
         bestValue = value;
         bestAction = action;
       }
     }
-    
+
     return bestAction;
   }
 
@@ -67,34 +67,35 @@ export class CoPilot {
     const contextKey = this.contextToKey(context);
     const nextContextKey = this.contextToKey(nextContext);
     const key = `${contextKey}:${action}`;
-    
+
     const currentValue = this.qTable.get(key) || 0;
     const nextBestValue = this.getNextBestValue(nextContextKey);
-    
-    const newValue = currentValue + this.learningRate * 
-      (reward + this.discountFactor * nextBestValue - currentValue);
-    
+
+    const newValue =
+      currentValue +
+      this.learningRate * (reward + this.discountFactor * nextBestValue - currentValue);
+
     this.qTable.set(key, newValue);
-    
+
     // Store history
     this.history.push({
       context,
       action,
       reward,
       nextContext,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
   getNextBestValue(contextKey) {
     let bestValue = 0;
-    
+
     for (const action of this.actions) {
       const key = `${contextKey}:${action}`;
       const value = this.qTable.get(key) || 0;
       bestValue = Math.max(bestValue, value);
     }
-    
+
     return bestValue;
   }
 
@@ -102,28 +103,28 @@ export class CoPilot {
     return JSON.stringify({
       hasLoop: context.hasLoop,
       loopType: context.loopType,
-      energy: Math.round(context.energy * 10) / 10
+      energy: Math.round(context.energy * 10) / 10,
     });
   }
 
   // Get suggestions based on context
   getSuggestions(context) {
     const suggestions = [];
-    
+
     for (const action of this.actions) {
       const contextKey = this.contextToKey(context);
       const key = `${contextKey}:${action}`;
       const value = this.qTable.get(key) || 0;
-      
+
       if (value > 0.5) {
         suggestions.push({
           action,
           confidence: value,
-          description: this.getActionDescription(action)
+          description: this.getActionDescription(action),
         });
       }
     }
-    
+
     return suggestions.sort((a, b) => b.confidence - a.confidence);
   }
 
@@ -136,9 +137,9 @@ export class CoPilot {
       'auto-slice': 'Automatically slice the audio',
       'auto-classify': 'Classify the loop type',
       'suggest-variation': 'Create a variation',
-      'suggest-transition': 'Suggest a transition'
+      'suggest-transition': 'Suggest a transition',
     };
-    
+
     return descriptions[action] || action;
   }
 
@@ -146,7 +147,7 @@ export class CoPilot {
   exportModel() {
     return {
       qTable: Object.fromEntries(this.qTable),
-      history: this.history.slice(-100) // Last 100 entries
+      history: this.history.slice(-100), // Last 100 entries
     };
   }
 

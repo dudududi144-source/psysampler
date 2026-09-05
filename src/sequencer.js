@@ -60,7 +60,7 @@ export class StepSequencer {
           track,
           step: this.currentStep,
           note: stepData.note,
-          velocity: stepData.velocity
+          velocity: stepData.velocity,
         });
       }
     }
@@ -98,14 +98,16 @@ export class StepSequencer {
       for (let step = 0; step < this.numSteps; step++) {
         const rand = determinism ? determinism.next() : Math.random();
         this.patterns[track][step].active = rand < density;
-        this.patterns[track][step].velocity = determinism ? determinism.nextFloat(0.5, 1.0) : 0.5 + Math.random() * 0.5;
+        this.patterns[track][step].velocity = determinism
+          ? determinism.nextFloat(0.5, 1.0)
+          : 0.5 + Math.random() * 0.5;
       }
     }
   }
 
   copyPattern(fromTrack, toTrack) {
     if (fromTrack >= 0 && fromTrack < this.numTracks && toTrack >= 0 && toTrack < this.numTracks) {
-      this.patterns[toTrack] = this.patterns[fromTrack].map(step => ({ ...step }));
+      this.patterns[toTrack] = this.patterns[fromTrack].map((step) => ({ ...step }));
     }
   }
 
@@ -113,15 +115,15 @@ export class StepSequencer {
     return {
       numSteps: this.numSteps,
       numTracks: this.numTracks,
-      patterns: this.patterns.map(track => track.map(step => ({ ...step }))),
-      swing: this.swing
+      patterns: this.patterns.map((track) => track.map((step) => ({ ...step }))),
+      swing: this.swing,
     };
   }
 
   import(data) {
     this.numSteps = data.numSteps;
     this.numTracks = data.numTracks;
-    this.patterns = data.patterns.map(track => track.map(step => ({ ...step })));
+    this.patterns = data.patterns.map((track) => track.map((step) => ({ ...step })));
     this.swing = data.swing;
   }
 }

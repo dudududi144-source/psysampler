@@ -16,7 +16,7 @@ for (let i = 0; i < iterations; i++) {
 }
 let end = performance.now();
 console.log(`  ${iterations} RNG calls: ${(end - start).toFixed(2)}ms`);
-console.log(`  ${(iterations / (end - start) * 1000).toFixed(0)} calls/second\n`);
+console.log(`  ${((iterations / (end - start)) * 1000).toFixed(0)} calls/second\n`);
 
 // Benchmark 2: Sequencer step processing
 console.log('📊 Benchmark 2: Sequencer step processing');
@@ -34,7 +34,7 @@ for (let i = 0; i < seqIterations; i++) {
 }
 end = performance.now();
 console.log(`  ${seqIterations} step cycles: ${(end - start).toFixed(2)}ms`);
-console.log(`  ${(seqIterations / (end - start) * 1000).toFixed(0)} cycles/second\n`);
+console.log(`  ${((seqIterations / (end - start)) * 1000).toFixed(0)} cycles/second\n`);
 
 // Benchmark 3: Array shuffle
 console.log('📊 Benchmark 3: Array shuffle');
@@ -45,8 +45,10 @@ for (let i = 0; i < shuffleIterations; i++) {
   det.shuffle([...array]);
 }
 end = performance.now();
-console.log(`  ${shuffleIterations} shuffles of ${array.length} elements: ${(end - start).toFixed(2)}ms`);
-console.log(`  ${(shuffleIterations / (end - start) * 1000).toFixed(0)} shuffles/second\n`);
+console.log(
+  `  ${shuffleIterations} shuffles of ${array.length} elements: ${(end - start).toFixed(2)}ms`,
+);
+console.log(`  ${((shuffleIterations / (end - start)) * 1000).toFixed(0)} shuffles/second\n`);
 
 // Benchmark 4: Pattern export/import
 console.log('📊 Benchmark 4: Pattern export/import');
@@ -59,6 +61,6 @@ for (let i = 0; i < exportIterations; i++) {
 }
 end = performance.now();
 console.log(`  ${exportIterations} export/import cycles: ${(end - start).toFixed(2)}ms`);
-console.log(`  ${(exportIterations / (end - start) * 1000).toFixed(0)} cycles/second\n`);
+console.log(`  ${((exportIterations / (end - start)) * 1000).toFixed(0)} cycles/second\n`);
 
 console.log('✅ Benchmarks complete!');
