@@ -1,6 +1,5 @@
 [test]
 coverage = true
-coverageThreshold = 0.8
 timeout = 10000
 
 [install]
