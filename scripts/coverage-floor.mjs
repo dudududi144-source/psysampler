@@ -14,34 +14,38 @@
  *
  * Usage: bun run coverage:floor   (or: bun scripts/coverage-floor.mjs)
  */
-import { spawnSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process';
 
-const FLOOR = 0.75
+const FLOOR = 0.75;
 
 const res = spawnSync('bun', ['test', '--coverage'], {
   encoding: 'utf8',
   cwd: new URL('..', import.meta.url).pathname,
-})
-const out = `${res.stdout ?? ''}\n${res.stderr ?? ''}`
+});
+const out = `${res.stdout ?? ''}\n${res.stderr ?? ''}`;
 
 // The coverage table's summary row looks like:
 //   All files                        |   79.41 |   81.63 |
-const m = out.match(/^All files\s+\|\s+([\d.]+)\s+\|\s+([\d.]+)\s*\|/m)
+const m = out.match(/^All files\s+\|\s+([\d.]+)\s+\|\s+([\d.]+)\s*\|/m);
 if (res.status !== 0) {
-  console.error('coverage-floor: bun test itself failed (exit', res.status, ') — fix tests first.')
-  process.exit(1)
+  console.error('coverage-floor: bun test itself failed (exit', res.status, ') — fix tests first.');
+  process.exit(1);
 }
 if (!m) {
-  console.error('coverage-floor: could not find the "All files" summary row in the coverage table.')
-  process.exit(1)
+  console.error(
+    'coverage-floor: could not find the "All files" summary row in the coverage table.',
+  );
+  process.exit(1);
 }
-const funcs = Number(m[1]) / 100
-const lines = Number(m[2]) / 100
-const worst = Math.min(funcs, lines)
-const pct = (x) => `${(x * 100).toFixed(2)}%`
-console.log(`coverage-floor: funcs ${pct(funcs)} · lines ${pct(lines)} · floor ${pct(FLOOR)}`)
+const funcs = Number(m[1]) / 100;
+const lines = Number(m[2]) / 100;
+const worst = Math.min(funcs, lines);
+const pct = (x) => `${(x * 100).toFixed(2)}%`;
+console.log(`coverage-floor: funcs ${pct(funcs)} · lines ${pct(lines)} · floor ${pct(FLOOR)}`);
 if (worst < FLOOR) {
-  console.error(`coverage-floor: FAIL — coverage dropped below the honest floor. Fix or re-measure and raise the floor deliberately.`)
-  process.exit(1)
+  console.error(
+    'coverage-floor: FAIL — coverage dropped below the honest floor. Fix or re-measure and raise the floor deliberately.',
+  );
+  process.exit(1);
 }
-console.log('coverage-floor: PASS — no regression against the measured floor.')
+console.log('coverage-floor: PASS — no regression against the measured floor.');
